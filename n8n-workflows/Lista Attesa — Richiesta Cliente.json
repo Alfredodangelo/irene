@@ -1,0 +1,137 @@
+{
+  "name": "Lista Attesa \u2014 Richiesta Cliente",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "waitlist-request",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "la-req-001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "waitlist-request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst client_id    = b.client_id    || '';\nconst request_type = b.request_type || 'join';\nconst priority     = b.priority     || null;\nif (!client_id) throw new Error('client_id mancante');\nconst typeLabel = request_type === 'join' ? 'entrare in lista anticipa' : 'uscire dalla lista anticipa';\nconst prioLabel = priority === 1 ? ' (\\uD83D\\uDD34 Urgente)' : priority === 2 ? ' (\\uD83D\\uDFE2 Normale)' : '';\nreturn [{ json: { client_id, request_type, priority, typeLabel, prioLabel } }];"
+      },
+      "id": "la-req-002",
+      "name": "Estrai Dati",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/notifications",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: 'waitlist_request', title: 'Richiesta lista attesa', body: 'Un cliente vuole ' + $('Estrai Dati').item.json.typeLabel + $('Estrai Dati').item.json.prioLabel + '.', client_id: $('Estrai Dati').item.json.client_id, read: false }) }}",
+        "options": {}
+      },
+      "id": "la-req-003",
+      "name": "Notifica Irene",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true }",
+        "options": {}
+      },
+      "id": "la-req-004",
+      "name": "Risposta OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Estrai Dati",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estrai Dati": {
+      "main": [
+        [
+          {
+            "node": "Notifica Irene",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notifica Irene": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "la-req-v1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "id": "ListaAttesaRichiestaCliente",
+  "tags": []
+}

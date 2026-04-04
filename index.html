@@ -1,0 +1,491 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irene Gipsy Tattoo - Realistic Tattoo Artist Roma</title>
+    <meta name="description"
+        content="Tatuatrice specializzata in tatuaggi realistici a Roma. 14 anni di esperienza in ritratti, animali e composizioni complesse.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Pinyon+Script&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#top" class="logo">Irene Gipsy Tattoo</a>
+
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#about" class="nav-link">Chi Sono</a></li>
+                <li><a href="#gallery" class="nav-link">Portfolio</a></li>
+                <li><a href="#processo" class="nav-link">Processo</a></li>
+                <li><a href="consultation.html" class="nav-link">Prenota Consulenza</a></li>
+                <li><a href="voucher.html" class="nav-link">Regala un Tatuaggio</a></li>
+                <li><a href="faq.html" class="nav-link">FAQ</a></li>
+                <li><a href="#contatti" class="nav-link">Contatti</a></li>
+                <li><a href="login.html" class="nav-link" id="navAreaLink"><i class="fas fa-user-circle" style="margin-right:5px;font-size:0.85em;"></i>Area Personale</a></li>
+                <li class="lang-switch">
+                    <a href="en/index.html" class="lang-link" aria-label="Switch to English"><span class="lang-flag-gb"></span> EN</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="top" class="hero">
+        <div class="hero-bg" style="background-image: url('images/img1.jpeg');"></div>
+        <div class="overlay"></div>
+        <!-- Stars Container -->
+        <div class="stars-container">
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+        </div>
+        <div class="hero-content container">
+            <h1 class="fade-in">Irene <span class="hero-gipsy">Gipsy</span> Tattoo</h1>
+            <h2 class="fade-in delay-1">Realistic Tattoo Artist</h2>
+            <p class="fade-in delay-2">L'arte che vive sulla pelle</p>
+            <div class="cta-group fade-in delay-3">
+                <a href="consultation.html" class="btn btn-primary">Prenota Consulenza</a>
+                <a href="#gallery" class="btn btn-secondary">Portfolio</a>
+            </div>
+        </div>
+        <!-- Frecce scroll (solo mobile) -->
+        <div class="scroll-indicator" aria-hidden="true">
+            <i class="fas fa-chevron-down"></i>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </header>
+
+    <!-- About Section -->
+    <section id="about" class="about section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-img fade-in-left">
+                    <img src="images/img5.jpeg" alt="Irene Gipsy Tattoo Artist">
+                </div>
+                <div class="col-text fade-in-right">
+                    <h2 class="section-title">La Mia Storia</h2>
+                    <p>Con <strong>14 anni di esperienza</strong> nel mondo del tatuaggio, mi sono specializzata
+                        esclusivamente nel <strong>realismo</strong>, la tecnica più complessa e affascinante dell'arte
+                        del tattoo.</p>
+                    <p>Ogni tatuaggio che realizzo è un'opera d'arte unica, studiata nei minimi dettagli per raccontare
+                        la tua storia sulla pelle. Ritratti, animali, composizioni complesse: trasformo le tue idee in
+                        capolavori indelebili.</p>
+                    <p>Il mio studio a <strong>Roma</strong> è uno spazio intimo e professionale dove arte, passione e
+                        tecnica si incontrano per creare il tuo tatuaggio perfetto.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="gallery" class="gallery section-padding bg-black">
+        <div class="container">
+            <h2 class="section-title text-center fade-in">I Miei Tatuaggi</h2>
+
+            <div class="filters fade-in">
+                <button class="filter-btn active" data-filter="all">Tutti</button>
+                <button class="filter-btn" data-filter="composizioni">Composizioni</button>
+                <button class="filter-btn" data-filter="animali">Animali</button>
+                <button class="filter-btn" data-filter="ritratti">Ritratti</button>
+                <button class="filter-btn" data-filter="mitologia">Mitologia</button>
+            </div>
+
+            <div class="gallery-scroll-wrap">
+            <div class="gallery-arrow gallery-arrow-left"><i class="fas fa-chevron-left"></i></div>
+            <div class="masonry-grid" id="galleryGrid">
+                <div class="gallery-loading"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+            <div class="gallery-arrow gallery-arrow-right"><i class="fas fa-chevron-right"></i></div>
+            </div>
+
+            <div class="text-center mt-4 fade-in">
+                <a href="consultation.html" class="btn btn-primary">Vuoi un tatuaggio così?</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section id="processo" class="process section-padding bg-dark-grey">
+        <div class="container">
+            <h2 class="section-title text-center fade-in">Come Lavoro</h2>
+
+            <div class="process-grid">
+                <a href="consultation.html" class="process-step fade-in-up" style="text-decoration:none; cursor:pointer;">
+                    <div class="icon-box">
+                        <i class="far fa-calendar-alt"></i>
+                    </div>
+                    <h3>1. Consulenza</h3>
+                    <p>Ci incontriamo per discutere la tua idea, dimensioni, posizione e stile. Analizziamo insieme
+                        riferimenti e ispirazioni.</p>
+                </a>
+
+                <div class="process-step fade-in-up delay-1">
+                    <div class="icon-box">
+                        <i class="fas fa-pen-nib"></i>
+                    </div>
+                    <h3>2. Progettazione Custom</h3>
+                    <p>Creo un disegno personalizzato unico per te. Il design viene perfezionato fino alla tua completa
+                        soddisfazione.</p>
+                </div>
+
+                <div class="process-step fade-in-up delay-2">
+                    <div class="icon-box">
+                        <i class="fas fa-paint-brush"></i>
+                    </div>
+                    <h3>3. Realizzazione</h3>
+                    <p>Durante la sessione di tatuaggio lavoro con precisione chirurgica per garantire il massimo
+                        realismo e dettaglio.</p>
+                </div>
+
+                <a href="#aftercare" class="process-step fade-in-up delay-3" style="text-decoration:none; cursor:pointer;">
+                    <div class="icon-box">
+                        <i class="far fa-heart"></i>
+                    </div>
+                    <h3>4. Aftercare</h3>
+                    <p>Ti fornisco istruzioni complete per la cura del tatuaggio e resto disponibile per qualsiasi
+                        domanda durante la guarigione.</p>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Behind The Scenes Section -->
+    <section class="bts section-padding">
+        <div class="container">
+            <h2 class="section-title text-center fade-in">Al Lavoro</h2>
+            <div class="gallery-scroll-wrap">
+                <div class="gallery-arrow gallery-arrow-left bts-arrow"><i class="fas fa-chevron-left"></i></div>
+                <div class="bts-grid" id="btsGrid">
+                    <div class="gallery-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+                <div class="gallery-arrow gallery-arrow-right bts-arrow"><i class="fas fa-chevron-right"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section id="recensioni" class="reviews section-padding bg-dark-grey">
+        <div class="container">
+            <h2 class="section-title text-center fade-in">Cosa Dicono i Clienti</h2>
+            <p class="reviews-subtitle text-center fade-in">Recensioni reali di chi ha vissuto l'esperienza in studio</p>
+
+            <div class="reviews-carousel">
+                <button class="reviews-nav reviews-prev" aria-label="Precedente">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+
+                <div class="reviews-track" id="reviewsTrack">
+
+                    <div class="review-card">
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <blockquote class="review-text">"Irene è semplicemente straordinaria. Il ritratto del mio cane è così realistico che sembra una fotografia. Professionalità e attenzione ai dettagli unica nel suo genere."</blockquote>
+                        <div class="review-author">
+                            <div class="review-avatar">M</div>
+                            <div>
+                                <p class="review-name">Marco R.</p>
+                                <p class="review-detail">Ritratto di animale</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="review-card">
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <blockquote class="review-text">"Irene ha trasformato la foto di mia nonna in un'opera d'arte permanente sulla mia pelle. Ogni volta che lo guardo mi commuovo. Grazie infinite, sei una fuoriclasse."</blockquote>
+                        <div class="review-author">
+                            <div class="review-avatar">F</div>
+                            <div>
+                                <p class="review-name">Federica B.</p>
+                                <p class="review-detail">Ritratto realistico</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="review-card">
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <blockquote class="review-text">"Ho aspettato mesi per avere un appuntamento, ma ne valeva assolutamente la pena. I dettagli sono incredibili, lo studio è pulito e l'atmosfera è rilassante e accogliente."</blockquote>
+                        <div class="review-author">
+                            <div class="review-avatar">A</div>
+                            <div>
+                                <p class="review-name">Alessandro M.</p>
+                                <p class="review-detail">Full sleeve</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="review-card">
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <blockquote class="review-text">"Esperienza fantastica dall'inizio alla fine. Mi ha ascoltato, ha capito esattamente quello che volevo e ha realizzato qualcosa di ancora più bello di quanto immaginassi."</blockquote>
+                        <div class="review-author">
+                            <div class="review-avatar">G</div>
+                            <div>
+                                <p class="review-name">Giulia T.</p>
+                                <p class="review-detail">Composizione floreale</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="review-card">
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <blockquote class="review-text">"Prima volta che mi tatuo e non potevo scegliere artista migliore. Mi ha spiegato tutto con pazienza e il risultato è magnifico. Tornerò sicuramente per il prossimo."</blockquote>
+                        <div class="review-author">
+                            <div class="review-avatar">L</div>
+                            <div>
+                                <p class="review-name">Lorenzo C.</p>
+                                <p class="review-detail">Primo tatuaggio</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="review-card">
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <blockquote class="review-text">"Il detail work sul mio tatuaggio a colori è incredibile. Irene è una vera artista — perfezionista, precisa, e il suo occhio per il realismo non ha eguali a Roma."</blockquote>
+                        <div class="review-author">
+                            <div class="review-avatar">V</div>
+                            <div>
+                                <p class="review-name">Valentina S.</p>
+                                <p class="review-detail">Realismo a colori</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <button class="reviews-nav reviews-next" aria-label="Successivo">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <div class="reviews-dots" id="reviewsDots"></div>
+        </div>
+    </section>
+
+    <!-- Aftercare Section -->
+    <section id="aftercare" class="aftercare section-padding bg-dark">
+        <div class="container">
+            <h2 class="section-title text-center fade-in">Cura del Tatuaggio</h2>
+
+            <div class="aftercare-grid">
+                <div class="aftercare-card fade-in-up">
+                    <h3>Prime 24 Ore</h3>
+                    <ul>
+                        <li>Rimuovi la pellicola dopo 3-4 ore</li>
+                        <li>Lava con sapone neutro e acqua tiepida</li>
+                        <li>Asciuga tamponando (non strofinare)</li>
+                        <li>Applica crema specifica</li>
+                    </ul>
+                </div>
+
+                <div class="aftercare-card fade-in-up delay-1">
+                    <h3>Giorni 2-14</h3>
+                    <ul>
+                        <li>Lava 2-3 volte al giorno</li>
+                        <li>Applica crema sottile 3-4 volte/dì</li>
+                        <li><strong>NON grattare</strong></li>
+                        <li>Evita sole, piscine, mare</li>
+                    </ul>
+                </div>
+
+                <div class="aftercare-card fade-in-up delay-2">
+                    <h3>Dopo 2 Settimane</h3>
+                    <ul>
+                        <li>Guarigione superficiale completata</li>
+                        <li>Idrata per 1 mese</li>
+                        <li>Usa protezione SPF 50+</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Scheda tecnica completa guarigione -->
+            <div id="scheda-guarigione" class="aftercare-full-sheet mt-4 fade-in">
+                <h3><i class="fas fa-shield-alt" style="margin-right:8px;"></i>Scheda Tecnica di Guarigione</h3>
+                <div class="aftercare-sheet-cols">
+                    <div class="aftercare-sheet-col">
+                        <h4>Da evitare</h4>
+                        <ul>
+                            <li><span class="ic no">✗</span> Sole diretto e UV per 4+ settimane</li>
+                            <li><span class="ic no">✗</span> Piscine, mare, sauna e bagni lunghi</li>
+                            <li><span class="ic no">✗</span> Grattare o staccare le crosticine</li>
+                            <li><span class="ic no">✗</span> Abiti sintetici attillati sull'area</li>
+                            <li><span class="ic no">✗</span> Detergenti aggressivi o profumati</li>
+                            <li><span class="ic no">✗</span> Attività fisica intensa prime 48h</li>
+                        </ul>
+                    </div>
+                    <div class="aftercare-sheet-col">
+                        <h4>Da fare</h4>
+                        <ul>
+                            <li><span class="ic yes">✓</span> Lava con sapone neutro 2-3x al giorno</li>
+                            <li><span class="ic yes">✓</span> Tampona (non sfregare) per asciugare</li>
+                            <li><span class="ic yes">✓</span> Applica crema cicatrizzante sottile</li>
+                            <li><span class="ic yes">✓</span> Idrata regolarmente per 30 giorni</li>
+                            <li><span class="ic yes">✓</span> Usa SPF 50+ sulla zona guarita</li>
+                            <li><span class="ic yes">✓</span> Indossa capi traspiranti in cotone</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section id="booking" class="booking section-padding bg-gradient">
+        <div class="container text-center">
+            <h2 class="section-title fade-in">Pronto per il Tuo Capolavoro?</h2>
+            <p class="lead fade-in">Parliamoci, analizziamo la tua idea e costruiamo insieme il tatuaggio perfetto per te.</p>
+            <div class="fade-in-up">
+                <a href="consultation.html" class="btn btn-primary btn-lg">Prenota una Consulenza</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contatti" class="contact section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-info fade-in-left">
+                    <h2 class="section-title">Dove Trovarmi</h2>
+
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h3>Studio</h3>
+                            <p><strong>Sang Royal Tattoos</strong></p>
+                            <p>Via Cristoforo Colombo, 344, 00145 Roma RM</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <i class="far fa-clock"></i>
+                        <div>
+                            <h3>Orari</h3>
+                            <p>Solo su appuntamento</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <i class="fas fa-phone-alt"></i>
+                        <div>
+                            <h3>Telefono/WhatsApp</h3>
+                            <a href="tel:+393471648654">+39 347 164 8654</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <i class="far fa-envelope"></i>
+                        <div>
+                            <h3>Email</h3>
+                            <a href="mailto:irenegipsytattoo@gmail.com">irenegipsytattoo@gmail.com</a>
+                        </div>
+                    </div>
+
+                    <div class="social-links mt-4">
+                        <a href="https://instagram.com/irenegipsytattoo" target="_blank"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="https://wa.me/393471648654" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                        <a href="mailto:irenegipsytattoo@gmail.com"><i class="far fa-envelope"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-map fade-in-right">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2972.238499252654!2d12.490587!3d41.854087!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x13258bdc38848079%3A0xa1977799a4e76313!2sVia%20Cristoforo%20Colombo%2C%20344%2C%2000145%20Roma%20RM!5e0!3m2!1sit!2sit!4v1700000000000!5m2!1sit!2sit"
+                        width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instagram Feed Section -->
+    <section class="instagram section-padding bg-black">
+        <div class="container text-center">
+            <h2 class="section-title fade-in">Seguimi su Instagram</h2>
+            <p class="mb-4 fade-in">Resta aggiornato sui miei ultimi lavori e progetti in corso.</p>
+            <a href="https://instagram.com/irenegipsytattoo" class="btn btn-primary" target="_blank"><i
+                    class="fab fa-instagram"></i> irenegipsytattoo</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Menu</h3>
+                    <ul>
+                        <li><a href="#top">Home</a></li>
+                        <li><a href="#about">Chi Sono</a></li>
+                        <li><a href="#gallery">Portfolio</a></li>
+                        <li><a href="consultation.html">Prenota Consulenza</a></li>
+                        <li><a href="voucher.html">Regala un Tatuaggio</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contatti Rapidi</h3>
+                    <ul>
+                        <li><a href="https://wa.me/393471648654">WhatsApp</a></li>
+                        <li><a href="mailto:irenegipsytattoo@gmail.com">Email</a></li>
+                        <li><a href="https://instagram.com/irenegipsytattoo">Instagram</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Lingue</h3>
+                    <div class="lang-links">
+                        <span class="active">🇮🇹 Italiano</span> | <a href="en/index.html">🇬🇧 English</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Irene Gipsy Tattoo - Realistic Tattoo Artist Roma</p>
+                <div class="footer-legal-links">
+                    <a href="legal.html">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#cookie">Cookie Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#termini">Termini e Condizioni</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

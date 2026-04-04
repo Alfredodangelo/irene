@@ -1,0 +1,354 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informed Consent - Irene Gipsy Tattoo</title>
+    <meta name="description"
+        content="Complete the informed consent form before your tattoo or piercing session with Irene Gipsy Tattoo in Rome.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Pinyon+Script&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <!-- intl-tel-input -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Irene Gipsy Tattoo</a>
+
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#about" class="nav-link">About</a></li>
+                <li><a href="index.html#gallery" class="nav-link">Portfolio</a></li>
+                <li><a href="index.html#processo" class="nav-link">Process</a></li>
+                <li><a href="consultation.html" class="nav-link">Book</a></li>
+                <li><a href="index.html#contatti" class="nav-link">Contact</a></li>
+                <li><a href="../login.html" class="nav-link" id="navAreaLink"><i class="fas fa-user-circle" style="margin-right:5px;font-size:0.85em;"></i>Personal Area</a></li>
+                <li class="lang-switch">
+                    <a href="../consent.html" class="lang-link" aria-label="Switch to Italian"><span class="lang-flag-it"></span> IT</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="hero-bg" style="background-image: url('../images/img1.jpeg');"></div>
+        <div class="overlay"></div>
+        <div class="stars-container">
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+        </div>
+        <div class="page-header-content container">
+            <h1 class="fade-in">Informed Consent</h1>
+            <p class="fade-in delay-1">Please complete this form before your session.<br>
+                All data is handled in compliance with GDPR.</p>
+            <a href="index.html" class="back-link fade-in delay-2">
+                <i class="fas fa-arrow-left"></i> Back to site
+            </a>
+        </div>
+    </header>
+
+    <!-- Consenso Section -->
+    <section class="section-padding bg-dark-grey">
+        <div class="container">
+
+            <!-- ⚠️ WIP: re-block before launch -->
+            <div style="background:#7c4a00;color:#ffd580;padding:10px 20px;font-size:0.85rem;text-align:center;margin-bottom:18px;border-radius:6px;">
+                ⚠️ <strong>WIP</strong> — Page unlocked for development. Re-block before launch (login guard + session-day check).
+            </div>
+
+            <!-- Step Indicator -->
+            <div class="consenso-steps-indicator">
+                <div class="consenso-step-dot active" id="stepDot1">
+                    <span>1</span>
+                    <div class="step-dot-label">Personal Details</div>
+                </div>
+                <div class="consenso-step-line"></div>
+                <div class="consenso-step-dot" id="stepDot2">
+                    <span>2</span>
+                    <div class="step-dot-label">Declaration & Signature</div>
+                </div>
+            </div>
+
+            <!-- STEP 1: Personal details -->
+            <div id="step1" class="consenso-step-content">
+                <div class="booking-card">
+
+                    <h3 class="booking-card-title">
+                        <i class="fas fa-user"></i> Personal Details
+                    </h3>
+
+                    <div class="form-group">
+                        <label for="nomeCognome">Full name *</label>
+                        <input type="text" id="nomeCognome" name="nomeCognome" placeholder="Mario Rossi" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dataNascita">Date of birth *</label>
+                            <input type="date" id="dataNascita" name="dataNascita" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cittaNascita">City of birth *</label>
+                            <input type="text" id="cittaNascita" name="cittaNascita" placeholder="Rome" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="indirizzo">Home address (full address, postcode, country) *</label>
+                        <input type="text" id="indirizzo" name="indirizzo"
+                            placeholder="23 Via Roma, Rome, 00182, Italy" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telefono">Phone *</label>
+                            <input type="tel" id="telefono" name="telefono" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-mail *</label>
+                            <input type="email" id="email" name="email" placeholder="mario@email.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Document type *</label>
+                        <div class="radio-pill-group">
+                            <label class="radio-pill">
+                                <input type="radio" name="tipoDocumento" value="National ID">
+                                <span>National ID</span>
+                            </label>
+                            <label class="radio-pill">
+                                <input type="radio" name="tipoDocumento" value="Driver's Licence">
+                                <span>Driver's Licence</span>
+                            </label>
+                            <label class="radio-pill">
+                                <input type="radio" name="tipoDocumento" value="Passport">
+                                <span>Passport</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="numeroDocumento">Document number *</label>
+                            <input type="text" id="numeroDocumento" name="numeroDocumento"
+                                placeholder="AB1234567" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="codiceFiscale">Tax code / National ID number *</label>
+                            <input type="text" id="codiceFiscale" name="codiceFiscale"
+                                placeholder="RSSMRI... / passport no." required>
+                        </div>
+                    </div>
+
+                    <p id="step1Msg" class="form-message"></p>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" onclick="goToStep2()">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- STEP 2: Service + Declaration + Signature -->
+            <div id="step2" class="consenso-step-content hidden">
+                <div class="booking-card">
+
+                    <h3 class="booking-card-title">
+                        <i class="fas fa-pen-nib"></i> Type of Procedure
+                    </h3>
+
+                    <div class="form-group">
+                        <label>I am requesting the following</label>
+                        <input type="hidden" name="tipoServizio" value="Tatuaggio">
+                        <p style="color:#D4AF37;font-weight:600;letter-spacing:0.08em;margin:6px 0 0;">TATTOO</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="parteCorpo">On the following body part *</label>
+                        <input type="text" id="parteCorpo" name="parteCorpo"
+                            placeholder="e.g. left arm, right ankle, back..." required>
+                    </div>
+
+                    <!-- Declaration -->
+                    <div class="consenso-declaration">
+                        <h4><i class="fas fa-file-contract"></i> Declarations</h4>
+
+                        <p><strong>I DECLARE THAT I HAVE BEEN INFORMED OF:</strong></p>
+                        <ul>
+                            <li>Treatment methods.</li>
+                            <li>Potential health risks.</li>
+                            <li>Correct aftercare of the tattooed area.</li>
+                            <li>Difficulties of removal.</li>
+                        </ul>
+
+                        <p><strong>I FURTHER DECLARE:</strong></p>
+                        <ul>
+                            <li>I have disclosed any conditions that may contraindicate the procedure.</li>
+                            <li>I have fully understood all information provided.</li>
+                        </ul>
+
+                        <p class="consenso-para"><strong>I FURTHERMORE AUTHORISE SANGROYAL SRLS</strong> free of
+                            charge, without time limits, also pursuant to arts. 10 and 320 of the Civil Code and arts.
+                            96 and 97 of Law 22.4.1941, n.633 (Copyright Law), to publish and/or distribute any of my
+                            images on the Sangroyal SRLS website, in print and/or any other medium, and I also authorise
+                            the storage of said photos and videos in the Company's digital archives, acknowledging that
+                            the purpose of such publications is purely informational and potentially promotional.</p>
+
+                        <p class="consenso-ritocchi-note">
+                            <i class="fas fa-info-circle"></i>
+                            <em>Any touch-ups may be carried out free of charge within one month of the session. After
+                                this period, a touch-up will be possible upon payment of a fee to be agreed with the
+                                artist following a prior consultation.</em>
+                        </p>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="form-group" style="max-width: 240px;">
+                        <label for="dataFirma">Date *</label>
+                        <input type="date" id="dataFirma" name="dataFirma" required>
+                    </div>
+
+                    <!-- Signature -->
+                    <div class="form-group">
+                        <label>Signature <span style="font-size:0.8em;color:#888;">(parent/guardian if
+                                minor)</span> *</label>
+                        <div class="signature-pad-wrap">
+                            <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+                        </div>
+                        <div class="signature-footer">
+                            <small class="form-hint">Sign in the box above with your mouse or finger</small>
+                            <button type="button" class="btn-signature-clear" onclick="clearSignature()">
+                                <i class="fas fa-eraser"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <p id="step2Msg" class="form-message"></p>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="goToStep1()">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="submitConsenso()" id="submitBtn">
+                            <i class="fas fa-check"></i> Submit Consent
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SUCCESS STATE -->
+            <div id="successState" class="success-state hidden">
+                <div class="success-card">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>Consent Submitted!</h2>
+                    <p class="success-subtitle">Your informed consent has been successfully recorded.<br>
+                        You're all set for your session with Irene!</p>
+                    <div id="consentoDetails" class="booking-details-box"></div>
+                    <div class="success-actions">
+                        <a href="../dashboard.html" class="btn btn-primary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Menu</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#gallery">Portfolio</a></li>
+                        <li><a href="consultation.html">Book Consultation</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="voucher.html">Gift a Tattoo</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Contacts</h3>
+                    <ul>
+                        <li><a href="https://wa.me/393471648654">WhatsApp</a></li>
+                        <li><a href="mailto:irenegipsytattoo@gmail.com">Email</a></li>
+                        <li><a href="https://instagram.com/irenegipsytattoo">Instagram</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Languages</h3>
+                    <div class="lang-links">
+                        <a href="../consent.html">🇮🇹 Italiano</a> | <span class="active">🇬🇧 English</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Irene Gipsy Tattoo - Realistic Tattoo Artist Rome</p>
+                <div class="footer-legal-links">
+                    <a href="legal.html">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#cookie">Cookie Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#termini">Terms &amp; Conditions</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Auth + seduta guard -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="../js/supabase-client.js"></script>
+    <!-- ⚠️ WIP: guard disabled — re-enable before launch -->
+    <script>
+    (async () => {
+        document.documentElement.style.visibility = 'hidden';
+        const { data: { session } } = await db.auth.getSession();
+        if (session) window.__authUser = session.user;
+        // WIP: redirect disabled
+        // if (!session) { window.location.replace('../login.html?next=' + encodeURIComponent(window.location.href)); return; }
+        document.documentElement.style.visibility = '';
+    })();
+    </script>
+
+    <!-- intl-tel-input -->
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/comuni-it.js"></script>
+    <script src="../js/consenso-en.js"></script>
+
+</body>
+
+</html>

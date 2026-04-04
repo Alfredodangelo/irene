@@ -1,0 +1,403 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Consultation - Irene Gipsy Tattoo</title>
+    <meta name="description"
+        content="Book your free consultation with Irene Gipsy Tattoo. Select an available date and time and fill out the form.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Pinyon+Script&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- intl-tel-input -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Irene Gipsy Tattoo</a>
+
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#about" class="nav-link">About</a></li>
+                <li><a href="index.html#gallery" class="nav-link">Portfolio</a></li>
+                <li><a href="index.html#processo" class="nav-link">Process</a></li>
+                <li><a href="consultation.html" class="nav-link active-page">Book Consultation</a></li>
+                <li><a href="voucher.html" class="nav-link">Gift Tattoo</a></li>
+                <li><a href="faq.html" class="nav-link">FAQ</a></li>
+                <li><a href="index.html#contatti" class="nav-link">Contact</a></li>
+                <li><a href="../login.html" class="nav-link" id="navAreaLink"><i class="fas fa-user-circle" style="margin-right:5px;font-size:0.85em;"></i>Personal Area</a></li>
+                <li class="lang-switch">
+                    <a href="../consultation.html" class="lang-link" aria-label="Switch to Italian"><span class="lang-flag-it"></span> IT</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="hero-bg" style="background-image: url('../images/img1.jpeg');"></div>
+        <div class="overlay"></div>
+        <div class="stars-container">
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+        </div>
+        <div class="page-header-content container">
+            <h1 class="fade-in">Book a Consultation</h1>
+            <p class="fade-in delay-1">Choose a date and time, fill out the form with your idea.<br>I'll get back to you with confirmation within 24 hours.</p>
+            <a href="index.html" class="back-link fade-in delay-2">
+                <i class="fas fa-arrow-left"></i> Back to site
+            </a>
+        </div>
+    </header>
+
+    <!-- Config Warning -->
+    <div id="configWarning" class="config-warning hidden">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Configuration required:</strong> Open <code>js/consulenza.js</code> and set
+        <code>CAL_API_KEY</code>, <code>CAL_EVENT_TYPE_ID</code> and <code>N8N_WEBHOOK_URL</code>.
+    </div>
+
+    <!-- Booking Section -->
+    <section class="consulenza-section section-padding bg-dark-grey">
+        <div class="container">
+
+            <!-- Main Booking Grid -->
+            <div class="booking-grid" id="bookingGrid">
+
+                <!-- ===== LEFT: Calendar + Time Slots ===== -->
+                <div class="calendar-side">
+
+                    <!-- Calendar Card -->
+                    <div class="booking-card">
+                        <h3 class="booking-card-title">
+                            <i class="far fa-calendar-alt"></i> Select a Date
+                        </h3>
+
+                        <!-- Calendar Navigation -->
+                        <div class="cal-header">
+                            <button id="prevMonth" class="cal-nav-btn" aria-label="Previous month">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="monthYearLabel" class="cal-month-label"></span>
+                            <button id="nextMonth" class="cal-nav-btn" aria-label="Next month">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <!-- Day Names Header -->
+                        <div class="cal-days-header">
+                            <span>Mo</span>
+                            <span>Tu</span>
+                            <span>We</span>
+                            <span>Th</span>
+                            <span>Fr</span>
+                            <span>Sa</span>
+                            <span>Su</span>
+                        </div>
+
+                        <!-- Calendar Grid -->
+                        <div id="calendarGrid" class="cal-grid"></div>
+
+                        <!-- Loading Indicator -->
+                        <div id="calLoading" class="cal-loading hidden">
+                            <span class="loading-spinner"></span>
+                            Loading availability...
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="cal-legend">
+                            <span class="legend-item">
+                                <span class="legend-dot dot-available"></span> Available
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-dot dot-unavailable"></span> Not available
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-dot dot-selected"></span> Selected
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots Card -->
+                    <div id="timeSlotsCard" class="booking-card hidden">
+                        <h3 class="booking-card-title" id="timeSlotsTitle">
+                            <i class="far fa-clock"></i> Available times
+                        </h3>
+                        <div id="timeSlotsGrid" class="time-slots-grid"></div>
+                    </div>
+
+                </div>
+
+                <!-- ===== RIGHT: Form ===== -->
+                <div class="form-side">
+                    <div class="booking-card" id="formCard">
+
+                        <!-- Selected Date/Time Summary -->
+                        <div id="selectedInfo" class="selected-info hidden">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="selectedInfoText"></span>
+                            <button type="button" id="changeDateTime" class="change-link">Change</button>
+                        </div>
+
+                        <h3 id="personalDataTitle" class="booking-card-title">
+                            <i class="fas fa-pen-nib"></i> Your Details
+                        </h3>
+                        <p id="bookingAsText" style="display:none; font-size:0.82rem; color:#aaa; margin-bottom:14px; padding:9px 13px; background:rgba(212,175,55,0.05); border-left:2px solid rgba(212,175,55,0.3); border-radius:6px;"></p>
+
+                        <form id="consulenzaForm" novalidate>
+
+                            <div id="personalDataSection">
+                            <!-- First + Last Name -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nome">First Name *</label>
+                                    <input type="text" id="nome" name="nome" placeholder="Mario" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cognome">Last Name *</label>
+                                    <input type="text" id="cognome" name="cognome" placeholder="Rossi" required>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" name="email" placeholder="mario@email.com" required>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="form-group">
+                                <label for="telefono">Mobile Number *</label>
+                                <input type="tel" id="telefono" name="telefono" placeholder="347 000 0000" required>
+                            </div>
+                            </div><!-- /personalDataSection -->
+
+                            <!-- Consultation location -->
+                            <div class="form-group">
+                                <label>Where do you prefer the consultation? *</label>
+                                <div class="payment-options">
+                                    <label class="payment-card">
+                                        <input type="radio" name="luogo" value="inPerson" required checked>
+                                        <span>
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            In Studio (Rome)
+                                        </span>
+                                    </label>
+                                    <label class="payment-card">
+                                        <input type="radio" name="luogo" value="integrations:whatsapp_video">
+                                        <span>
+                                            <i class="fab fa-whatsapp"></i>
+                                            WhatsApp Video
+                                        </span>
+                                    </label>
+                                </div>
+                                <p style="font-size:0.72rem;color:#888;margin-top:6px;font-style:italic;">In-studio consultation is recommended. Video is only for those who cannot travel to Rome.</p>
+                                <div id="whatsappMotivo" style="display:none;margin-top:8px;">
+                                    <label for="motivoVideo" style="font-size:0.82rem;">Why can't you come to the studio? *</label>
+                                    <input type="text" id="motivoVideo" name="motivoVideo" placeholder="E.g.: I live in Milan" style="margin-top:4px;">
+                                </div>
+                            </div>
+
+                            <!-- Idea description -->
+                            <div class="form-group">
+                                <label for="descrizione">Describe your idea *</label>
+                                <textarea id="descrizione" name="descrizione" rows="4"
+                                    placeholder="A Medusa with a piercing gaze on my arm..."
+                                    required></textarea>
+                            </div>
+
+                            <!-- Photo Upload -->
+                            <div class="form-group">
+                                <label>Upload reference photos <span class="label-optional">(optional, min 2 – max 4)</span></label>
+                                <div class="upload-area" id="uploadArea">
+                                    <input type="file" id="fotoInput" name="foto" accept="image/*" multiple
+                                        style="display:none;">
+                                    <div class="upload-placeholder" id="uploadPlaceholder">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Drag photos here or <strong>click to upload</strong></p>
+                                        <small>Optional · If you upload, minimum 2 and maximum 4 · Max 10 MB each</small>
+                                    </div>
+                                    <div id="photoPreview" class="photo-preview hidden"></div>
+                                </div>
+                                <small class="form-hint">Optional — if you have visual references, include front/back/side shots in good lighting</small>
+                            </div>
+
+                            <!-- Payment preference -->
+                            <div class="form-group">
+                                <label>Payment Preference *</label>
+                                <div class="payment-options">
+                                    <label class="payment-card">
+                                        <input type="radio" name="pagamento" value="Cash" required>
+                                        <span>
+                                            <i class="fas fa-money-bill-wave"></i>
+                                            Cash
+                                        </span>
+                                    </label>
+                                    <label class="payment-card">
+                                        <input type="radio" name="pagamento" value="Card">
+                                        <span>
+                                            <i class="fas fa-credit-card"></i>
+                                            Card
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Deposit Info -->
+                            <div class="caparra-info">
+                                <h4><i class="fas fa-info-circle"></i> Deposit &amp; Booking</h4>
+                                <p>The deposit secures your date. A separate deposit is required for each session.</p>
+                                <p><strong>Cancellation/rescheduling policy:</strong></p>
+                                <ul>
+                                    <li>More than 14 days before: deposit refunded 100%</li>
+                                    <li>Less than 14 days before: deposit is forfeited</li>
+                                    <li>Rescheduling within 14 days: deposit is forfeited</li>
+                                    <li>Rescheduling beyond 14 days: deposit converted to credit</li>
+                                </ul>
+                                <p><strong>How much does a tattoo cost?</strong><br>
+                                The price depends on size, complexity, colours and number of sessions.<br>
+                                The quote will be agreed during the consultation.</p>
+                            </div>
+
+                            <!-- GDPR -->
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="gdpr" name="gdpr" required>
+                                    <span>I have read and accept the above and consent to the processing of my personal data pursuant to EU Regulation 2016/679 (GDPR). The data provided will be used solely to handle my contact/booking request and will not be shared with third parties. I may exercise my rights of access, rectification and erasure of my data at any time. *</span>
+                                </label>
+                            </div>
+
+                            <!-- Newsletter -->
+                            <div class="form-group">
+                                <label>Would you like to receive updates and news?</label>
+                                <div class="newsletter-options">
+                                    <label class="radio-option">
+                                        <input type="radio" name="newsletter" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="newsletter" value="No">
+                                        <span>No</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- No Date Warning -->
+                            <div id="noDateWarning" class="no-date-warning hidden">
+                                <i class="fas fa-calendar-times"></i>
+                                Please select a date and time from the calendar on the left
+                            </div>
+
+                            <!-- Submit -->
+                            <button type="submit" id="submitBtn" class="btn btn-primary btn-lg submit-btn">
+                                <i class="fas fa-check"></i> Confirm Booking
+                            </button>
+
+                            <p id="formMsg" class="form-message"></p>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== SUCCESS STATE ===== -->
+            <div id="successState" class="success-state hidden">
+                <div class="success-card">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>Booking Confirmed!</h2>
+                    <p class="success-subtitle">You will receive a confirmation email from Cal.com shortly.<br>
+                        If you don't receive it, please check your spam folder.</p>
+                    <div id="bookingDetails" class="booking-details-box"></div>
+                    <div class="success-actions">
+                        <a href="index.html" class="btn btn-primary">
+                            <i class="fas fa-home"></i> Back to Site
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Menu</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#gallery">Portfolio</a></li>
+                        <li><a href="consultation.html">Book Consultation</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="voucher.html">Gift a Tattoo</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Contacts</h3>
+                    <ul>
+                        <li><a href="https://wa.me/393471648654">WhatsApp</a></li>
+                        <li><a href="mailto:irenegipsytattoo@gmail.com">Email</a></li>
+                        <li><a href="https://instagram.com/irenegipsytattoo">Instagram</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Languages</h3>
+                    <div class="lang-links">
+                        <a href="../consultation.html">🇮🇹 Italiano</a> | <span class="active">🇬🇧 English</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Irene Gipsy Tattoo - Realistic Tattoo Artist Rome</p>
+                <div class="footer-legal-links">
+                    <a href="legal.html">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#cookie">Cookie Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#termini">Terms &amp; Conditions</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- intl-tel-input -->
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
+
+    <!-- Supabase (for logged-in user prefill) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="../js/supabase-client.js"></script>
+
+    <!-- Scripts -->
+    <script src="../js/main.js"></script>
+    <script src="../js/consulenza-en.js"></script>
+
+</body>
+
+</html>

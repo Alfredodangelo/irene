@@ -1,0 +1,240 @@
+{
+  "name": "Admin — Crea Cliente",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "admin-crea-cliente",
+        "responseMode": "responseNode",
+        "options": { "allowedOrigins": "*" }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 300],
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Webhook",
+      "webhookId": "admin-crea-cliente"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\n\nconst first = (body.first_name || '').trim();\nconst last  = (body.last_name  || '').trim();\nconst email = (body.email      || '').trim().toLowerCase();\nconst phone = (body.phone      || '').trim();\nconst source = (body.source    || 'admin').trim();\nconst existing_user_id = (body.existing_user_id || '').trim();\n\nif (!first || !last || !email) {\n  throw new Error('Dati mancanti: first_name, last_name, email obbligatori');\n}\n\n// Genera password solo se non è Google OAuth (servirà al branch classico)\nconst chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#';\nconst password = Array.from({ length: 10 }, () =>\n  chars[Math.floor(Math.random() * chars.length)]\n).join('');\n\nreturn [{ json: { first_name: first, last_name: last, email, phone, temp_password: password, source, existing_user_id } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "name": "Prepara Dati e Password"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "cond-google-oauth-01",
+              "leftValue": "={{ $json.source }}",
+              "rightValue": "google_oauth",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [680, 300],
+      "id": "if-google-oauth-0001-0002-0003-000000000001",
+      "name": "Google OAuth?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/auth/v1/admin/users",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
+            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ email: $json.email, password: $json.temp_password, user_metadata: { first_name: $json.first_name, last_name: $json.last_name, full_name: $json.first_name + ' ' + $json.last_name, phone: $json.phone, must_change_password: true }, email_confirm: true }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [920, 440],
+      "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+      "name": "Crea Utente Auth",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp = $input.first().json;\nif (!resp.id) {\n  const msg = resp.message || resp.msg || JSON.stringify(resp);\n  throw new Error('Supabase auth error: ' + msg);\n}\nreturn [{ json: { id: resp.id, email: resp.email } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1140, 440],
+      "id": "d4e5f6a7-b8c9-0123-defa-234567890123",
+      "name": "Estrai ID Utente"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
+            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "Prefer",        "value": "resolution=merge-duplicates" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ id: $('Estrai ID Utente').item.json.id, user_id: $('Estrai ID Utente').item.json.id, email: $('Prepara Dati e Password').item.json.email, first_name: $('Prepara Dati e Password').item.json.first_name, last_name: $('Prepara Dati e Password').item.json.last_name, phone: $('Prepara Dati e Password').item.json.phone || null }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1360, 440],
+      "id": "e5f6a7b8-c9d0-1234-efab-345678901234",
+      "name": "Salva Profilo Cliente",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Prepara Dati e Password').item.json.email }}",
+        "subject": "🔐 Il tuo account personale — Irene Gipsy Tattoo",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n  <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n  <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap\" rel=\"stylesheet\">\n  <style>\n    body { margin:0; padding:0; background-color:#0a0a0a; font-family:'Montserrat',sans-serif; }\n    @media only screen and (max-width:600px) {\n      .email-wrapper { padding:10px 5px !important; }\n      .header { padding:28px 16px 24px !important; }\n      .content { padding:24px 16px !important; }\n      .password-code { font-size:1.3rem !important; letter-spacing:3px !important; }\n      .btn-mobile { display:block !important; width:85% !important; max-width:300px !important; margin:0 auto !important; box-sizing:border-box !important; padding:14px 20px !important; }\n    }\n  </style>\n</head>\n<body style=\"margin:0;padding:0;background-color:#0a0a0a;\">\n  <div class=\"email-wrapper\" style=\"background-color:#0a0a0a;padding:30px 10px;\">\n    <div style=\"max-width:600px;width:100%;margin:0 auto;background-color:#121212;overflow:hidden;\">\n\n      <!-- HEADER -->\n      <div class=\"header\" style=\"background-color:#000000;padding:40px 30px 32px;text-align:center;border-bottom:1px solid #222;\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.6rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:6px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#F5F5DC;letter-spacing:3px;text-transform:uppercase;display:block;margin-bottom:20px;\">Realistic Tattoo Artist</span>\n        <div style=\"width:60px;height:2px;background-color:#D4AF37;margin:0 auto 20px;\"></div>\n        <h1 style=\"font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:400;color:#D4AF37;margin:0;letter-spacing:0.5px;\">✅ Il tuo account è pronto</h1>\n      </div>\n\n      <!-- CONTENT -->\n      <div class=\"content\" style=\"background-color:#121212;padding:36px 30px;\">\n\n        <p style=\"font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;color:#D4AF37;margin-bottom:14px;font-style:italic;\">Ciao {{ $('Prepara Dati e Password').item.json.first_name }},</p>\n\n        <p style=\"font-size:0.95rem;margin-bottom:28px;color:#F5F5DC;font-weight:300;line-height:1.7;\">\n          Irene ha creato il tuo <strong style=\"color:#D4AF37;font-weight:600;\">account personale</strong> su Irene Gipsy Tattoo. Qui sotto trovi le credenziali per accedere alla tua area riservata.\n        </p>\n\n        <!-- CREDENZIALI BOX -->\n        <div style=\"background-color:#1a160a;border:1px solid #D4AF37;padding:28px 24px;margin:0 0 24px;\">\n          <p style=\"font-family:'Playfair Display',serif;font-size:1rem;font-weight:400;color:#D4AF37;margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid #3a2e10;\">🔐 Le Tue Credenziali</p>\n\n          <div style=\"display:flex;align-items:flex-start;margin:10px 0;line-height:1.5;\">\n            <span style=\"font-size:16px;margin-right:12px;min-width:24px;flex-shrink:0;margin-top:1px;\">📧</span>\n            <div style=\"overflow:hidden;\">\n              <span style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;\">Email</span>\n              <span style=\"font-family:'Courier New',monospace;font-size:1rem;font-weight:700;color:#D4AF37;display:block;word-break:break-all;\">{{ $('Prepara Dati e Password').item.json.email }}</span>\n            </div>\n          </div>\n\n          <div style=\"height:1px;background-color:#3a2e10;margin:16px 0;\"></div>\n\n          <div style=\"display:flex;align-items:flex-start;margin:10px 0;line-height:1.5;\">\n            <span style=\"font-size:16px;margin-right:12px;min-width:24px;flex-shrink:0;margin-top:1px;\">🔑</span>\n            <div style=\"width:100%;\">\n              <span style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:10px;\">Password Temporanea</span>\n              <span class=\"password-code\" style=\"font-family:'Courier New',monospace;font-size:1.6rem;font-weight:700;color:#D4AF37;letter-spacing:6px;display:block;line-height:1;\">{{ $('Prepara Dati e Password').item.json.temp_password }}</span>\n            </div>\n          </div>\n        </div>\n\n        <!-- INFO BOX -->\n        <div style=\"background-color:#0d0d0d;padding:24px 20px;margin:0 0 28px;border-left:2px solid #D4AF37;\">\n          <p style=\"font-family:'Playfair Display',serif;font-size:1rem;font-weight:400;color:#D4AF37;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;\">ℹ️ Primo Accesso</p>\n          <p style=\"font-family:'Montserrat',sans-serif;font-size:0.9rem;color:#F5F5DC;font-weight:300;line-height:1.7;margin:0;\">\n            Dopo il primo accesso potrai <strong style=\"color:#D4AF37;font-weight:600;\">cambiare la password</strong> dal tuo profilo. Conserva questa email: in caso di necessità puoi richiedere il reset dalla pagina di accesso.\n          </p>\n        </div>\n\n        <!-- CTA -->\n        <div style=\"text-align:center;margin:0 0 28px;\">\n          <p style=\"font-size:0.8rem;color:#888888;text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;\">Accedi subito alla tua area riservata</p>\n          <a href=\"https://irenegipsytattoo.com/login.html\" class=\"btn-mobile\" style=\"display:inline-block;padding:12px 30px;border:1px solid #D4AF37;text-transform:uppercase;font-family:'Montserrat',sans-serif;font-size:0.9rem;letter-spacing:1px;background-color:#D4AF37;color:#000000;font-weight:600;text-decoration:none;\">\n            🔑 Accedi alla Tua Area Personale\n          </a>\n        </div>\n\n        <div style=\"background-color:#1a1a1a;padding:20px;border:1px solid #333333;\">\n          <p style=\"font-size:0.85rem;color:#888888;font-style:italic;margin:0;line-height:1.7;\">\n            💡 Se non riconosci questo account, ignora questa email in tutta sicurezza.\n          </p>\n        </div>\n\n      </div>\n\n      <!-- FOOTER -->\n      <div style=\"background-color:#000000;text-align:center;padding:30px 20px;border-top:1px solid #222222;\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.1rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:4px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.7rem;text-transform:uppercase;letter-spacing:3px;color:#F5F5DC;display:block;margin-bottom:16px;\">Realistic Tattoo Artist</span>\n        <p style=\"margin:0;\">\n          <a href=\"mailto:irenegipsytattoo@gmail.com\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Email</a> |\n          <a href=\"https://www.instagram.com/irenegipsytattoo/\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Instagram</a> |\n          <a href=\"https://wa.me/393471648654\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">WhatsApp</a>\n        </p>\n        <p style=\"margin:16px 0 0;font-size:0.7rem;color:#333333;letter-spacing:0.5px;\">© 2026 Tutti i diritti riservati</p>\n      </div>\n\n    </div>\n  </div>\n</body>\n</html>",
+        "options": { "appendAttribution": false }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1580, 440],
+      "id": "f6a7b8c9-d0e1-2345-fabc-456789012345",
+      "name": "Invia Email Benvenuto",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZmFlwpy10UFOwY00",
+          "name": "Gmail - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, client_id: $('Estrai ID Utente').item.json.id }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1800, 440],
+      "id": "a7b8c9d0-e1f2-3456-abcd-567890123456",
+      "name": "Risposta OK"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, error: true, message: $input.first().json.message || 'Errore nella creazione del cliente' }) }}",
+        "options": { "responseCode": 400 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1140, 640],
+      "id": "b8c9d0e1-f2a3-4567-bcde-678901234567",
+      "name": "Risposta Errore"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Branch Google OAuth: l'utente auth esiste gia (creato da Supabase OAuth).\n// Usiamo existing_user_id come ID per il profilo clients.\nconst data = $('Prepara Dati e Password').item.json;\nconst userId = data.existing_user_id;\n\nif (!userId) {\n  throw new Error('existing_user_id mancante per registrazione Google OAuth');\n}\n\nreturn [{ json: { id: userId, user_id: userId, email: data.email, first_name: data.first_name, last_name: data.last_name, phone: data.phone || null } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 160],
+      "id": "google-set-uid-0001-0002-0003-000000000001",
+      "name": "Set User ID Google"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
+            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "Prefer",        "value": "resolution=merge-duplicates" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ id: $json.id, user_id: $json.user_id, email: $json.email, first_name: $json.first_name, last_name: $json.last_name, phone: $json.phone }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 160],
+      "id": "google-salva-prof-0001-0002-0003-000000000002",
+      "name": "Salva Profilo Google",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, client_id: $('Set User ID Google').item.json.id }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1360, 160],
+      "id": "google-risposta-ok-0001-0002-0003-000000000003",
+      "name": "Risposta OK Google"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Prepara Dati e Password", "type": "main", "index": 0 }]]
+    },
+    "Prepara Dati e Password": {
+      "main": [[{ "node": "Google OAuth?", "type": "main", "index": 0 }]]
+    },
+    "Google OAuth?": {
+      "main": [
+        [{ "node": "Set User ID Google", "type": "main", "index": 0 }],
+        [{ "node": "Crea Utente Auth", "type": "main", "index": 0 }]
+      ]
+    },
+    "Set User ID Google": {
+      "main": [[{ "node": "Salva Profilo Google", "type": "main", "index": 0 }]]
+    },
+    "Salva Profilo Google": {
+      "main": [[{ "node": "Risposta OK Google", "type": "main", "index": 0 }]]
+    },
+    "Crea Utente Auth": {
+      "main": [[{ "node": "Estrai ID Utente", "type": "main", "index": 0 }]],
+      "error": [[{ "node": "Risposta Errore", "type": "main", "index": 0 }]]
+    },
+    "Estrai ID Utente": {
+      "main": [[{ "node": "Salva Profilo Cliente", "type": "main", "index": 0 }]]
+    },
+    "Salva Profilo Cliente": {
+      "main": [[{ "node": "Invia Email Benvenuto", "type": "main", "index": 0 }]]
+    },
+    "Invia Email Benvenuto": {
+      "main": [[{ "node": "Risposta OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "meta": { "instanceId": "irene-gipsy-tattoo" },
+  "tags": []
+}

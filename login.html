@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accedi - Irene Gipsy Tattoo</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/roman-sd" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-dim: rgba(212,175,55,0.15);
+            --bg: #0a0a0a;
+            --bg-card: #111111;
+            --border: rgba(212,175,55,0.25);
+            --text: #e0e0e0;
+            --text-muted: #888;
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Montserrat', sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background-image: radial-gradient(ellipse at top, rgba(212,175,55,0.04) 0%, transparent 60%);
+        }
+
+        .login-logo {
+            font-family: 'Roman SD', serif;
+            font-size: 1.5rem;
+            color: var(--gold);
+            letter-spacing: 3px;
+            text-align: center;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .login-subtitle {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px 36px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .login-card h2 {
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .login-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .btn-google {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: #fff;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-google:hover { opacity: 0.9; }
+        .btn-google svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .magic-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .magic-input {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .magic-input:focus { border-color: var(--gold); }
+
+        .btn-magic {
+            width: 100%;
+            padding: 13px 20px;
+            background: transparent;
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            color: var(--gold);
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-magic:hover { background: var(--gold-dim); }
+        .btn-magic:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ── OTP STEP 2 ── */
+        .otp-step { display: none; }
+        .otp-step.visible { display: block; }
+        .otp-hint {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.7;
+            text-align: center;
+        }
+        .otp-hint strong { color: var(--text); }
+        .otp-input {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            padding: 14px;
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 1.6rem;
+            letter-spacing: 10px;
+            text-align: center;
+            margin-bottom: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .otp-input:focus { border-color: var(--gold); }
+        .otp-back {
+            display: block;
+            text-align: center;
+            margin-top: 14px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            font-family: var(--font-body);
+            cursor: pointer;
+            width: 100%;
+        }
+        .otp-back:hover { color: var(--gold); }
+
+        .login-msg {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            text-align: center;
+            display: none;
+        }
+        .login-msg.success { background: rgba(85,201,122,0.12); border: 1px solid rgba(85,201,122,0.3); color: #55c97a; }
+        .login-msg.error   { background: rgba(224,85,85,0.12);  border: 1px solid rgba(224,85,85,0.3);  color: #e05555; }
+        .login-msg.show    { display: block; }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 28px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+        .back-link:hover { color: var(--gold); }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid rgba(212,175,55,0.3);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .link-btn {
+            background: none; border: none; cursor: pointer;
+            color: var(--text-muted); font-family: var(--font-body);
+            font-size: 0.78rem; padding: 0; transition: color 0.2s;
+        }
+        .link-btn:hover { color: var(--gold); }
+        .forgot-row { text-align: right; margin: -4px 0 14px; }
+        .alt-login-row { text-align: center; margin-top: 16px; }
+
+        .admin-link {
+            display: block;
+            text-align: center;
+            margin-top: 14px;
+            font-size: 0.72rem;
+            color: rgba(212,175,55,0.25);
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        .admin-link:hover { color: rgba(212,175,55,0.7); }
+
+        /* ── Modal Registrazione Google ── */
+        .reg-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .reg-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px 28px;
+            width: 100%; max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+        }
+        .reg-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        .reg-card .reg-sub {
+            font-size: 0.8rem; color: var(--text-muted);
+            text-align: center; margin-bottom: 20px; line-height: 1.6;
+        }
+        .reg-card label {
+            display: block; font-size: 0.78rem; color: var(--text-muted);
+            margin-bottom: 4px; margin-top: 10px;
+        }
+        .reg-card .magic-input { margin-bottom: 0; }
+        .reg-card .magic-input[readonly] { opacity: 0.6; cursor: not-allowed; }
+        .reg-phone-row { display: flex; gap: 8px; }
+        .reg-phone-row select {
+            width: 90px; flex-shrink: 0;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px; padding: 10px 8px;
+            color: var(--text); font-family: var(--font-body); font-size: 0.85rem;
+        }
+        .reg-phone-row input { flex: 1; }
+        .reg-msg {
+            margin-top: 12px; padding: 10px 14px; border-radius: 8px;
+            font-size: 0.82rem; text-align: center; display: none;
+        }
+        .reg-msg.error { display: block; background: rgba(224,85,85,0.12); border: 1px solid rgba(224,85,85,0.3); color: #e05555; }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-logo">Irene Gipsy Tattoo</div>
+    <p class="login-subtitle">Area Personale</p>
+
+    <div class="login-card">
+        <h2>Bentornato</h2>
+        <p>Accedi per visualizzare i tuoi appuntamenti, voucher e documenti personali.</p>
+
+        <!-- Google Login -->
+        <button class="btn-google" id="googleBtn">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Accedi con Google
+        </button>
+
+        <div class="divider">oppure accedi con email</div>
+
+        <!-- SEZIONE A: Email + Password (default) -->
+        <div id="sectionPwd">
+            <input type="email" id="emailInput" class="magic-input" placeholder="nome@email.com" autocomplete="email">
+            <input type="password" id="passwordInput" class="magic-input" placeholder="Password" autocomplete="current-password">
+            <div class="forgot-row">
+                <button class="link-btn" id="forgotPwdBtn">Password dimenticata?</button>
+            </div>
+            <button class="btn-magic" id="loginBtn">Accedi</button>
+            <div class="alt-login-row">
+                <button class="link-btn" id="toOtpBtn">Nessuna password? Ricevi il codice via email →</button>
+            </div>
+        </div>
+
+        <!-- SEZIONE B: OTP – inserisci email (nascosta) -->
+        <div id="sectionOtp1" style="display:none;">
+            <p class="magic-label">Inserisci la tua email per ricevere un codice di accesso</p>
+            <input type="email" id="otpEmailInput" class="magic-input" placeholder="nome@email.com" autocomplete="email">
+            <button class="btn-magic" id="sendCodeBtn">Invia codice di accesso</button>
+            <div class="alt-login-row">
+                <button class="link-btn" id="toPwdBtn">← Torna al login con password</button>
+            </div>
+        </div>
+
+        <!-- SEZIONE C: OTP – inserisci codice (nascosta) -->
+        <div id="sectionOtp2" style="display:none;">
+            <p class="otp-hint">Abbiamo inviato un codice a 8 cifre a<br><strong id="emailDisplay"></strong></p>
+            <input type="text" id="otpInput" class="otp-input" placeholder="00000000" maxlength="8" inputmode="numeric" autocomplete="one-time-code">
+            <button class="btn-magic" id="verifyBtn">Accedi</button>
+            <button class="otp-back" id="backBtn">← Cambia email o rimanda il codice</button>
+        </div>
+
+        <!-- SEZIONE D: Imposta nuova password (mostrata dopo link di reset/invito) -->
+        <div id="sectionNewPwd" style="display:none;">
+            <p class="magic-label">Scegli la tua nuova password</p>
+            <input type="password" id="newPwdInput" class="magic-input" placeholder="Nuova password (min. 8 caratteri)" autocomplete="new-password">
+            <input type="password" id="newPwdConfirm" class="magic-input" placeholder="Ripeti la password" autocomplete="new-password">
+            <button class="btn-magic" id="savePwdBtn">Salva password e accedi</button>
+        </div>
+
+        <div class="login-msg" id="loginMsg"></div>
+    </div>
+
+    <a href="index.html" class="back-link">← Torna al sito</a>
+
+    <!-- Modal Registrazione Google -->
+    <div class="reg-overlay" id="regOverlay" onclick="if(event.target===this)closeRegModal()">
+        <div class="reg-card">
+            <h3>Completa la registrazione</h3>
+            <p class="reg-sub">Verifica i tuoi dati e inserisci il numero di cellulare per completare la creazione del tuo account.</p>
+
+            <label for="regNome">Nome *</label>
+            <input type="text" id="regNome" class="magic-input" placeholder="Nome">
+
+            <label for="regCognome">Cognome *</label>
+            <input type="text" id="regCognome" class="magic-input" placeholder="Cognome">
+
+            <label for="regEmail">Email</label>
+            <input type="email" id="regEmail" class="magic-input" readonly>
+
+            <label>Telefono *</label>
+            <div class="reg-phone-row">
+                <select id="regPhonePrefix">
+                    <option value="+39" selected>+39</option>
+                    <option value="+44">+44</option>
+                    <option value="+1">+1</option>
+                    <option value="+33">+33</option>
+                    <option value="+49">+49</option>
+                    <option value="+34">+34</option>
+                    <option value="+41">+41</option>
+                    <option value="+43">+43</option>
+                    <option value="+31">+31</option>
+                    <option value="+32">+32</option>
+                    <option value="+351">+351</option>
+                    <option value="+48">+48</option>
+                    <option value="+40">+40</option>
+                    <option value="+30">+30</option>
+                    <option value="+46">+46</option>
+                    <option value="+47">+47</option>
+                    <option value="+45">+45</option>
+                    <option value="+358">+358</option>
+                    <option value="+55">+55</option>
+                    <option value="+61">+61</option>
+                    <option value="+81">+81</option>
+                </select>
+                <input type="tel" id="regPhone" class="magic-input" placeholder="347 000 0000" inputmode="numeric">
+            </div>
+
+            <div class="reg-msg" id="regMsg"></div>
+
+            <button class="btn-magic" id="regSaveBtn" style="margin-top:16px;" onclick="submitGoogleRegistration()">
+                Crea il mio account
+            </button>
+        </div>
+    </div>
+
+    <!-- Supabase Client -->
+    <script src="js/supabase-client.js"></script>
+    <script>
+        // ── Destinazione post-login ───────────────────────────────────
+        const ADMIN_EMAIL = 'irenegipsytattoo@gmail.com';
+        const _params     = new URLSearchParams(window.location.search);
+        const _nextParam  = _params.get('next') || '';
+        const _redirectTo = window.location.origin + '/login.html';
+
+        function getRedirect(session) {
+            if (_nextParam && !_nextParam.startsWith('http')) return _nextParam;
+            return session?.user?.email?.toLowerCase() === ADMIN_EMAIL ? 'admin-dashboard.html' : 'dashboard.html';
+        }
+
+        // Controlla se è un nuovo utente Google (creato da meno di 60s)
+        let _handledNewGoogle = false;
+        function checkNewGoogleUser(session) {
+            if (_handledNewGoogle) return true;
+            const email = session.user.email;
+            if (email?.toLowerCase() !== ADMIN_EMAIL) {
+                const provider  = session.user.app_metadata?.provider;
+                const createdMs = new Date(session.user.created_at).getTime();
+                if (provider === 'google' && (Date.now() - createdMs) < 60000) {
+                    _handledNewGoogle = true;
+                    _pendingGoogleSession = session;
+                    openRegModal(session.user);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Se già loggato, vai subito alla destinazione
+        db.auth.getSession().then(({ data: { session } }) => {
+            if (!session) return;
+            if (checkNewGoogleUser(session)) return;
+            window.location.href = getRedirect(session);
+        });
+
+        // Auth state: login OK → redirect; recupero password → mostra form nuova pwd
+        db.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                showSection('sectionNewPwd');
+                showMsg('Scegli la tua nuova password.', 'success');
+            } else if (event === 'SIGNED_IN' && session) {
+                // Non fare redirect se siamo nella schermata di nuova password
+                if (document.getElementById('sectionNewPwd').style.display === 'block') return;
+
+                // Nuovo utente Google → mostra modal di registrazione
+                if (checkNewGoogleUser(session)) return;
+
+                window.location.href = getRedirect(session);
+            }
+        });
+
+        function showSection(id) {
+            ['sectionPwd','sectionOtp1','sectionOtp2','sectionNewPwd'].forEach(s => {
+                document.getElementById(s).style.display = s === id ? 'block' : 'none';
+            });
+            document.getElementById('loginMsg').className = 'login-msg';
+        }
+
+        // ── Google Login ──────────────────────────────────────────────
+        document.getElementById('googleBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('googleBtn');
+            btn.innerHTML = '<span class="loading-spinner"></span> Apertura Google...';
+            btn.disabled = true;
+            const { error } = await db.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: _redirectTo }
+            });
+            if (error) {
+                showMsg('Errore: ' + error.message, 'error');
+                btn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Accedi con Google';
+                btn.disabled = false;
+            }
+        });
+
+        // ── SEZIONE A: Email + Password ───────────────────────────────
+        document.getElementById('loginBtn').addEventListener('click', loginWithPassword);
+        document.getElementById('passwordInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') loginWithPassword();
+        });
+        document.getElementById('emailInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') document.getElementById('passwordInput').focus();
+        });
+
+        async function loginWithPassword() {
+            const email    = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            if (!email || !password) { showMsg('Inserisci email e password.', 'error'); return; }
+
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = '<span class="loading-spinner"></span> Accesso in corso...';
+            btn.disabled = true;
+
+            const { error } = await db.auth.signInWithPassword({ email, password });
+
+            btn.textContent = 'Accedi';
+            btn.disabled = false;
+
+            if (error) {
+                const wrong = error.message.toLowerCase().includes('invalid') || error.status === 400;
+                showMsg(wrong ? 'Email o password non corretti.' : error.message, 'error');
+            }
+        }
+
+        // Password dimenticata
+        document.getElementById('forgotPwdBtn').addEventListener('click', async () => {
+            const email = document.getElementById('emailInput').value.trim();
+            if (!email) { showMsg('Inserisci prima la tua email nel campo sopra.', 'error'); return; }
+
+            const { error } = await db.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.href
+            });
+
+            if (error) {
+                showMsg('Errore: ' + error.message, 'error');
+            } else {
+                showMsg('Email inviata! Controlla la tua casella e clicca il link per scegliere una nuova password.', 'success');
+            }
+        });
+
+        // Toggle → OTP
+        document.getElementById('toOtpBtn').addEventListener('click', () => {
+            const email = document.getElementById('emailInput').value.trim();
+            if (email) document.getElementById('otpEmailInput').value = email;
+            showSection('sectionOtp1');
+        });
+
+        // ── SEZIONE D: Nuova password (dopo link di reset/invito) ─────
+        document.getElementById('savePwdBtn').addEventListener('click', async () => {
+            const p1 = document.getElementById('newPwdInput').value;
+            const p2 = document.getElementById('newPwdConfirm').value;
+            if (p1.length < 8) { showMsg('La password deve avere almeno 8 caratteri.', 'error'); return; }
+            if (p1 !== p2)      { showMsg('Le password non coincidono.', 'error'); return; }
+
+            const btn = document.getElementById('savePwdBtn');
+            btn.innerHTML = '<span class="loading-spinner"></span> Salvataggio...';
+            btn.disabled = true;
+
+            const { error } = await db.auth.updateUser({ password: p1 });
+
+            btn.textContent = 'Salva password e accedi';
+            btn.disabled = false;
+
+            if (error) {
+                showMsg('Errore: ' + error.message, 'error');
+            } else {
+                showMsg('Password salvata! Accesso in corso...', 'success');
+                setTimeout(() => { window.location.href = _nextParam || _redirectTo; }, 1500);
+            }
+        });
+
+        // ── SEZIONE B: OTP – invia codice ─────────────────────────────
+        let _otpEmail = '';
+        document.getElementById('sendCodeBtn').addEventListener('click', sendCode);
+        document.getElementById('otpEmailInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') sendCode();
+        });
+        document.getElementById('toPwdBtn').addEventListener('click', () => showSection('sectionPwd'));
+
+        async function sendCode() {
+            const email = document.getElementById('otpEmailInput').value.trim();
+            if (!email) { showMsg('Inserisci la tua email.', 'error'); return; }
+
+            const btn = document.getElementById('sendCodeBtn');
+            btn.innerHTML = '<span class="loading-spinner"></span> Invio in corso...';
+            btn.disabled = true;
+
+            // Verifica che l'email sia già registrata prima di inviare il codice
+            const { data: isRegistered } = await db.rpc('email_is_registered', { check_email: email });
+            if (!isRegistered) {
+                showMsg('Email non trovata. Per accedere devi prima prenotare una consulenza con Irene.', 'error');
+                btn.textContent = 'Invia codice di accesso';
+                btn.disabled = false;
+                return;
+            }
+
+            const { error } = await db.auth.signInWithOtp({
+                email,
+                options: { shouldCreateUser: false }
+            });
+
+            btn.textContent = 'Invia codice di accesso';
+            btn.disabled = false;
+
+            if (error) {
+                const notFound = error.message?.toLowerCase().includes('signups not allowed')
+                              || error.message?.toLowerCase().includes('not allowed')
+                              || error.status === 422;
+                showMsg(notFound
+                    ? 'Email non trovata. Sei già cliente? Contatta Irene per accedere.'
+                    : 'Errore: ' + error.message, 'error');
+            } else {
+                _otpEmail = email;
+                document.getElementById('emailDisplay').textContent = email;
+                document.getElementById('sectionOtp1').style.display = 'none';
+                document.getElementById('sectionOtp2').style.display = 'block';
+                document.getElementById('loginMsg').className = 'login-msg';
+                document.getElementById('otpInput').focus();
+            }
+        }
+
+        // ── SEZIONE C: OTP – verifica codice ──────────────────────────
+        document.getElementById('verifyBtn').addEventListener('click', verifyCode);
+        document.getElementById('otpInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') verifyCode();
+        });
+        document.getElementById('backBtn').addEventListener('click', () => {
+            document.getElementById('otpInput').value = '';
+            document.getElementById('sectionOtp2').style.display = 'none';
+            document.getElementById('sectionOtp1').style.display = 'block';
+            document.getElementById('loginMsg').className = 'login-msg';
+        });
+
+        async function verifyCode() {
+            const token = document.getElementById('otpInput').value.trim().replace(/\D/g, '');
+            if (token.length < 6) { showMsg('Inserisci il codice ricevuto via email.', 'error'); return; }
+
+            const btn = document.getElementById('verifyBtn');
+            btn.innerHTML = '<span class="loading-spinner"></span> Verifica in corso...';
+            btn.disabled = true;
+
+            const { error } = await db.auth.verifyOtp({ email: _otpEmail, token, type: 'email' });
+
+            btn.textContent = 'Accedi';
+            btn.disabled = false;
+
+            if (error) { showMsg('Codice non valido o scaduto. Richiedine uno nuovo.', 'error'); }
+        }
+
+        // ── Registrazione Google ─────────────────────────────────────
+        let _pendingGoogleSession = null;
+
+        function openRegModal(user) {
+            const meta = user.user_metadata || {};
+            const fullName = meta.full_name || meta.name || '';
+            const parts = fullName.split(' ');
+            document.getElementById('regNome').value = parts[0] || '';
+            document.getElementById('regCognome').value = parts.slice(1).join(' ') || '';
+            document.getElementById('regEmail').value = user.email || '';
+            document.getElementById('regMsg').className = 'reg-msg';
+            document.getElementById('regMsg').textContent = '';
+            document.getElementById('regSaveBtn').disabled = false;
+            document.getElementById('regSaveBtn').textContent = 'Crea il mio account';
+            document.getElementById('regOverlay').style.display = 'flex';
+        }
+
+        function closeRegModal() {
+            document.getElementById('regOverlay').style.display = 'none';
+            // Se chiude senza completare, fa signOut
+            if (_pendingGoogleSession) {
+                db.auth.signOut();
+                _pendingGoogleSession = null;
+            }
+        }
+
+        async function submitGoogleRegistration() {
+            const nome = document.getElementById('regNome').value.trim();
+            const cognome = document.getElementById('regCognome').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const prefix = document.getElementById('regPhonePrefix').value;
+            const num = document.getElementById('regPhone').value.trim().replace(/\s/g, '');
+            const phone = num ? (prefix + num) : '';
+            const msg = document.getElementById('regMsg');
+            const btn = document.getElementById('regSaveBtn');
+
+            if (!nome || !cognome || !phone) {
+                msg.textContent = 'Compila tutti i campi obbligatori.';
+                msg.className = 'reg-msg error';
+                return;
+            }
+            if (!/^\+\d{7,15}$/.test(phone)) {
+                msg.textContent = 'Inserisci un numero di telefono valido.';
+                msg.className = 'reg-msg error';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> Creazione in corso...';
+
+            try {
+                // 1. Crea record nella tabella clients (via n8n webhook)
+                const resp = await fetch('https://n8n.srv1204993.hstgr.cloud/webhook/admin-crea-cliente', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        first_name: nome,
+                        last_name: cognome,
+                        email: email,
+                        phone: phone,
+                        source: 'google_oauth',
+                        existing_user_id: _pendingGoogleSession.user.id,
+                    }),
+                });
+                const result = await resp.json().catch(() => ({}));
+                if (!resp.ok || result.error) {
+                    throw new Error(result.message || result.error || 'Errore creazione account');
+                }
+
+                // 2. Aggiorna user_metadata in Supabase auth
+                await db.auth.updateUser({
+                    data: {
+                        full_name: `${nome} ${cognome}`,
+                        first_name: nome,
+                        last_name: cognome,
+                        phone: phone,
+                    }
+                });
+
+                document.getElementById('regOverlay').style.display = 'none';
+                const session = _pendingGoogleSession;
+                _pendingGoogleSession = null;
+                window.location.href = getRedirect(session);
+            } catch (err) {
+                msg.textContent = 'Errore: ' + err.message;
+                msg.className = 'reg-msg error';
+                btn.disabled = false;
+                btn.textContent = 'Crea il mio account';
+            }
+        }
+
+        // ── Helper ────────────────────────────────────────────────────
+        function showMsg(text, type) {
+            const el = document.getElementById('loginMsg');
+            el.textContent = text;
+            el.className = 'login-msg show ' + type;
+        }
+    </script>
+</body>
+</html>

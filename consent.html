@@ -1,0 +1,338 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consenso Informato - Irene Gipsy Tattoo</title>
+    <meta name="description"
+        content="Compila il consenso informato prima della tua seduta di tatuaggio o piercing con Irene Gipsy Tattoo a Roma.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Pinyon+Script&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- intl-tel-input -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Irene Gipsy Tattoo</a>
+
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#about" class="nav-link">Chi Sono</a></li>
+                <li><a href="index.html#gallery" class="nav-link">Portfolio</a></li>
+                <li><a href="index.html#processo" class="nav-link">Processo</a></li>
+                <li><a href="consultation.html" class="nav-link">Prenota</a></li>
+                <li><a href="index.html#contatti" class="nav-link">Contatti</a></li>
+                <li><a href="login.html" class="nav-link" id="navAreaLink"><i class="fas fa-user-circle" style="margin-right:5px;font-size:0.85em;"></i>Area Personale</a></li>
+                <li class="lang-switch">
+                    <a href="en/consent.html" class="lang-link" aria-label="Switch to English"><span class="lang-flag-gb"></span> EN</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="hero-bg" style="background-image: url('images/img1.jpeg');"></div>
+        <div class="overlay"></div>
+        <div class="stars-container">
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+        </div>
+        <div class="page-header-content container">
+            <h1 class="fade-in">Consenso Informato</h1>
+            <p class="fade-in delay-1">Compila il modulo prima della tua seduta.<br>
+                Tutti i dati sono trattati nel rispetto del GDPR.</p>
+            <a href="index.html" class="back-link fade-in delay-2">
+                <i class="fas fa-arrow-left"></i> Torna al sito
+            </a>
+        </div>
+    </header>
+
+    <!-- Consenso Section -->
+    <section class="section-padding bg-dark-grey">
+        <div class="container">
+
+            <!-- ⚠️ WIP: ribloccare prima del lancio -->
+            <div style="background:#7c4a00;color:#ffd580;padding:10px 20px;font-size:0.85rem;text-align:center;margin-bottom:18px;border-radius:6px;">
+                ⚠️ <strong>WIP</strong> — Pagina sbloccata per lavorazione. Ribloccare prima del lancio: guard login + controllo appuntamento + <strong>webhook-test → /webhook/</strong> in js/consenso.js.
+            </div>
+
+            <div id="formContainer">
+
+                <!-- Card 1: Dati personali -->
+                <div class="booking-card">
+
+                    <h3 class="booking-card-title">
+                        <i class="fas fa-user"></i> Dati Personali
+                    </h3>
+
+                    <div class="form-group">
+                        <label for="nomeCognome">Il/la sottoscritto/a (nome e cognome) *</label>
+                        <input type="text" id="nomeCognome" name="nomeCognome" placeholder="Mario Rossi" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dataNascita">Nato/a il giorno *</label>
+                            <input type="date" id="dataNascita" name="dataNascita" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cittaNascita">A (città e provincia) *</label>
+                            <input type="text" id="cittaNascita" name="cittaNascita" placeholder="Roma (RM)" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="indirizzo">Residente in (indirizzo completo, CAP e provincia) *</label>
+                        <input type="text" id="indirizzo" name="indirizzo"
+                            placeholder="Via Roma 23, Roma (RM), 00182" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telefono">Telefono *</label>
+                            <input type="tel" id="telefono" name="telefono" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-mail *</label>
+                            <input type="email" id="email" name="email" placeholder="mariorossi@email.it" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo di documento *</label>
+                        <div class="radio-pill-group">
+                            <label class="radio-pill">
+                                <input type="radio" name="tipoDocumento" value="Carta d'identità">
+                                <span>Carta d'identità</span>
+                            </label>
+                            <label class="radio-pill">
+                                <input type="radio" name="tipoDocumento" value="Patente">
+                                <span>Patente</span>
+                            </label>
+                            <label class="radio-pill">
+                                <input type="radio" name="tipoDocumento" value="Passaporto">
+                                <span>Passaporto</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="numeroDocumento">Numero documento *</label>
+                            <input type="text" id="numeroDocumento" name="numeroDocumento"
+                                placeholder="AB1234567" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="codiceFiscale">Codice fiscale *</label>
+                            <input type="text" id="codiceFiscale" name="codiceFiscale"
+                                placeholder="RSSMRI..." maxlength="16" required>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Card 2: Intervento + Dichiarazione + Firma -->
+                <div class="booking-card" style="margin-top:20px">
+
+                    <h3 class="booking-card-title">
+                        <i class="fas fa-pen-nib"></i> Tipo di Intervento
+                    </h3>
+
+                    <div class="form-group">
+                        <label>Richiedo la realizzazione di un</label>
+                        <input type="hidden" name="tipoServizio" value="Tatuaggio">
+                        <p style="color:#D4AF37;font-weight:600;letter-spacing:0.08em;margin:6px 0 0;">TATUAGGIO</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="parteCorpo">Nella seguente parte del corpo *</label>
+                        <input type="text" id="parteCorpo" name="parteCorpo"
+                            placeholder="es. braccio sinistro, caviglia destra, schiena..." required>
+                    </div>
+
+                    <!-- Dichiarazione -->
+                    <div class="consenso-declaration">
+                        <h4><i class="fas fa-file-contract"></i> Dichiarazioni</h4>
+
+                        <p><strong>DICHIARO DI ESSERE STATO INFORMATO SU:</strong></p>
+                        <ul>
+                            <li>Modalità del trattamento.</li>
+                            <li>Rischi potenziali per la salute.</li>
+                            <li>Corretto trattamento della zona tatuata.</li>
+                            <li>Difficoltà di rimozione.</li>
+                        </ul>
+
+                        <p><strong>DICHIARO INOLTRE:</strong></p>
+                        <ul>
+                            <li>Di aver riferito eventuali condizioni che possono controindicare il trattamento.</li>
+                            <li>Di aver ben compreso tutte le informazioni fornite.</li>
+                            <li>Di essere a conoscenza che <strong>non è consentito portare accompagnatori durante la seduta di tatuaggio</strong>.</li>
+                        </ul>
+
+                        <p class="consenso-para"><strong>AUTORIZZO INOLTRE IRENE GIPSY TATTOO</strong> a titolo gratuito,
+                            senza limiti di tempo, anche ai sensi degli artt. 10 e 320 cod. civ. e degli artt. 96 e 97
+                            legge 22.4.1941, n.633, Legge sul diritto d'autore, alla pubblicazione e/o diffusione in
+                            qualsiasi delle mie immagini sul sito Internet di Irene Gipsy Tattoo, su carta stampata e/o
+                            qualsiasi altro mezzo di diffusione, nonché autorizzo la conservazione delle foto e dei video
+                            stessi negli archivi informatici e prendo atto che la finalità di tali
+                            pubblicazioni sono meramente di carattere informativo ed eventualmente promozionale.</p>
+
+                        <p class="consenso-ritocchi-note">
+                            <i class="fas fa-info-circle"></i>
+                            <em>Eventuali ritocchi potranno essere effettuati gratuitamente entro un mese dalla seduta.
+                                Decorso tale periodo, il ritocco sarà possibile previo pagamento di un corrispettivo
+                                economico da concordare con il tatuatore a seguito di preventiva consulenza.</em>
+                        </p>
+                    </div>
+
+                    <!-- Data -->
+                    <div class="form-group" style="max-width: 240px;">
+                        <label for="dataFirma">Data *</label>
+                        <input type="date" id="dataFirma" name="dataFirma" required>
+                    </div>
+
+                    <!-- Firma -->
+                    <div class="form-group">
+                        <label>Firma <span style="font-size:0.8em;color:#888;">(del genitore/tutore in caso di
+                                minore)</span> *</label>
+                        <div class="signature-pad-wrap">
+                            <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+                        </div>
+                        <div class="signature-footer">
+                            <small class="form-hint">Firma nella casella con il mouse o il dito</small>
+                            <button type="button" class="btn-signature-clear" onclick="clearSignature()">
+                                <i class="fas fa-eraser"></i> Cancella
+                            </button>
+                        </div>
+                    </div>
+
+                    <p id="formMsg" class="form-message"></p>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" onclick="submitConsenso()" id="submitBtn">
+                            <i class="fas fa-check"></i> Invia Consenso
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- SUCCESS STATE -->
+            <div id="successState" class="success-state hidden">
+                <div class="success-card">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>Consenso Inviato!</h2>
+                    <p class="success-subtitle">Il tuo consenso informato è stato registrato con successo.<br>
+                        Ora sei pronto/a per la tua seduta con Irene!</p>
+                    <div id="consentoDetails" class="booking-details-box"></div>
+                    <div class="success-actions">
+                        <a href="dashboard.html" class="btn btn-primary">
+                            <i class="fas fa-arrow-left"></i> Torna alla Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Menu</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#about">Chi Sono</a></li>
+                        <li><a href="index.html#gallery">Portfolio</a></li>
+                        <li><a href="consultation.html">Prenota Consulenza</a></li>
+                        <li><a href="voucher.html">Regala un Tatuaggio</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contatti Rapidi</h3>
+                    <ul>
+                        <li><a href="https://wa.me/393471648654">WhatsApp</a></li>
+                        <li><a href="mailto:irenegipsytattoo@gmail.com">Email</a></li>
+                        <li><a href="https://instagram.com/irenegipsytattoo">Instagram</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Lingue</h3>
+                    <div class="lang-links">
+                        <span class="active">🇮🇹 Italiano</span> | <a href="en/consent.html">🇬🇧 English</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Irene Gipsy Tattoo - Realistic Tattoo Artist Roma</p>
+                <div class="footer-legal-links">
+                    <a href="legal.html">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#cookie">Cookie Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#termini">Termini e Condizioni</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Auth + seduta guard -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <!-- ⚠️ WIP: guard disabilitato — riabilitare prima del lancio -->
+    <script>
+    (async () => {
+        document.documentElement.style.visibility = 'hidden';
+        const { data: { session } } = await db.auth.getSession();
+        if (session) window.__authUser = session.user;
+        // WIP: tutti i controlli disabilitati
+        // if (!session) { window.location.replace('login.html?next=' + encodeURIComponent(window.location.href)); return; }
+        // if (new Date().getHours() < 10) { window.location.replace('dashboard.html'); return; }
+        // const todayStr = new Date().toLocaleDateString('sv-SE');
+        // const { data: client } = await db.from('clients').select('id').eq('user_id', session.user.id).maybeSingle();
+        // if (!client) { window.location.replace('dashboard.html'); return; }
+        // const { data: appts } = await db.from('appointments').select('id').eq('client_id', client.id).eq('type', 'seduta').in('status', ['pending','confirmed']).gte('scheduled_at', todayStr + 'T00:00:00').lte('scheduled_at', todayStr + 'T23:59:59');
+        // if (!appts || appts.length === 0) { window.location.replace('dashboard.html'); return; }
+        document.documentElement.style.visibility = '';
+    })();
+    </script>
+
+    <!-- intl-tel-input -->
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/comuni-it.js"></script>
+    <script src="js/consenso.js"></script>
+
+</body>
+
+</html>

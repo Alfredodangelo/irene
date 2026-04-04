@@ -1,0 +1,403 @@
+{
+  "name": "Cal.com — Cancella Prenotazione",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $('Estrai Cal UID').item.json.client_email }}",
+        "subject": "=❌ {{ $('Estrai Cal UID').item.json.appointment_type === 'seduta' ? 'Seduta Cancellata' : $('Estrai Cal UID').item.json.appointment_type === 'pre-seduta' ? 'Pre-Seduta Cancellata' : 'Consulenza Cancellata' }} - Irene Gipsy Tattoo",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n  <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n  <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap\" rel=\"stylesheet\">\n  <style>\n    body { margin:0; padding:0; background-color:#0a0a0a; font-family:'Montserrat',sans-serif; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }\n    .email-wrapper { background-color:#0a0a0a; padding:30px 10px; }\n    .container { max-width:600px; width:100%; margin:0 auto; background-color:#121212; overflow:hidden; }\n    .header { background-color:#000000; padding:40px 30px 32px; text-align:center; border-bottom:1px solid #222; }\n    .header-divider { width:60px; height:2px; background-color:#D4AF37; margin:0 auto 20px; }\n    .content { background-color:#121212; padding:36px 30px; }\n    .footer { background-color:#000000; text-align:center; padding:30px 20px; border-top:1px solid #222; }\n    @media only screen and (max-width:600px) {\n      .email-wrapper { padding:10px 5px !important; }\n      .header { padding:28px 16px 24px !important; }\n      .content { padding:24px 16px !important; }\n      .footer { padding:24px 16px !important; }\n      .header-script { font-size:1.3rem !important; }\n      .header-h1 { font-size:1.4rem !important; }\n      .note { padding:16px !important; }\n      .btn-mobile { display:block !important; width:85% !important; max-width:300px !important; margin:0 auto !important; box-sizing:border-box !important; padding:14px 20px !important; }\n    }\n    @media only screen and (max-width:400px) {\n      .header-h1 { font-size:1.2rem !important; }\n      .btn-mobile { width:92% !important; font-size:0.85rem !important; }\n    }\n  </style>\n</head>\n<body style=\"margin:0;padding:0;background-color:#0a0a0a;\">\n  <div class=\"email-wrapper\" style=\"background-color:#0a0a0a;padding:30px 10px;\">\n    <div class=\"container\" style=\"max-width:600px;width:100%;margin:0 auto;background-color:#121212;overflow:hidden;\">\n\n      <!-- HEADER -->\n      <div class=\"header\" style=\"background-color:#000000;padding:40px 30px 32px;text-align:center;border-bottom:1px solid #222;\">\n        <span class=\"header-script\" style=\"font-family:'Playfair Display',serif;font-size:1.6rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:6px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#F5F5DC;letter-spacing:3px;text-transform:uppercase;display:block;margin-bottom:20px;\">Realistic Tattoo Artist</span>\n        <div class=\"header-divider\" style=\"width:60px;height:2px;background-color:#D4AF37;margin:0 auto 20px;\"></div>\n        <h1 class=\"header-h1\" style=\"font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:400;color:#D4AF37;margin:0;letter-spacing:0.5px;\">❌ {{ $('Estrai Cal UID').item.json.appointment_type === 'seduta' ? 'Seduta Cancellata' : $('Estrai Cal UID').item.json.appointment_type === 'pre-seduta' ? 'Pre-Seduta Cancellata' : 'Consulenza Cancellata' }}</h1>\n      </div>\n\n      <!-- CONTENT -->\n      <div class=\"content\" style=\"background-color:#121212;padding:36px 30px;\">\n\n        <p style=\"font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;color:#D4AF37;margin-bottom:14px;font-style:italic;\">Ciao {{ $('Estrai Cal UID').item.json.client_name }},</p>\n\n        <p style=\"font-size:0.95rem;margin-bottom:28px;color:#F5F5DC;font-weight:300;line-height:1.7;font-family:'Montserrat',sans-serif;text-align:justify;\">\n          Ti informiamo che {{ $('Estrai Cal UID').item.json.appointment_type === 'seduta' ? 'la tua seduta tatuaggio' : $('Estrai Cal UID').item.json.appointment_type === 'pre-seduta' ? 'la tua pre-seduta' : 'la tua consulenza' }} è stata <strong style=\"color:#D4AF37;font-weight:600;\">cancellata</strong>.\n        </p>\n\n        <!-- INFO BOX DATA -->\n        <div style=\"background-color:#0d0d0d;padding:24px 20px;margin:0 0 28px;border-left:2px solid #D4AF37;\">\n          <p style=\"font-family:'Playfair Display',serif;font-size:1rem;font-weight:400;color:#D4AF37;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;\">📋 Dettagli Appuntamento Cancellato</p>\n          <div style=\"display:flex;align-items:flex-start;margin:10px 0;line-height:1.5;\">\n            <span style=\"font-size:16px;margin-right:12px;min-width:24px;flex-shrink:0;margin-top:1px;\">📅</span>\n            <div>\n              <span style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;margin-right:8px;\">Data:</span>\n              <span style=\"color:#F5F5DC;font-weight:400;font-size:0.9rem;\">{{ $('Estrai Cal UID').item.json.scheduled_at ? new Date($('Estrai Cal UID').item.json.scheduled_at).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—' }}</span>\n            </div>\n          </div>\n        </div>\n\n        <!-- NOTE -->\n        <div class=\"note\" style=\"background-color:#1a1a1a;padding:20px;border:1px solid #333333;\">\n          <p style=\"font-size:0.85rem;color:#888888;font-style:italic;margin:0;line-height:1.7;font-family:'Montserrat',sans-serif;text-align:justify;\">\n            💬 Per qualsiasi necessità non esitare a contattarci. A presto!\n          </p>\n        </div>\n\n      </div>\n\n      <!-- FOOTER -->\n      <div class=\"footer\" style=\"background-color:#000000;text-align:center;padding:30px 20px;border-top:1px solid #222222;\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.1rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:4px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.7rem;text-transform:uppercase;letter-spacing:3px;color:#F5F5DC;display:block;margin-bottom:16px;\">Realistic Tattoo Artist</span>\n        <p style=\"margin:0 0 10px;\">\n          <a href=\"mailto:irenegipsytattoo@gmail.com\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Email</a> |\n          <a href=\"https://www.instagram.com/irenegipsytattoo/\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Instagram</a> |\n          <a href=\"https://wa.me/393471648654\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Whatsapp</a>\n        </p>\n        <p style=\"margin:0 0 16px;\">\n          <a href=\"https://www.irenegipsytattoo.com\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">www.irenegipsytattoo.com</a>\n        </p>\n        <p style=\"margin:0;font-size:0.7rem;color:#333333;letter-spacing:0.5px;font-family:'Montserrat',sans-serif;\">© 2026 Tutti i diritti riservati</p>\n      </div>\n\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "1a1a5a81-5f0f-4ed9-a72a-27129b0b6e41",
+      "name": "Invia Email Cancellazione",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3344,
+        864
+      ],
+      "webhookId": "bd3f347d-5c6f-48c2-baf1-4651a818a94f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZmFlwpy10UFOwY00",
+          "name": "Gmail - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cancel-appointment",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "0d6915de-17a2-4aee-a52b-f785838059e1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        1488,
+        928
+      ],
+      "webhookId": "cancel-appointment"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst appointment_id   = b.appointment_id   || '';\nconst cal_booking_uid  = b.cal_booking_uid  || null;\nconst client_email     = b.client_email     || '';\nconst client_name      = b.client_name      || 'Cliente';\nconst scheduled_at     = b.scheduled_at     || null;\nconst appointment_type = b.appointment_type || 'consulenza';\n\nif (!appointment_id) throw new Error('appointment_id mancante');\nif (!client_email)   throw new Error('client_email mancante');\n\nreturn [{ json: { appointment_id, cal_booking_uid, client_email, client_name, scheduled_at, appointment_type } }];"
+      },
+      "id": "09d5a083-3461-4a38-88dc-5046c10bd41d",
+      "name": "Estrai Dati",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Usa direttamente il cal_booking_uid passato dal frontend\n// (il lookup Supabase è rimosso: la riga viene eliminata prima che n8n possa leggerla)\nconst b = $input.item.json;\nconst cal_booking_uid  = b.cal_booking_uid  || null;\nconst client_email     = b.client_email;\nconst client_name      = b.client_name;\nconst scheduled_at     = b.scheduled_at;\nconst appointment_id   = b.appointment_id;\nconst appointment_type = b.appointment_type || 'consulenza';\n\nreturn [{ json: { cal_booking_uid, has_uid: !!cal_booking_uid, client_email, client_name, scheduled_at, appointment_id, appointment_type } }];"
+      },
+      "id": "8627e6d0-b891-44e7-9d36-16fe7498865f",
+      "name": "Estrai Cal UID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-uid",
+              "leftValue": "={{ $json.has_uid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7575798e-8c48-49c6-aa33-ddafafc3963b",
+      "name": "Ha Cal UID?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.cal.com/v2/bookings/{{ $json.cal_booking_uid }}/cancel",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer cal_live_c63016ee51343f3492c2759c4a0d5c93"
+            },
+            {
+              "name": "cal-api-version",
+              "value": "2024-08-13"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"cancellationReason\": \"Appuntamento cancellato da Irene\" }",
+        "options": {}
+      },
+      "id": "f434fdc6-1225-4032-b83f-14f7d43faff8",
+      "name": "Cancella su Cal.com",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2368,
+        784
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.cal.com/v2/bookings?attendeeEmail=' + encodeURIComponent($json.client_email || '') + '&status=upcoming' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer cal_live_c63016ee51343f3492c2759c4a0d5c93"
+            },
+            {
+              "name": "cal-api-version",
+              "value": "2024-08-13"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c914372e-4481-4bf7-a49f-a1d562d13ced",
+      "name": "Cerca su Cal.com per Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2368,
+        1088
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const res = $input.item.json;\nlet uid = null;\nif (res?.data && Array.isArray(res.data) && res.data.length > 0) {\n  uid = res.data[0]?.uid || null;\n}\nconst client_email     = $('Estrai Cal UID').item.json.client_email;\nconst client_name      = $('Estrai Cal UID').item.json.client_name;\nconst scheduled_at     = $('Estrai Cal UID').item.json.scheduled_at;\nconst appointment_id   = $('Estrai Cal UID').item.json.appointment_id;\nconst appointment_type = $('Estrai Cal UID').item.json.appointment_type || 'consulenza';\nreturn [{ json: { cal_booking_uid: uid, has_uid_calcom: !!uid, client_email, client_name, scheduled_at, appointment_id, appointment_type } }];"
+      },
+      "id": "b1296883-37c4-42d5-82e3-4f3e53a40e30",
+      "name": "Estrai UID da Cal.com",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2592,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-uid-calcom",
+              "leftValue": "={{ $json.has_uid_calcom }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3a050441-c098-4078-a579-e8b01fe6614f",
+      "name": "Ha UID da Cal.com?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2816,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.cal.com/v2/bookings/' + $json.cal_booking_uid + '/cancel' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer cal_live_c63016ee51343f3492c2759c4a0d5c93"
+            },
+            {
+              "name": "cal-api-version",
+              "value": "2024-08-13"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"cancellationReason\": \"Appuntamento cancellato da Irene\" }",
+        "options": {}
+      },
+      "id": "46cf0ee8-e5dc-463c-ade0-44baa066a601",
+      "name": "Cancella su Cal.com (fallback)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2944,
+        912
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true }",
+        "options": {}
+      },
+      "id": "d5e1c64d-de40-4f4f-9ef1-990b822f2b3c",
+      "name": "Risposta OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        3552,
+        896
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Invia Email Cancellazione": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Estrai Dati",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estrai Dati": {
+      "main": [
+        [
+          {
+            "node": "Estrai Cal UID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estrai Cal UID": {
+      "main": [
+        [
+          {
+            "node": "Ha Cal UID?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ha Cal UID?": {
+      "main": [
+        [
+          {
+            "node": "Cancella su Cal.com",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cerca su Cal.com per Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancella su Cal.com": {
+      "main": [
+        [
+          {
+            "node": "Invia Email Cancellazione",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cerca su Cal.com per Email": {
+      "main": [
+        [
+          {
+            "node": "Estrai UID da Cal.com",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estrai UID da Cal.com": {
+      "main": [
+        [
+          {
+            "node": "Ha UID da Cal.com?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ha UID da Cal.com?": {
+      "main": [
+        [
+          {
+            "node": "Cancella su Cal.com (fallback)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invia Email Cancellazione",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancella su Cal.com (fallback)": {
+      "main": [
+        [
+          {
+            "node": "Invia Email Cancellazione",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "34e2bb31-ec63-4ce2-9546-04a92d1c17af",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "id": "2oYbrDO4YQvqo3kV",
+  "tags": []
+}

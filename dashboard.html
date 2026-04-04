@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area Personale - Irene Gipsy Tattoo</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/roman-sd" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- intl-tel-input -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-dim: rgba(212,175,55,0.12);
+            --gold-border: rgba(212,175,55,0.25);
+            --bg: #0a0a0a;
+            --bg-card: #111111;
+            --bg-row: #161616;
+            --border: rgba(255,255,255,0.07);
+            --text: #e0e0e0;
+            --text-muted: #777;
+            --green: #55c97a;
+            --red: #e05555;
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Montserrat', sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            min-height: 100vh;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            background: #0d0d0d;
+            border-bottom: 1px solid var(--gold-border);
+            padding: 0 24px;
+            height: 62px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-logo {
+            font-family: 'Roman SD', serif;
+            font-size: 1.2rem;
+            color: var(--gold);
+            text-decoration: none;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .topbar-right { display: flex; align-items: center; gap: 16px; }
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gold);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-name {
+            font-size: 0.82rem;
+            color: var(--text);
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .btn-logout {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+        /* ── LAYOUT ── */
+        .dash-layout {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 20px 60px;
+        }
+
+        /* ── PAGE TITLE ── */
+        .dash-title {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+        .dash-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        /* ── TABS ── */
+        .tabs {
+            display: flex;
+            justify-content: space-evenly;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 28px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            flex: none;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding: 12px 8px;
+            cursor: pointer;
+            transition: color 0.2s;
+            white-space: nowrap;
+            text-align: center;
+            position: relative;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--gold); border-bottom-color: transparent; }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 2px;
+            background: var(--gold);
+            border-radius: 2px;
+        }
+
+        /* ── TAB PANELS ── */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── SECTION LABEL ── */
+        .section-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+
+        /* ── TABLE-STYLE LIST ── */
+        .data-list {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .data-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+        }
+        .data-row:last-child { border-bottom: none; }
+        .data-row-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+        .data-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: var(--gold-dim);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--gold);
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .data-info { min-width: 0; }
+        .data-title {
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .data-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .badge {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+        .badge-pending    { background: rgba(251,188,5,0.12);  color: #fbbc05; }
+        .badge-confirmed  { background: rgba(85,201,122,0.12); color: var(--green); }
+        .badge-completed  { background: rgba(85,201,122,0.1);  color: var(--green); }
+        .badge-cancelled  { background: rgba(224,85,85,0.12);  color: var(--red); }
+        .badge-active     { background: rgba(85,201,122,0.12); color: var(--green); }
+        .badge-used       { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+        .badge-expired    { background: rgba(224,85,85,0.10);  color: var(--red); }
+        .badge-reschedule { background: rgba(251,146,60,0.12); color: #fb923c; }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center;
+            padding: 56px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state i {
+            font-size: 2.5rem;
+            color: rgba(212,175,55,0.2);
+            margin-bottom: 16px;
+        }
+        .empty-state p { font-size: 0.88rem; line-height: 1.7; }
+
+        /* ── GALLERIA ── */
+.btn-upload {
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-border);
+            border-radius: 8px;
+            color: var(--gold);
+            font-family: var(--font-body);
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 11px 24px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; max-width: 260px;
+        }
+        .btn-upload:hover { background: rgba(212,175,55,0.2); }
+        #uploadInput { display: none; }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .gallery-thumb {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+        }
+        .gallery-thumb img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .gallery-thumb-del {
+            position: absolute;
+            top: 6px; right: 6px;
+            background: rgba(0,0,0,0.7);
+            border: none;
+            border-radius: 50%;
+            width: 28px; height: 28px;
+            color: #fff;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .gallery-thumb:hover .gallery-thumb-del { opacity: 1; }
+
+        .upload-progress {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        .upload-progress.show { display: block; }
+
+        /* ── LOADING ── */
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 22px; height: 22px;
+            border: 2px solid rgba(212,175,55,0.2);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed;
+            bottom: 24px; right: 24px;
+            background: #1a1a1a;
+            border: 1px solid var(--gold-border);
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-size: 0.85rem;
+            color: var(--text);
+            z-index: 999;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.3s, transform 0.3s;
+            max-width: 300px;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.error { border-color: rgba(224,85,85,0.4); }
+
+        /* ── JOURNEY VIEW ── */
+        .journey-wrap { display: flex; flex-direction: column; margin-bottom: 8px; }
+        .journey-step { display: flex; gap: 14px; }
+        .journey-connector {
+            display: flex; flex-direction: column;
+            align-items: center; flex-shrink: 0; width: 38px;
+        }
+        .journey-num {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 1.5px solid var(--gold-border);
+            background: var(--gold-dim);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-heading);
+            font-size: 1rem; color: var(--gold);
+            flex-shrink: 0; position: relative; z-index: 1;
+        }
+        .journey-num.done {
+            background: rgba(85,201,122,0.12);
+            border-color: rgba(85,201,122,0.4);
+            color: var(--green);
+        }
+        .journey-line {
+            flex: 1; width: 1px;
+            background: var(--border);
+            min-height: 16px;
+        }
+        .journey-body {
+            flex: 1; min-width: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+        }
+        .journey-step-title {
+            font-size: 0.7rem; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 10px;
+        }
+        .journey-date { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+        .journey-date i { color: var(--gold); font-size: 0.78rem; margin-right: 5px; }
+        .journey-notes { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+        .journey-notes i { font-size: 0.7rem; margin-right: 4px; }
+        .journey-row {
+            display: flex; align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px; flex-wrap: wrap;
+        }
+        .journey-cta {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 9px 16px;
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-border);
+            border-radius: 8px;
+            color: var(--gold);
+            font-family: var(--font-body);
+            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.5px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .journey-cta:hover { background: rgba(212,175,55,0.22); }
+        .journey-empty { font-size: 0.82rem; color: var(--text-muted); }
+        /* .waitlist-badge rimosso — ora usa stile inline in buildWaitlistBlock */
+
+        /* ── Waitlist join modal buttons ── */
+        .wl-choice-btn {
+            flex: 1; padding: 12px 8px; border-radius: 10px; cursor: pointer;
+            background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.12);
+            color: #ccc; font-family: inherit; font-size: 0.82rem; transition: all 0.18s; text-align: center;
+        }
+        .wl-choice-btn:hover { border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.05); }
+        .wl-choice-btn.selected { border-color: #D4AF37; background: rgba(212,175,55,0.1); color: #D4AF37; }
+
+        /* ── PROFILO FORM ── */
+        .profile-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 28px 24px;
+            max-width: 520px;
+        }
+        .profile-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .profile-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+        .profile-group label {
+            font-size: 0.74rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .profile-group input {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 8px;
+            padding: 11px 14px;
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .profile-group input:focus { border-color: var(--gold); }
+        .profile-group input[readonly] {
+            opacity: 0.5; cursor: not-allowed;
+        }
+        .btn-save-profile {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; max-width: 260px; margin: 0 auto; white-space: nowrap;
+            padding: 11px 24px;
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-border);
+            border-radius: 8px;
+            color: var(--gold);
+            font-family: var(--font-body);
+            font-size: 0.82rem; font-weight: 600; letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-save-profile:hover { background: rgba(212,175,55,0.22); }
+        .btn-save-profile:disabled { opacity: 0.4; cursor: not-allowed; }
+        .voucher-claim-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .voucher-claim-row input {
+            flex: 1;
+            min-width: 0;
+        }
+        /* intl-tel-input (profilo) */
+        #profile-phone-wrapper { width: 100%; }
+        #profile-phone-wrapper .iti { display: block; width: 100%; }
+        #profile-phone-wrapper .iti__flag-container { z-index: 10; }
+        #profile-phone-wrapper .iti__selected-flag { background: transparent; border-right: 1px solid #2a2a2a; padding: 0 10px; }
+        /* intl-tel-input (completa profilo modal) */
+        #cpPhoneWrapper { width: 100%; }
+        #cpPhoneWrapper .iti { display: block; width: 100%; }
+        #cpPhoneWrapper .iti__flag-container { z-index: 10; }
+        #cpPhoneWrapper .iti__selected-flag { background: transparent; border-right: 1px solid #2a2a2a; padding: 0 10px; }
+        #cpPhoneWrapper .iti__selected-flag:hover { background: rgba(255,255,255,0.05); }
+        #profile-phone-wrapper .iti__selected-flag:hover { background: rgba(255,255,255,0.04); }
+        #profile-phone-wrapper .iti__country-list { background: #1a1a1a; border: 1px solid #2a2a2a; color: #ccc; max-height: 200px; }
+        #profile-phone-wrapper .iti__country.iti__highlight { background: rgba(212,175,55,0.12); }
+        #profile-phone-wrapper .iti__dial-code { color: #888; }
+        #profile-phone-wrapper .iti input { width: 100%; box-sizing: border-box; }
+
+        .btn-claim-voucher {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 11px 16px;
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-border);
+            border-radius: 8px;
+            color: var(--gold);
+            font-family: var(--font-body);
+            font-size: 0.78rem; font-weight: 600; letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-claim-voucher:hover { background: rgba(212,175,55,0.22); }
+        .profile-msg {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            display: none;
+        }
+        .profile-msg.show { display: block; }
+        .profile-msg.ok  { color: var(--green); }
+        .profile-msg.err { color: var(--red); }
+
+        /* ── DESKTOP ── */
+        @media (min-width: 769px) {
+            .dash-layout { max-width: 1060px; padding: 40px 32px 60px; }
+            .dash-title { font-size: 2rem; }
+            .tabs { justify-content: center; gap: 6px; }
+            .tab-btn { padding: 12px 16px; font-size: 0.78rem; }
+            .profile-card { max-width: 600px; }
+            .profile-form-row { gap: 16px; }
+            .gallery-grid { grid-template-columns: repeat(4, 1fr); }
+            .journey-body { padding: 20px 24px; }
+            .data-row { padding: 16px 20px; }
+        }
+        @media (min-width: 1200px) {
+            .dash-layout { max-width: 1120px; padding: 48px 40px 60px; }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .topbar { padding: 0 16px; height: 54px; }
+            .topbar-logo { font-size: 1.05rem; letter-spacing: 1.5px; }
+            .topbar-right { gap: 10px; }
+            .user-name { max-width: 120px; }
+            .dash-layout { padding: 24px 16px 60px; }
+        }
+        @media (max-width: 640px) {
+            /* Topbar */
+            .topbar { padding: 0 12px; height: 50px; }
+            .topbar-logo { font-size: 0.9rem; letter-spacing: 1px; }
+            .user-name { display: none; }
+            .topbar-right { gap: 8px; }
+            .btn-logout { padding: 5px 10px; font-size: 0.7rem; }
+
+            /* Layout */
+            .dash-layout { padding: 18px 12px 60px; }
+            .dash-title  { font-size: 1.3rem; }
+            .dash-subtitle { margin-bottom: 20px; font-size: 0.75rem; }
+
+            /* Tabs */
+            .tab-btn { padding: 10px 6px; font-size: 0.67rem; }
+
+            /* Data list */
+            .data-row { padding: 12px 12px; gap: 8px; }
+            .data-icon { width: 32px; height: 32px; font-size: 0.78rem; border-radius: 8px; }
+            .data-title { font-size: 0.82rem; }
+            .data-meta { font-size: 0.7rem; }
+            .badge { font-size: 0.6rem; padding: 3px 8px; }
+
+            /* Journey */
+            .journey-body { padding: 12px 12px; margin-bottom: 10px; }
+            .journey-step { gap: 10px; }
+            .journey-connector { width: 30px; }
+            .journey-num { width: 30px; height: 30px; font-size: 0.85rem; }
+            .journey-date { font-size: 0.82rem; }
+            .journey-notes { font-size: 0.7rem; }
+            .journey-cta { padding: 7px 12px; gap: 6px; }
+
+            /* Empty state */
+            .empty-state { padding: 36px 12px; }
+            .empty-state i { font-size: 2rem; margin-bottom: 10px; }
+            .empty-state p { font-size: 0.8rem; }
+
+            /* Galleria */
+            .gallery-header { flex-wrap: wrap; gap: 8px; }
+            .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .gallery-thumb-del { opacity: 1; }
+            .btn-upload { padding: 11px 24px; font-size: 0.82rem; }
+
+            /* Profilo */
+            .profile-form-row { grid-template-columns: 1fr; gap: 0; }
+            .profile-card { padding: 16px 14px; }
+
+            /* Toast */
+            .toast { left: 12px; right: 12px; max-width: none; bottom: 14px; font-size: 0.8rem; }
+        }
+        @media (max-width: 480px) {
+            .tab-btn { padding: 9px 5px; font-size: 0.63rem; letter-spacing: 0.5px; }
+            .data-row { padding: 10px 10px; }
+            .data-row-left { gap: 10px; }
+            .journey-body { padding: 10px 10px; }
+            .journey-cta { padding: 7px 10px; }
+            .profile-card { padding: 14px 12px; }
+            .section-label { font-size: 0.65rem; letter-spacing: 1.5px; }
+            .gallery-grid { gap: 6px; }
+        }
+        @media (max-width: 380px) {
+            .topbar-logo { font-size: 0.82rem; }
+            .dash-title { font-size: 1.15rem; }
+            .data-icon { width: 28px; height: 28px; font-size: 0.72rem; }
+            .tab-btn { padding: 8px 4px; font-size: 0.6rem; letter-spacing: 0.2px; }
+            .journey-num { width: 26px; height: 26px; font-size: 0.78rem; }
+            .journey-connector { width: 26px; }
+        }
+
+        /* ── CAMBIO PASSWORD – PRIMO ACCESSO ── */
+        .chpwd-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.93);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .chpwd-card {
+            background: var(--bg-card);
+            border: 1px solid var(--gold-border);
+            border-radius: 16px;
+            padding: 36px 32px;
+            max-width: 420px;
+            width: 100%;
+        }
+        .chpwd-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+        .chpwd-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        .chpwd-input {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .chpwd-input:focus { border-color: var(--gold); }
+        .chpwd-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-border);
+            border-radius: 8px;
+            color: var(--gold);
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 4px;
+        }
+        .chpwd-btn:hover { background: rgba(212,175,55,0.22); }
+        .chpwd-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .chpwd-msg {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            min-height: 20px;
+            color: var(--red);
+        }
+        .chpwd-msg.ok { color: var(--green); }
+        @media (max-width: 640px) {
+            .chpwd-card { padding: 28px 20px; }
+        }
+
+        /* ── RESCHEDULE — banner esito nella card consulenza ── */
+        .reschedule-banner {
+            margin-top: 10px;
+            padding: 9px 13px;
+            border-radius: 7px;
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+        .reschedule-pending {
+            background: rgba(251,188,5,0.08);
+            border-left: 3px solid #fbbc05;
+            color: #fbbc05;
+        }
+        .reschedule-accepted {
+            background: rgba(85,201,122,0.08);
+            border-left: 3px solid var(--green);
+            color: var(--green);
+        }
+        .reschedule-rejected {
+            background: rgba(224,85,85,0.08);
+            border-left: 3px solid var(--red);
+            color: var(--red);
+        }
+
+        /* ── RESCHEDULE — bottone nella card consulenza ── */
+        .btn-reschedule {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 10px;
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-border);
+            border-radius: 8px;
+            color: var(--gold);
+            font-family: var(--font-body);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-reschedule:hover {
+            background: rgba(212,175,55,0.22);
+            border-color: var(--gold);
+        }
+        .btn-consent {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 10px;
+            background: rgba(109,192,124,0.1);
+            border: 1px solid rgba(109,192,124,0.35);
+            border-radius: 8px;
+            color: #6dc07c;
+            font-family: var(--font-body);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 8px 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-consent:hover { background: rgba(109,192,124,0.2); border-color: #6dc07c; }
+
+        /* ── Banner proposta nuova data da Irene ── */
+        .irene-proposal-banner {
+            margin-top: 14px;
+            font-size: 0.82rem;
+            line-height: 1.4;
+            color: #fbbf24;
+        }
+        .irene-proposal-banner .ipb-content {
+            background: #0d0d0d;
+            border: 1px solid rgba(212,175,55,0.55);
+            border-radius: 10px;
+            padding: 11px 14px;
+        }
+        .irene-proposal-banner .ipb-header {
+            font-weight: 700;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+        .irene-proposal-banner .ipb-detail {
+            color: #fff;
+            font-size: 0.88rem;
+        }
+        .irene-proposal-banner .ipb-reason {
+            font-size: 0.79rem;
+            color: #d4a017;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        .irene-proposal-banner .ipb-btns {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        /* Custom select dropdown */
+        .rb-custom-select { position:relative; width:100%; }
+        .rb-cs-trigger {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:10px 13px; cursor:pointer;
+            background:rgba(212,175,55,0.07); border:1px solid rgba(212,175,55,0.25);
+            border-radius:8px; color:#e8e8e8; font-size:0.88rem; user-select:none;
+        }
+        .rb-cs-trigger:hover { background:rgba(212,175,55,0.12); }
+        .rb-cs-arrow { font-size:0.7rem; color:#888; transition:transform 0.2s; }
+        .rb-custom-select.open .rb-cs-arrow { transform:rotate(180deg); }
+        .rb-cs-dropdown {
+            position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:200;
+            background:#1a1a1a; border:1px solid rgba(212,175,55,0.25);
+            border-radius:8px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.5);
+        }
+        .rb-cs-option {
+            padding:10px 13px; cursor:pointer; font-size:0.88rem; color:#e8e8e8;
+            display:flex; align-items:center; gap:8px;
+        }
+        .rb-cs-option:hover { background:rgba(212,175,55,0.1); }
+
+        /* ══════════════════════════════════════════
+           RESCHEDULE — Modal calendario cambio data
+           ══════════════════════════════════════════ */
+        .rsch-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.88);
+            z-index: 9000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+            overflow-y: auto;
+        }
+        .rsch-card {
+            background: var(--bg-card);
+            border: 1px solid var(--gold-border);
+            border-radius: 16px;
+            width: 100%; max-width: 430px;
+            max-height: 90vh; overflow-y: auto;
+            padding: 22px 22px 20px;
+            position: relative;
+        }
+        .rsch-header {
+            display: flex; align-items: flex-start; gap: 10px;
+            margin-bottom: 18px;
+        }
+        .rsch-title {
+            font-family: var(--font-heading);
+            font-size: 1.1rem; color: var(--gold); margin: 0 0 3px;
+        }
+        .rsch-title i { margin-right: 7px; }
+        .rsch-subtitle { font-size: 0.74rem; color: var(--text-muted); line-height: 1.55; }
+        .rsch-close {
+            background: none; border: none; color: var(--text-muted);
+            font-size: 1rem; cursor: pointer; padding: 2px;
+            transition: color 0.2s; flex-shrink: 0; margin-left: auto; line-height: 1;
+        }
+        .rsch-close:hover { color: var(--text); }
+
+        /* ── Calendar ── */
+        .rsch-calendar {
+            background: var(--bg-row); border: 1px solid var(--border);
+            border-radius: 12px; padding: 14px; margin-bottom: 14px;
+        }
+        .rsch-cal-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .rsch-cal-btn {
+            background: none; border: 1px solid var(--border);
+            border-radius: 7px; color: var(--text-muted);
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.72rem;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .rsch-cal-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+        .rsch-cal-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .rsch-cal-label {
+            font-family: var(--font-heading);
+            font-size: 0.92rem; color: var(--gold);
+        }
+        .rsch-days-header {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 0.6rem; font-weight: 600; letter-spacing: 0.5px;
+            text-transform: uppercase; color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .rsch-cal-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px;
+        }
+        .rsch-day {
+            aspect-ratio: 1;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 7px; font-size: 0.78rem; cursor: default;
+        }
+        .rsch-day.empty { visibility: hidden; }
+        .rsch-day.past  { color: rgba(255,255,255,0.18); }
+        .rsch-day.unavail { color: rgba(255,255,255,0.28); }
+        .rsch-day.avail {
+            color: var(--text); cursor: pointer;
+            background: rgba(212,175,55,0.06);
+            border: 1px solid rgba(212,175,55,0.22);
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .rsch-day.avail:hover { background: rgba(212,175,55,0.18); border-color: var(--gold); }
+        .rsch-day.today-avail { font-weight: 700; }
+        .rsch-day.selected {
+            background: var(--gold) !important;
+            border-color: var(--gold) !important;
+            color: #000 !important; font-weight: 700;
+        }
+        .rsch-cal-loading {
+            text-align: center; padding: 10px;
+            font-size: 0.76rem; color: var(--text-muted);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .rsch-cal-loading.hidden { display: none; }
+        .rsch-spinner {
+            display: inline-block; width: 13px; height: 13px;
+            border: 2px solid rgba(212,175,55,0.2);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite; flex-shrink: 0;
+        }
+        .rsch-legend {
+            display: flex; gap: 14px; margin-top: 10px;
+            font-size: 0.65rem; color: var(--text-muted);
+        }
+        .rsch-dot {
+            display: inline-block; width: 7px; height: 7px;
+            border-radius: 50%; margin-right: 4px; vertical-align: middle;
+        }
+        .rsch-dot-avail { background: rgba(212,175,55,0.7); border: 1px solid rgba(212,175,55,0.5); }
+        .rsch-dot-sel   { background: var(--gold); }
+
+        /* ── Time slots ── */
+        .rsch-times-wrap { margin-bottom: 14px; }
+        .rsch-times-wrap.hidden { display: none; }
+        .rsch-times-title {
+            font-size: 0.7rem; font-weight: 600;
+            letter-spacing: 1px; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 9px;
+        }
+        .rsch-times-title i { color: var(--gold); }
+        .rsch-times-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+        }
+        .rsch-time-btn {
+            background: rgba(212,175,55,0.05);
+            border: 1px solid rgba(212,175,55,0.18);
+            border-radius: 7px; color: var(--text);
+            padding: 8px 4px; font-family: var(--font-body);
+            font-size: 0.78rem; text-align: center;
+            cursor: pointer; transition: background 0.15s, border-color 0.15s;
+        }
+        .rsch-time-btn:hover { background: rgba(212,175,55,0.15); border-color: rgba(212,175,55,0.5); }
+        .rsch-time-btn.selected {
+            background: var(--gold); border-color: var(--gold);
+            color: #000; font-weight: 700;
+        }
+
+        /* ── Summary bar ── */
+        .rsch-summary {
+            display: flex; align-items: center; gap: 9px;
+            background: rgba(212,175,55,0.07);
+            border: 1px solid rgba(212,175,55,0.22);
+            border-radius: 8px; padding: 10px 13px;
+            margin-bottom: 14px; font-size: 0.82rem;
+        }
+        .rsch-summary.hidden { display: none; }
+        .rsch-summary > i { color: var(--gold); flex-shrink: 0; }
+        #rschSummaryText { flex: 1; color: var(--text); }
+        .rsch-change-btn {
+            background: none; border: none; color: var(--gold);
+            font-size: 0.72rem; cursor: pointer; white-space: nowrap;
+            font-family: var(--font-body); padding: 0;
+        }
+        .rsch-change-btn:hover { text-decoration: underline; }
+
+        /* ── Textarea & form ── */
+        .rsch-field { margin-bottom: 13px; }
+        .rsch-label {
+            display: block; margin-bottom: 6px;
+            font-size: 0.7rem; font-weight: 600;
+            letter-spacing: 1px; text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .rsch-req { color: var(--gold); }
+        .rsch-textarea {
+            width: 100%; padding: 10px 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px; color: var(--text);
+            font-family: var(--font-body); font-size: 0.84rem;
+            resize: vertical; min-height: 70px;
+            box-sizing: border-box; transition: border-color 0.2s;
+        }
+        .rsch-textarea:focus { outline: none; border-color: var(--gold); }
+
+        /* ── Msg & buttons ── */
+        .rsch-msg { font-size: 0.78rem; min-height: 16px; margin-bottom: 12px; }
+        .rsch-btns { display: flex; gap: 9px; }
+        .rsch-btn-confirm {
+            flex: 1; background: var(--gold); border: none; color: #000;
+            padding: 11px 14px; border-radius: 8px;
+            font-family: var(--font-body); font-size: 0.83rem;
+            font-weight: 700; letter-spacing: 0.04em; cursor: pointer;
+            transition: opacity 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            touch-action: manipulation;
+        }
+        .rsch-btn-confirm:hover { opacity: 0.88; }
+        .rsch-btn-confirm:disabled { opacity: 0.42; cursor: not-allowed; }
+        .rsch-btn-cancel {
+            background: none; border: 1px solid rgba(255,255,255,0.12);
+            color: var(--text-muted); padding: 11px 14px;
+            border-radius: 8px; font-family: var(--font-body);
+            font-size: 0.83rem; cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+            touch-action: manipulation;
+        }
+        .rsch-btn-cancel:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
+
+        @media (max-width: 480px) {
+            .rsch-card { padding: 16px 14px; border-radius: 14px; }
+            .rsch-times-grid { grid-template-columns: repeat(3, 1fr); }
+            .rsch-day { font-size: 0.72rem; border-radius: 5px; }
+            .rsch-btns { flex-direction: column; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <a href="index.html" class="topbar-logo">Irene Gipsy Tattoo</a>
+        <div class="topbar-right">
+            <div class="user-chip">
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fas fa-user" style="font-size:0.85rem;"></i>
+                </div>
+                <span class="user-name" id="userName">—</span>
+            </div>
+            <button class="btn-logout" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Esci
+            </button>
+        </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dash-layout">
+        <h1 class="dash-title">La tua Area Personale</h1>
+        <p class="dash-subtitle" id="dashSubtitle">Caricamento in corso...</p>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="appointments"><i class="far fa-calendar-alt"></i> Appuntamenti</button>
+            <button class="tab-btn" data-tab="gallery"><i class="fas fa-images"></i> Galleria</button>
+            <button class="tab-btn" data-tab="profile"><i class="fas fa-user-circle"></i> Profilo</button>
+            <button class="tab-btn" data-tab="vouchers"><i class="fas fa-gift"></i> Voucher</button>
+        </div>
+
+        <!-- Panel: Appuntamenti -->
+        <div class="tab-panel active" id="panel-appointments">
+            <div id="listAppointments">
+                <div class="loading-state"><div class="loading-spinner"></div><br>Caricamento...</div>
+            </div>
+            <!-- Guida cura tatuaggio -->
+            <div style="margin-top:18px;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:14px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                <div>
+                    <div style="font-size:0.8rem;font-weight:600;color:#D4AF37;margin-bottom:3px;"><i class="fas fa-heart" style="margin-right:6px;"></i>Guida alla Cura del Tatuaggio</div>
+                    <div style="font-size:0.74rem;color:#888;line-height:1.4;">Cosa fare e non fare, tempi di guarigione, consigli a lungo termine.</div>
+                </div>
+                <a href="cura-tatuaggio.html" target="_blank" style="display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#D4AF37,#e8cc70);color:#111;font-family:'Montserrat',sans-serif;font-size:0.78rem;font-weight:700;padding:9px 16px;border-radius:8px;text-decoration:none;white-space:nowrap;letter-spacing:0.02em;margin-left:auto;">
+                    <i class="fas fa-download"></i> Scarica PDF
+                </a>
+            </div>
+        </div>
+
+        <!-- Panel: Galleria -->
+        <div class="tab-panel" id="panel-gallery">
+            <input type="file" id="uploadInput" accept="image/*" multiple>
+            <p class="upload-progress" id="uploadProgress">Caricamento foto...</p>
+            <div class="gallery-grid" id="galleryGrid">
+                <div class="loading-state" style="grid-column:1/-1;"><div class="loading-spinner"></div><br>Caricamento...</div>
+            </div>
+            <div style="display:flex;justify-content:center;margin-top:18px;">
+                <button class="btn-upload" id="uploadBtn">
+                    <i class="fas fa-plus"></i> Aggiungi foto
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel: Profilo -->
+        <div class="tab-panel" id="panel-profile">
+            <p class="section-label">I tuoi dati personali</p>
+            <div class="profile-card">
+                <div class="profile-form-row">
+                    <div class="profile-group">
+                        <label for="profileNome">Nome</label>
+                        <input type="text" id="profileNome" placeholder="Mario">
+                    </div>
+                    <div class="profile-group">
+                        <label for="profileCognome">Cognome</label>
+                        <input type="text" id="profileCognome" placeholder="Rossi">
+                    </div>
+                </div>
+                <div class="profile-group">
+                    <label for="profilePhone">Cellulare</label>
+                    <div id="profile-phone-wrapper">
+                        <input type="tel" id="profilePhone" placeholder="347 000 0000">
+                    </div>
+                </div>
+                <div class="profile-group">
+                    <label for="profileEmail">Email</label>
+                    <input type="email" id="profileEmail" readonly>
+                </div>
+                <button class="btn-save-profile" id="saveProfileBtn">
+                    <i class="fas fa-save"></i> Salva dati
+                </button>
+                <p class="profile-msg" id="profileMsg"></p>
+            </div>
+
+            <!-- Cambio password -->
+            <p class="section-label" style="margin-top:28px;">Sicurezza</p>
+            <div class="profile-card">
+                <div class="profile-group">
+                    <label for="pwdNew">Nuova password</label>
+                    <input type="password" id="pwdNew" placeholder="Min. 8 caratteri" autocomplete="new-password">
+                </div>
+                <div class="profile-group">
+                    <label for="pwdConfirm">Ripeti nuova password</label>
+                    <input type="password" id="pwdConfirm" placeholder="Ripeti la password" autocomplete="new-password">
+                </div>
+                <button class="btn-save-profile" id="savePwdBtn">
+                    <i class="fas fa-lock"></i> Aggiorna password
+                </button>
+                <p class="profile-msg" id="pwdMsg"></p>
+            </div>
+
+            <!-- Newsletter -->
+            <p class="section-label" style="margin-top:28px;">Newsletter</p>
+            <div class="profile-card">
+                <p style="font-size:0.85rem;color:var(--text-muted);margin:0 0 16px;line-height:1.6;">
+                    Vuoi ricevere aggiornamenti, novità e offerte esclusive da Irene Gipsy Tattoo?
+                </p>
+                <div style="display:flex;gap:10px;margin-bottom:14px;">
+                    <button id="nlYesBtn" onclick="saveNewsletterConsent(true)"
+                        style="flex:1;padding:10px 0;border-radius:8px;cursor:pointer;font-size:0.88rem;font-family:inherit;
+                        border:1px solid rgba(212,175,55,0.35);background:transparent;color:#aaa;transition:all .2s;">
+                        <i class="fas fa-check" style="margin-right:6px;"></i>Sì, iscrivimi
+                    </button>
+                    <button id="nlNoBtn" onclick="saveNewsletterConsent(false)"
+                        style="flex:1;padding:10px 0;border-radius:8px;cursor:pointer;font-size:0.88rem;font-family:inherit;
+                        border:1px solid rgba(255,255,255,0.1);background:transparent;color:#aaa;transition:all .2s;">
+                        <i class="fas fa-times" style="margin-right:6px;"></i>No, grazie
+                    </button>
+                </div>
+                <p id="nlMsg" class="profile-msg"></p>
+                <p style="font-size:0.72rem;color:#555;line-height:1.6;margin:0;border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;">
+                    <i class="fas fa-shield-alt" style="margin-right:4px;color:#666;"></i>
+                    <strong style="color:#666;">Privacy:</strong> I tuoi dati non saranno mai ceduti a terzi.
+                    Riceverai al massimo una email al mese con aggiornamenti sullo studio, nuovi lavori e disponibilità.
+                    Puoi cancellarti in qualsiasi momento cambiando questa impostazione.
+                    Il trattamento dei dati avviene ai sensi del Reg. UE 2016/679 (GDPR).
+                </p>
+            </div>
+
+            <!-- Zona pericolosa -->
+            <p class="section-label" style="margin-top:28px;color:rgba(248,113,113,0.7);">Zona pericolosa</p>
+            <div class="profile-card" style="border-color:rgba(248,113,113,0.2);">
+                <p style="font-size:0.85rem;color:var(--text-muted);margin:0 0 14px;line-height:1.6;">
+                    Puoi richiedere la cancellazione del tuo account. Irene riceverà una notifica e deciderà se procedere.
+                    <strong style="color:rgba(248,113,113,0.8);">I consensi firmati e i dati legali resteranno conservati per obbligo di legge.</strong>
+                </p>
+                <div id="deleteAccountStatus"></div>
+                <div style="text-align:center;">
+                    <button onclick="openDeleteAccountModal()" id="deleteAccountBtn"
+                        style="background:transparent;border:1px solid rgba(248,113,113,0.4);color:#f87171;padding:9px 18px;
+                        border-radius:8px;cursor:pointer;font-size:0.85rem;font-family:inherit;">
+                        <i class="fas fa-user-slash" style="margin-right:6px;"></i>Richiedi eliminazione account
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Voucher -->
+        <div class="tab-panel" id="panel-vouchers">
+            <p class="section-label">I tuoi buoni regalo</p>
+
+            <!-- Riscatta codice -->
+            <div class="profile-card" style="max-width:520px;margin-bottom:20px;">
+                <div style="font-size:0.74rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;">Hai un codice voucher?</div>
+                <div class="voucher-claim-row">
+                    <input type="text" id="voucherCodeInput" placeholder="IGT-YYYYMMDD-XXXX" maxlength="20"
+                        style="text-transform:uppercase;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:8px;padding:11px 14px;color:var(--text);font-family:var(--font-body);font-size:0.88rem;outline:none;flex:1;">
+                    <button onclick="claimVoucherByCode()" id="claimVoucherBtn" class="btn-claim-voucher">
+                        <i class="fas fa-plus"></i> Aggiungi
+                    </button>
+                </div>
+                <p id="voucherClaimMsg" style="font-size:0.8rem;margin-top:8px;min-height:18px;"></p>
+            </div>
+
+            <!-- Lista voucher -->
+            <div id="vouchersList">
+                <div class="loading-state"><div class="loading-spinner"></div><br>Caricamento...</div>
+            </div>
+        </div>
+
+    </div><!-- /.dash-layout -->
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Overlay cambio password (primo accesso) -->
+    <div class="chpwd-overlay" id="chpwdOverlay" style="display:none;">
+        <div class="chpwd-card">
+            <h2 class="chpwd-title">Benvenuto!</h2>
+            <p class="chpwd-sub">Imposta una password personale per accedere alla tua area riservata.<br>Scegli una password sicura di almeno 8 caratteri.</p>
+            <input type="password" id="chpwd1" class="chpwd-input" placeholder="Nuova password (min. 8 caratteri)" autocomplete="new-password">
+            <input type="password" id="chpwd2" class="chpwd-input" placeholder="Ripeti la password" autocomplete="new-password">
+            <button class="chpwd-btn" id="chpwdBtn"><i class="fas fa-lock"></i> Salva password</button>
+            <p class="chpwd-msg" id="chpwdMsg"></p>
+        </div>
+    </div>
+
+    <!-- Modal: Completa profilo (Google OAuth primo accesso) -->
+    <div class="chpwd-overlay" id="completeProfileOverlay" style="display:none;">
+        <div class="chpwd-card">
+            <h2 class="chpwd-title">Benvenuto/a! 👋</h2>
+            <p class="chpwd-sub">Hai effettuato l'accesso con Google. Completa il tuo profilo per continuare.</p>
+            <input type="text" id="cpNome" class="chpwd-input" placeholder="Nome *" autocomplete="given-name">
+            <input type="text" id="cpCognome" class="chpwd-input" placeholder="Cognome *" autocomplete="family-name">
+            <div id="cpPhoneWrapper"><input type="tel" id="cpPhone" class="chpwd-input" placeholder="Cellulare *" autocomplete="tel"></div>
+            <input type="email" id="cpEmail" class="chpwd-input" placeholder="Email" readonly style="opacity:0.5;cursor:not-allowed;">
+            <button class="chpwd-btn" id="cpSaveBtn"><i class="fas fa-check"></i> Salva e continua</button>
+            <p class="chpwd-msg" id="cpMsg"></p>
+        </div>
+    </div>
+
+    <!-- Modal: Elimina account -->
+    <div class="rsch-overlay" id="deleteAccountModal" style="display:none;" onclick="if(event.target===this)closeDeleteAccountModal()">
+        <div class="rsch-card" style="max-width:440px;">
+            <div class="rsch-header" style="background:rgba(248,113,113,0.08);border-bottom-color:rgba(248,113,113,0.2);">
+                <i class="fas fa-exclamation-triangle" style="color:#f87171;margin-right:8px;"></i>
+                <span style="color:#f87171;">Richiedi eliminazione account</span>
+            </div>
+            <div style="padding:20px 24px;">
+                <p style="font-size:0.88rem;color:#ccc;line-height:1.75;margin-bottom:16px;">
+                    Sei sicura/o di voler richiedere la cancellazione del tuo account?<br><br>
+                    <strong style="color:#f87171;">Perderai l'accesso all'area personale</strong> e non potrai più visualizzare i tuoi appuntamenti, voucher o dati.<br><br>
+                    Per obbligo di legge, i consensi firmati e i dati relativi ai trattamenti resteranno conservati da Irene per almeno 5 anni.
+                </p>
+                <p style="font-size:0.8rem;color:#888;margin-bottom:16px;">
+                    La richiesta sarà inviata a Irene, che la valuterà e procederà alla cancellazione.
+                </p>
+                <p id="deleteAccountMsg" style="font-size:0.82rem;color:#f87171;margin-bottom:10px;min-height:18px;"></p>
+                <div class="rsch-btns">
+                    <button onclick="confirmRequestDeletion()" id="deleteAccountConfirmBtn"
+                        style="background:rgba(248,113,113,0.15);border:1px solid #f87171;color:#f87171;
+                        padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.88rem;">
+                        <i class="fas fa-user-slash" style="margin-right:6px;"></i>Sì, invia la richiesta
+                    </button>
+                    <button onclick="closeDeleteAccountModal()"
+                        style="background:transparent;border:1px solid #333;color:#888;
+                        padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.88rem;">
+                        Annulla
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Richiesta cambio data consulenza -->
+    <div class="rsch-overlay" id="rescheduleModal" style="display:none;" onclick="if(event.target===this)closeRescheduleModal()">
+        <div class="rsch-card">
+
+            <!-- Header -->
+            <div class="rsch-header">
+                <div style="flex:1;min-width:0;">
+                    <h3 class="rsch-title" id="rschModalTitle"><i class="fas fa-calendar-alt"></i> Richiedi cambio data</h3>
+                    <p class="rsch-subtitle" id="rschModalSubtitle">Scegli una data disponibile dal calendario. La richiesta sarà inviata a Irene — la data attuale resterà invariata fino alla conferma.</p>
+                </div>
+                <button class="rsch-close" onclick="closeRescheduleModal()" aria-label="Chiudi"><i class="fas fa-times"></i></button>
+            </div>
+
+            <input type="hidden" id="rescheduleApptId">
+
+            <!-- Calendario con disponibilità Cal.com -->
+            <div class="rsch-calendar">
+                <div class="rsch-cal-nav">
+                    <button class="rsch-cal-btn" id="rschPrevMonth" aria-label="Mese precedente"><i class="fas fa-chevron-left"></i></button>
+                    <span class="rsch-cal-label" id="rschMonthLabel"></span>
+                    <button class="rsch-cal-btn" id="rschNextMonth" aria-label="Mese successivo"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="rsch-days-header">
+                    <span>Lu</span><span>Ma</span><span>Me</span><span>Gi</span><span>Ve</span><span>Sa</span><span>Do</span>
+                </div>
+                <div id="rschCalGrid" class="rsch-cal-grid"></div>
+                <div id="rschCalLoading" class="rsch-cal-loading hidden">
+                    <span class="rsch-spinner"></span> Caricamento disponibilità...
+                </div>
+                <div class="rsch-legend">
+                    <span><span class="rsch-dot rsch-dot-avail"></span> Disponibile</span>
+                    <span><span class="rsch-dot rsch-dot-sel"></span> Selezionata</span>
+                </div>
+            </div>
+
+            <!-- Slot orari (visibili dopo selezione data) -->
+            <div id="rschTimesWrap" class="rsch-times-wrap hidden">
+                <p class="rsch-times-title" id="rschTimesTitle"><i class="far fa-clock"></i> Orari disponibili</p>
+                <div id="rschTimesGrid" class="rsch-times-grid"></div>
+            </div>
+
+            <!-- Riepilogo selezione -->
+            <div id="rschSummary" class="rsch-summary hidden">
+                <i class="fas fa-check-circle"></i>
+                <span id="rschSummaryText"></span>
+                <button class="rsch-change-btn" onclick="rschClearSelection()"><i class="fas fa-redo-alt"></i> Cambia</button>
+            </div>
+
+            <!-- Motivazione -->
+            <div class="rsch-field" id="rschReasonField">
+                <label class="rsch-label">Motivazione <span class="rsch-req">*</span></label>
+                <textarea id="rescheduleReason" class="rsch-textarea" rows="3" placeholder="Spiega brevemente il motivo della richiesta (min. 10 caratteri)..."></textarea>
+            </div>
+
+            <p id="rescheduleMsg" class="rsch-msg"></p>
+
+            <div class="rsch-btns">
+                <button class="rsch-btn-confirm" onclick="submitRescheduleRequest()" id="rescheduleSubmitBtn">
+                    <i class="fas fa-paper-plane"></i> Invia richiesta
+                </button>
+                <button class="rsch-btn-cancel" onclick="closeRescheduleModal()">Annulla</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal: Entra in lista anticipa -->
+    <div class="rsch-overlay" id="wlJoinModal" style="display:none;" onclick="if(event.target===this)closeWlJoinModal()">
+        <div class="rsch-card" style="max-width:360px;">
+            <div class="rsch-header">
+                <div style="flex:1;min-width:0;">
+                    <h3 class="rsch-title"><i class="fas fa-star"></i> Lista d'attesa</h3>
+                    <p class="rsch-subtitle">Se si libera un posto prima della tua data, riceverai una notifica con 24 ore per rispondere.</p>
+                </div>
+                <button class="rsch-close" onclick="closeWlJoinModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <p id="wlJoinMsg" style="color:#f87171;font-size:0.78rem;min-height:18px;margin-top:16px;"></p>
+            <div class="rsch-btns" style="margin-top:8px;">
+                <button class="rsch-btn-confirm" onclick="submitWlJoinRequest()"><i class="fas fa-paper-plane"></i> Invia richiesta</button>
+                <button class="rsch-btn-cancel" onclick="closeWlJoinModal()">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Esci dalla lista prioritaria -->
+    <div class="rsch-overlay" id="wlLeaveModal" style="display:none;" onclick="if(event.target===this)closeWlLeaveModal()">
+        <div class="rsch-card" style="max-width:340px;">
+            <div class="rsch-header">
+                <div style="flex:1;min-width:0;">
+                    <h3 class="rsch-title"><i class="fas fa-sign-out-alt"></i> Esci dalla lista?</h3>
+                    <p class="rsch-subtitle">La tua richiesta verrà inviata a Irene per conferma.</p>
+                </div>
+                <button class="rsch-close" onclick="closeWlLeaveModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="rsch-btns" style="margin-top:20px;">
+                <button class="rsch-btn-confirm" onclick="confirmWlLeave()"><i class="fas fa-sign-out-alt"></i> Sì, esci</button>
+                <button class="rsch-btn-cancel" onclick="closeWlLeaveModal()">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Confirm custom (sostituisce confirm() nativo) -->
+    <div id="dashConfirmOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#1a1a1a;border:1px solid rgba(212,175,55,0.25);border-radius:16px;padding:24px 22px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.7);">
+            <div id="dashConfirmMsg" style="color:#e5e5e5;font-size:0.9rem;line-height:1.55;margin-bottom:20px;text-align:center;white-space:pre-line;"></div>
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button id="dashConfirmOk" style="flex:1;padding:11px 0;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.5);color:#D4AF37;border-radius:9px;font-size:0.88rem;font-weight:700;cursor:pointer;font-family:inherit;">Conferma</button>
+                <button id="dashConfirmCancel" style="flex:1;padding:11px 0;background:transparent;border:1px solid rgba(255,255,255,0.12);color:#888;border-radius:9px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:inherit;">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Riprenota Consulenza -->
+    <div class="rsch-overlay" id="rebookModal" style="display:none;" onclick="if(event.target===this)closeRebookModal()">
+        <div class="rsch-card">
+            <div class="rsch-header">
+                <div style="flex:1;min-width:0;">
+                    <h3 class="rsch-title"><i class="fas fa-redo"></i> Riprenota Consulenza</h3>
+                    <p class="rsch-subtitle">Scegli una nuova data e conferma le preferenze. I tuoi dati personali sono già salvati.</p>
+                </div>
+                <button class="rsch-close" onclick="closeRebookModal()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Calendario -->
+            <div class="rsch-calendar">
+                <div class="rsch-cal-nav">
+                    <button class="rsch-cal-btn" id="rbPrevMonth"><i class="fas fa-chevron-left"></i></button>
+                    <span class="rsch-cal-label" id="rbMonthLabel"></span>
+                    <button class="rsch-cal-btn" id="rbNextMonth"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="rsch-days-header">
+                    <span>Lu</span><span>Ma</span><span>Me</span><span>Gi</span><span>Ve</span><span>Sa</span><span>Do</span>
+                </div>
+                <div id="rbCalGrid" class="rsch-cal-grid"></div>
+                <div id="rbCalLoading" class="rsch-cal-loading hidden">
+                    <span class="rsch-spinner"></span> Caricamento disponibilità...
+                </div>
+                <div class="rsch-legend">
+                    <span><span class="rsch-dot rsch-dot-avail"></span> Disponibile</span>
+                    <span><span class="rsch-dot rsch-dot-sel"></span> Selezionata</span>
+                </div>
+            </div>
+
+            <!-- Orari -->
+            <div id="rbTimesWrap" class="rsch-times-wrap hidden">
+                <p class="rsch-times-title" id="rbTimesTitle"><i class="far fa-clock"></i> Orari disponibili</p>
+                <div id="rbTimesGrid" class="rsch-times-grid"></div>
+            </div>
+
+            <!-- Riepilogo selezione -->
+            <div id="rbSummary" class="rsch-summary hidden">
+                <i class="fas fa-check-circle"></i>
+                <span id="rbSummaryText"></span>
+                <button class="rsch-change-btn" onclick="rbClearSelection()"><i class="fas fa-redo-alt"></i> Cambia</button>
+            </div>
+
+            <!-- Modalità -->
+            <div class="rsch-field">
+                <label class="rsch-label">Modalità <span class="rsch-req">*</span></label>
+                <input type="hidden" id="rbLuogo" value="integrations:whatsapp_video">
+                <div class="rb-custom-select" id="rbLuogoBox" onclick="rbToggleSelect('rbLuogoBox')">
+                    <div class="rb-cs-trigger">
+                        <span id="rbLuogoLabel"><i class="fab fa-whatsapp" style="color:#25D366;"></i> Video WhatsApp</span>
+                        <i class="fas fa-chevron-down rb-cs-arrow"></i>
+                    </div>
+                    <div class="rb-cs-dropdown" id="rbLuogoDropdown" style="display:none;">
+                        <div class="rb-cs-option" onclick="rbSelectOption('rbLuogo','integrations:whatsapp_video','<i class=\'fab fa-whatsapp\' style=\'color:#25D366;\'></i> Video WhatsApp',event)">
+                            <i class="fab fa-whatsapp" style="color:#25D366;"></i> Video WhatsApp
+                        </div>
+                        <div class="rb-cs-option" onclick="rbSelectOption('rbLuogo','inPerson','<i class=\'fas fa-map-marker-alt\' style=\'color:#D4AF37;\'></i> Di persona',event)">
+                            <i class="fas fa-map-marker-alt" style="color:#D4AF37;"></i> Di persona
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagamento -->
+            <div class="rsch-field">
+                <label class="rsch-label">Preferenza pagamento <span class="rsch-req">*</span></label>
+                <input type="hidden" id="rbPagamento" value="Contanti">
+                <div class="rb-custom-select" id="rbPagamentoBox" onclick="rbToggleSelect('rbPagamentoBox')">
+                    <div class="rb-cs-trigger">
+                        <span id="rbPagamentoLabel"><i class="fas fa-money-bill-wave" style="color:#6dc07c;"></i> Contanti</span>
+                        <i class="fas fa-chevron-down rb-cs-arrow"></i>
+                    </div>
+                    <div class="rb-cs-dropdown" id="rbPagamentoDropdown" style="display:none;">
+                        <div class="rb-cs-option" onclick="rbSelectOption('rbPagamento','Contanti','<i class=\'fas fa-money-bill-wave\' style=\'color:#6dc07c;\'></i> Contanti',event)">
+                            <i class="fas fa-money-bill-wave" style="color:#6dc07c;"></i> Contanti
+                        </div>
+                        <div class="rb-cs-option" onclick="rbSelectOption('rbPagamento','POS','<i class=\'fas fa-credit-card\' style=\'color:#6dc07c;\'></i> POS / Carta',event)">
+                            <i class="fas fa-credit-card" style="color:#6dc07c;"></i> POS / Carta
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Idea -->
+            <div class="rsch-field">
+                <label class="rsch-label">La tua idea <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(modifica se è cambiata)</span></label>
+                <textarea id="rbIdea" class="rsch-textarea" rows="3" placeholder="Descrivi la tua idea per il tatuaggio..."></textarea>
+            </div>
+
+            <p id="rbMsg" class="rsch-msg"></p>
+
+            <div class="rsch-btns">
+                <button class="rsch-btn-confirm" onclick="submitRebook()" id="rbSubmitBtn">
+                    <i class="fas fa-calendar-check"></i> Conferma prenotazione
+                </button>
+                <button class="rsch-btn-cancel" onclick="closeRebookModal()">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/supabase-client.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

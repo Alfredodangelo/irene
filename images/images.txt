@@ -1,0 +1,52 @@
+CATALOGO IMMAGINI - Irene Gipsy Tattoo
+======================================
+Aggiornato: Febbraio 2026
+
+GALLERIE DISPONIBILI:
+  gallery_lavori    → Galleria Portfolio (sezione #gallery nel sito, con titolo/descrizione visibile)
+  gallery_al_lavoro → Galleria "Al Lavoro" (sezione BTS, foto di Irene che tatua, senza didascalia)
+  altro             → Usata in altre sezioni del sito (hero, about, ecc.)
+
+NOTA: la colonna DESCRIZIONE si riferisce solo alle immagini in gallery_lavori
+      ed è il testo che compare sulla scheda dell'immagine nel portfolio del sito.
+
+======================================
+  FILE ATTIVI NEL SITO (cartella images/)
+======================================
+
+NOME FILE         | GALLERIA           | DESCRIZIONE TATUAGGIO
+------------------|--------------------|-----------------------------------------------
+img1.jpeg         | altro              | (hero background + Al Lavoro)
+img2.jpeg         | gallery_lavori     | Statua greca
+img3.jpeg         | gallery_lavori     | Mogli nella giungla
+img4.jpeg         | gallery_al_lavoro  | —
+img5.jpeg         | altro              | (foto About + Al Lavoro)
+img6.png          | gallery_al_lavoro  | —
+img7.png          | gallery_al_lavoro  | —
+img8.jpeg         | gallery_lavori     | Donna Guerriera
+img9.jpeg         | gallery_lavori     | Teschio & Donna
+img10.jpeg        | gallery_lavori     | Leopardo & Donna
+img11.jpeg        | gallery_lavori     | Occhio, Orologio & Giglio
+img12.jpeg        | gallery_lavori     | Ritratto Donna
+img13.jpeg        | gallery_lavori     | Back Piece Mitologico - Medusa & Apollo
+img14.jpeg        | gallery_lavori     | Dea greca
+img15.jpeg        | gallery_lavori     | Colomba & Rosa
+img16.jpeg        | gallery_lavori     | Guerriera con Elmo
+img17.jpeg        | gallery_lavori     | Capo Nativo Americano con Lupi
+img18.jpeg        | gallery_lavori     | Medusa con Serpenti
+img19.jpeg        | gallery_lavori     | Statue Greche
+img20.jpeg        | gallery_lavori     | Ritratto Neonata
+img21.jpeg        | gallery_lavori     | Zeus / Poseidone
+img22.jpeg        | gallery_lavori     | Donna con Alloro & Zeus
+img23.jpeg        | gallery_lavori     | Ercole con Pelle di Leone
+img24.jpeg        | gallery_lavori     | Leone & Cucciolo
+img25.jpeg        | gallery_lavori     | Guerriero Spartano
+img26.jpeg        | gallery_lavori     | Rosa
+img27.jpeg        | gallery_lavori     | Sleeve Classico - Angeli & Statue
+img28.jpeg        | gallery_lavori     | Leone con Volute Barocche
+img29.jpeg        | gallery_lavori     | Anubis con Scarabeo
+img30.jpeg        | gallery_lavori     | Harley Quinn
+img31.jpeg        | gallery_lavori     | Ritratto di due Bambini
+img32.jpeg        | gallery_lavori     | Donna & Leone
+img33.jpeg        | gallery_lavori     | Catrina con Teschi & Serpente
+video1.mp4        | gallery_al_lavoro  | —

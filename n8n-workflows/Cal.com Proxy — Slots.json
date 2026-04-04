@@ -1,0 +1,188 @@
+{
+  "name": "Cal.com Proxy — Slots",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "cal-slots",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "cff60711-3428-4d60-bf06-e4b68e217013",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "cal-slots"
+    },
+    {
+      "parameters": {
+        "url": "https://api.cal.com/v2/slots/available",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "eventTypeId",
+              "value": "={{ $json.query.eventTypeId }}"
+            },
+            {
+              "name": "startTime",
+              "value": "={{ $json.query.startTime }}"
+            },
+            {
+              "name": "endTime",
+              "value": "={{ $json.query.endTime }}"
+            },
+            {
+              "name": "timeZone",
+              "value": "={{ $json.query.timeZone }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer cal_live_c63016ee51343f3492c2759c4a0d5c93"
+            },
+            {
+              "name": "cal-api-version",
+              "value": "2024-08-13"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ff6f0179-c120-46aa-afe1-e09870bc678b",
+      "name": "Get Cal Slots",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($(\"Filtra Slot\").item.json) }}",
+        "options": {}
+      },
+      "id": "c7d5155e-dbb7-4997-900e-80cec289b2bf",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        884,
+        0
+      ]
+    },
+    {
+      "id": "0b42827f-5b71-41fe-9a06-7e4e2d883884",
+      "name": "Leggi Blocchi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        444,
+        0
+      ],
+      "alwaysOutputData": true,
+      "parameters": {
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/blocked_dates?select=date_from,date_to",
+        "method": "GET",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "fe792ed9-b518-451e-98bc-ca4be81ff058",
+      "name": "Filtra Slot",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        664,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Slot da Cal.com (v2: wrappato in .data)\nconst slotsData = $(\"Get Cal Slots\").item.json;\nconst slots = slotsData.data?.slots || slotsData.slots || {};\n\n// Date bloccate - gestisce errore o tabella vuota\nlet blocked = [];\ntry {\n  blocked = $input.all()\n    .map(b => b.json)\n    .filter(b => b && b.date_from && !b.message && !b.error);\n} catch(e) { blocked = []; }\n\n// Filtra slot bloccati\nconst filtered = {};\nfor (const [date, times] of Object.entries(slots)) {\n  const dayStr = date.substring(0, 10);\n  const isBlocked = blocked.some(b => dayStr >= b.date_from && dayStr <= b.date_to);\n  if (!isBlocked) filtered[date] = times;\n}\n\nreturn [{ json: { slots: filtered } }];"
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Cal Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Cal Slots": {
+      "main": [
+        [
+          {
+            "node": "Leggi Blocchi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leggi Blocchi": {
+      "main": [
+        [
+          {
+            "node": "Filtra Slot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtra Slot": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "fCzJrySoSEPcF6vp"
+  },
+  "versionId": "0e9e9b3d-5ea6-4914-9bae-2e1e24b2ff6e",
+  "meta": {
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "id": "xSUzkel6IslFRui2",
+  "tags": []
+}

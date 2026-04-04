@@ -1,0 +1,328 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regala un Tatuaggio - Irene Gipsy Tattoo</title>
+    <meta name="description"
+        content="Regala un buono tatuaggio a chi ami. Scegli l'importo da €50 a €800 e paga online in modo sicuro.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Pinyon+Script&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Irene Gipsy Tattoo</a>
+
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#about" class="nav-link">Chi Sono</a></li>
+                <li><a href="index.html#gallery" class="nav-link">Portfolio</a></li>
+                <li><a href="index.html#processo" class="nav-link">Processo</a></li>
+                <li><a href="consultation.html" class="nav-link">Prenota Consulenza</a></li>
+                <li><a href="voucher.html" class="nav-link">Regala un Tatuaggio</a></li>
+                <li><a href="faq.html" class="nav-link">FAQ</a></li>
+                <li><a href="index.html#contatti" class="nav-link">Contatti</a></li>
+                <li><a href="login.html" class="nav-link" id="navAreaLink"><i class="fas fa-user-circle" style="margin-right:5px;font-size:0.85em;"></i>Area Personale</a></li>
+                <li class="lang-switch">
+                    <a href="en/voucher.html" class="lang-link" aria-label="Switch to English"><span class="lang-flag-gb"></span> EN</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="hero-bg" style="background-image: url('images/img1.jpeg');"></div>
+        <div class="overlay"></div>
+        <div class="stars-container">
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+        </div>
+        <div class="page-header-content container">
+            <h1 class="fade-in">Regala un Tatuaggio</h1>
+            <p class="fade-in delay-1">Il regalo perfetto per chi ama l'arte sulla pelle.<br>
+                Scegli l'importo, paga online e ricevi il buono via email.</p>
+            <a href="index.html" class="back-link fade-in delay-2">
+                <i class="fas fa-arrow-left"></i> Torna al sito
+            </a>
+        </div>
+    </header>
+
+    <!-- Voucher Section -->
+    <section class="section-padding bg-dark-grey">
+        <div class="container">
+
+            <!-- ⚠️ DEV TODO: da completare prima del lancio -->
+            <div class="dev-todo-banner">
+                <div class="dev-todo-banner-title"><i class="fas fa-tools"></i> Da completare prima del lancio</div>
+                <ul>
+                    <li><strong>PayPal:</strong> inserire il <code>PAYPAL_CLIENT_ID</code> reale in <code>js/voucher.js</code> — riga 8</li>
+<li><strong>Tasto test:</strong> il pulsante "MODALITÀ TEST" sparirà automaticamente quando PayPal sarà configurato</li>
+                </ul>
+            </div>
+
+            <div id="voucherGrid" class="voucher-grid">
+
+                <!-- LEFT: Info + Importo -->
+                <div class="voucher-info-side">
+
+                    <!-- Info Card -->
+                    <div class="booking-card">
+                        <h3 class="booking-card-title">
+                            <i class="fas fa-gift"></i> Come funziona
+                        </h3>
+                        <div class="voucher-how-list">
+                            <div class="voucher-step">
+                                <span class="voucher-step-num">1</span>
+                                <div>
+                                    <strong>Scegli l'importo</strong>
+                                    <p>Seleziona un valore da €50 a €800, oppure inserisci un importo personalizzato.</p>
+                                </div>
+                            </div>
+                            <div class="voucher-step">
+                                <span class="voucher-step-num">2</span>
+                                <div>
+                                    <strong>Paga in sicurezza</strong>
+                                    <p>Pagamento online con PayPal — carta di credito, debito o conto PayPal.</p>
+                                </div>
+                            </div>
+                            <div class="voucher-step">
+                                <span class="voucher-step-num">3</span>
+                                <div>
+                                    <strong>Ricevi il buono</strong>
+                                    <p>Il codice voucher ti verrà inviato via email entro pochi minuti dal pagamento.</p>
+                                </div>
+                            </div>
+                            <div class="voucher-step">
+                                <span class="voucher-step-num">4</span>
+                                <div>
+                                    <strong>Il regalo viene usato</strong>
+                                    <p>Il destinatario potrà riscattare il buono al momento della prenotazione o in studio, scalando l'importo dal totale del tatuaggio.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="voucher-validity-note">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Valido <strong>12 mesi</strong> dall'acquisto · non rimborsabile.</span>
+                        </div>
+                    </div>
+
+                    <!-- Importo Card -->
+                    <div class="booking-card">
+                        <h3 class="booking-card-title">
+                            <i class="fas fa-euro-sign"></i> Scegli l'Importo
+                        </h3>
+
+                        <div class="voucher-preset-grid">
+                            <button class="voucher-preset-btn" data-amount="50" onclick="selectAmount(50)">€50</button>
+                            <button class="voucher-preset-btn" data-amount="100" onclick="selectAmount(100)">€100</button>
+                            <button class="voucher-preset-btn" data-amount="150" onclick="selectAmount(150)">€150</button>
+                            <button class="voucher-preset-btn" data-amount="200" onclick="selectAmount(200)">€200</button>
+                            <button class="voucher-preset-btn" data-amount="300" onclick="selectAmount(300)">€300</button>
+                            <button class="voucher-preset-btn" data-amount="500" onclick="selectAmount(500)">€500</button>
+                            <button class="voucher-preset-btn" data-amount="800" onclick="selectAmount(800)">€800</button>
+                        </div>
+
+                        <div class="voucher-custom-row">
+                            <label for="customAmount">Importo personalizzato (€50–€800):</label>
+                            <div class="voucher-custom-input-wrap">
+                                <span class="voucher-currency">€</span>
+                                <input type="number" id="customAmount" min="50" max="800" step="10"
+                                    placeholder="" oninput="onCustomAmountInput(this.value)">
+                            </div>
+                        </div>
+
+                        <div id="selectedAmountDisplay" class="voucher-amount-display hidden">
+                            Importo selezionato: <strong id="selectedAmountText">—</strong>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT: Form -->
+                <div class="voucher-form-side">
+                    <div class="booking-card">
+
+                        <h3 class="booking-card-title">
+                            <i class="fas fa-pen-nib"></i> I Tuoi Dati
+                        </h3>
+
+                        <form id="voucherForm" novalidate>
+
+                            <!-- Chi acquista -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nome">Il tuo Nome *</label>
+                                    <input type="text" id="nome" name="nome" placeholder="Mario" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cognome">Il tuo Cognome *</label>
+                                    <input type="text" id="cognome" name="cognome" placeholder="Rossi" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">La tua Email *</label>
+                                <input type="email" id="email" name="email" placeholder="mario@email.it" required>
+                                <small class="form-hint">Il codice voucher verrà inviato a questo indirizzo.</small>
+                            </div>
+
+                            <!-- Destinatario (opzionale) -->
+                            <div class="voucher-recipient-section">
+                                <h4 class="voucher-section-label">
+                                    <i class="fas fa-user-friends"></i> Destinatario
+                                    <span class="label-optional">(opzionale — per personalizzare il buono)</span>
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="nomeDestinatario">Nome del destinatario</label>
+                                    <input type="text" id="nomeDestinatario" name="nomeDestinatario" placeholder="Laura">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="messaggio">Messaggio personalizzato</label>
+                                    <textarea id="messaggio" name="messaggio" rows="3"
+                                        placeholder="Auguri! Questo buono è per realizzare il tatuaggio con cui hai sempre sognato..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- GDPR -->
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="gdpr" name="gdpr" required>
+                                    <span>Accetto ciò che ho letto e acconsento al trattamento dei miei dati personali ai sensi del Regolamento UE 2016/679 (GDPR). I dati forniti saranno utilizzati esclusivamente per gestire la mia richiesta di contatto/prenotazione e non saranno condivisi con terze parti. Posso esercitare i diritti di accesso, rettifica e cancellazione dei miei dati in qualsiasi momento. *</span>
+                                </label>
+                            </div>
+
+                            <!-- No amount warning -->
+                            <div id="noAmountWarning" class="no-date-warning hidden">
+                                <i class="fas fa-euro-sign"></i>
+                                Seleziona prima l'importo del buono
+                            </div>
+
+                            <!-- PayPal -->
+                            <div id="paypalSection" class="deposit-section hidden">
+                                <div class="deposit-header">
+                                    <i class="fas fa-gift"></i>
+                                    <strong>Buono da acquistare: <span id="paypalAmountLabel">—</span></strong>
+                                </div>
+                                <p class="paypal-label">Clicca per pagare e ricevere il buono:</p>
+                                <div id="paypalButtonContainer" class="paypal-container"></div>
+                                <div id="paypalNotConfigured" class="paypal-not-configured hidden">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Pagamento PayPal non ancora configurato — il pulsante verrà attivato a breve.
+                                </div>
+
+                                <!-- TEST MODE: pulsante visibile solo quando PayPal non è configurato -->
+                                <button type="button" id="testSubmitBtn" class="btn-test-mode hidden" onclick="testSubmitWithoutPayment()">
+                                    <i class="fas fa-flask"></i> MODALITÀ TEST — Acquista senza pagamento
+                                </button>
+
+                                <div id="paymentSuccess" class="payment-success hidden">
+                                    <i class="fas fa-check-circle"></i>
+                                    Pagamento ricevuto — generazione buono in corso...
+                                </div>
+                            </div>
+
+                            <p id="formMsg" class="form-message"></p>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SUCCESS STATE -->
+            <div id="successState" class="success-state hidden">
+                <div class="success-card">
+                    <div class="success-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <h2>Buono Acquistato!</h2>
+                    <p class="success-subtitle">Il tuo codice voucher è pronto.<br>
+                        Riceverai anche un'email di conferma a breve.</p>
+                    <div id="voucherCodeDisplay" class="voucher-code-display"></div>
+                    <div id="bookingDetails" class="booking-details-box"></div>
+                    <div class="success-actions">
+                        <a href="index.html" class="btn btn-primary">
+                            <i class="fas fa-home"></i> Torna al Sito
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Menu</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#about">Chi Sono</a></li>
+                        <li><a href="index.html#gallery">Portfolio</a></li>
+                        <li><a href="consultation.html">Prenota Consulenza</a></li>
+                        <li><a href="voucher.html">Regala un Tatuaggio</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contatti Rapidi</h3>
+                    <ul>
+                        <li><a href="https://wa.me/393471648654">WhatsApp</a></li>
+                        <li><a href="mailto:irenegipsytattoo@gmail.com">Email</a></li>
+                        <li><a href="https://instagram.com/irenegipsytattoo">Instagram</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Lingue</h3>
+                    <div class="lang-links">
+                        <span class="active">🇮🇹 Italiano</span> | <a href="en/voucher.html">🇬🇧 English</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Irene Gipsy Tattoo - Realistic Tattoo Artist Roma</p>
+                <div class="footer-legal-links">
+                    <a href="legal.html">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#cookie">Cookie Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#termini">Termini e Condizioni</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/voucher.js"></script>
+
+</body>
+
+</html>

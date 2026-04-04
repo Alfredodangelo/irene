@@ -1,0 +1,338 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prenota Pre-Seduta - Irene Gipsy Tattoo</title>
+    <meta name="description"
+        content="Prenota la tua pre-seduta con Irene Gipsy Tattoo. Un appuntamento breve prima della sessione per definire i dettagli finali del tatuaggio.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Pinyon+Script&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- intl-tel-input -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
+
+    <!-- Supabase + Auth Guard (⚠️ WIP: disabilitato — riabilitare prima del lancio) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <!-- <script src="js/auth-guard.js"></script> -->
+    <script>(async()=>{const{data}=await db.auth.getSession();if(data.session)window.__authUser=data.session.user;document.documentElement.style.visibility='';})();</script>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Irene Gipsy Tattoo</a>
+
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#about" class="nav-link">Chi Sono</a></li>
+                <li><a href="index.html#gallery" class="nav-link">Portfolio</a></li>
+                <li><a href="index.html#processo" class="nav-link">Processo</a></li>
+                <li><a href="consultation.html" class="nav-link">Prenota</a></li>
+                <li><a href="index.html#contatti" class="nav-link">Contatti</a></li>
+                <li><a href="login.html" class="nav-link" id="navAreaLink"><i class="fas fa-user-circle" style="margin-right:5px;font-size:0.85em;"></i>Area Personale</a></li>
+                <li class="lang-switch">
+                    <a href="en/pre-session.html" class="lang-link" aria-label="Switch to English"><span class="lang-flag-gb"></span> EN</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="hero-bg" style="background-image: url('images/img1.jpeg');"></div>
+        <div class="overlay"></div>
+        <div class="stars-container">
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+        </div>
+        <div class="page-header-content container">
+            <h1 class="fade-in">Prenota la Pre-Seduta</h1>
+            <p class="fade-in delay-1">Un breve appuntamento prima della tua sessione<br>per definire i dettagli finali del tatuaggio.</p>
+            <a href="index.html" class="back-link fade-in delay-2">
+                <i class="fas fa-arrow-left"></i> Torna al sito
+            </a>
+        </div>
+    </header>
+
+    <!-- Config Warning -->
+    <div id="configWarning" class="config-warning hidden">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Configurazione richiesta:</strong> Apri <code>js/preseduta.js</code> e inserisci <code>CAL_API_KEY</code>.
+    </div>
+
+    <!-- Booking Section -->
+    <section class="consulenza-section section-padding bg-dark-grey">
+        <div class="container">
+
+            <!-- ⚠️ WIP: ribloccare prima del lancio -->
+            <div style="background:#7c4a00;color:#ffd580;padding:10px 20px;font-size:0.85rem;text-align:center;margin-bottom:18px;border-radius:6px;">
+                ⚠️ <strong>WIP</strong> — Pagina sbloccata per lavorazione. Ribloccare prima del lancio (webhook).
+            </div>
+
+            <div class="booking-grid" id="bookingGrid">
+
+                <!-- ===== LEFT: First Session + Calendar + Time Slots ===== -->
+                <div class="calendar-side">
+
+                    <!-- First Session Section (banner or input) -->
+                    <div id="firstSessionSection" class="booking-card"></div>
+
+                    <!-- Calendar Card -->
+                    <div class="booking-card">
+                        <h3 class="booking-card-title">
+                            <i class="far fa-calendar-alt"></i> Seleziona una Data
+                        </h3>
+
+                        <!-- Calendar Navigation -->
+                        <div class="cal-header">
+                            <button id="prevMonth" class="cal-nav-btn" aria-label="Mese precedente">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="monthYearLabel" class="cal-month-label"></span>
+                            <button id="nextMonth" class="cal-nav-btn" aria-label="Mese successivo">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <!-- Day Names -->
+                        <div class="cal-days-header">
+                            <span>Lu</span><span>Ma</span><span>Me</span>
+                            <span>Gi</span><span>Ve</span><span>Sa</span><span>Do</span>
+                        </div>
+
+                        <!-- Calendar Grid -->
+                        <div id="calendarGrid" class="cal-grid"></div>
+
+                        <!-- Loading -->
+                        <div id="calLoading" class="cal-loading hidden">
+                            <span class="loading-spinner"></span>
+                            Caricamento disponibilità...
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="cal-legend">
+                            <span class="legend-item"><span class="legend-dot dot-available"></span> Disponibile</span>
+                            <span class="legend-item"><span class="legend-dot dot-unavailable"></span> Non disponibile</span>
+                            <span class="legend-item"><span class="legend-dot dot-selected"></span> Selezionata</span>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots Card -->
+                    <div id="timeSlotsCard" class="booking-card hidden">
+                        <h3 class="booking-card-title" id="timeSlotsTitle">
+                            <i class="far fa-clock"></i> Orari disponibili
+                        </h3>
+                        <div id="timeSlotsGrid" class="time-slots-grid"></div>
+                    </div>
+
+                </div>
+
+                <!-- ===== RIGHT: Form ===== -->
+                <div class="form-side">
+                    <div class="booking-card" id="formCard">
+
+                        <!-- Selected Date/Time Summary -->
+                        <div id="selectedInfo" class="selected-info hidden">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="selectedInfoText"></span>
+                            <button type="button" id="changeDateTime" class="change-link">Modifica</button>
+                        </div>
+
+                        <h3 class="booking-card-title" id="personalDataTitle">
+                            <i class="fas fa-pen-nib"></i> I Tuoi Dati
+                        </h3>
+
+                        <!-- Banner "stai prenotando come" (visibile solo se loggato) -->
+                        <div id="bookingAsInfo" style="display:none;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:rgba(212,175,55,0.07);border:1px solid rgba(212,175,55,0.2);border-radius:8px;font-size:0.84rem;color:#bbb;">
+                            <i class="fas fa-user-circle" style="color:#D4AF37;font-size:1.1rem;flex-shrink:0;"></i>
+                            <span id="bookingAsText"></span>
+                        </div>
+
+                        <form id="presedutaForm" novalidate>
+
+                            <div id="personalDataSection">
+
+                            <!-- Nome + Cognome -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nome">Nome *</label>
+                                    <input type="text" id="nome" name="nome" placeholder="Mario" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cognome">Cognome *</label>
+                                    <input type="text" id="cognome" name="cognome" placeholder="Rossi" required>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" name="email" placeholder="mario@email.it" required>
+                            </div>
+
+                            <!-- Telefono -->
+                            <div class="form-group">
+                                <label for="telefono">Numero di Cellulare *</label>
+                                <input type="tel" id="telefono" name="telefono" placeholder="347 000 0000" required>
+                            </div>
+
+                            </div><!-- /personalDataSection -->
+
+                            <!-- Luogo -->
+                            <div class="form-group">
+                                <label>Dove preferisci la pre-seduta? *</label>
+                                <div class="payment-options">
+                                    <label class="payment-card">
+                                        <input type="radio" name="luogo" value="inPerson" required checked>
+                                        <span>
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            In Studio (Roma)
+                                        </span>
+                                    </label>
+                                    <label class="payment-card">
+                                        <input type="radio" name="luogo" value="integrations:whatsapp_video">
+                                        <span>
+                                            <i class="fab fa-whatsapp"></i>
+                                            Video su WhatsApp
+                                        </span>
+                                    </label>
+                                </div>
+                                <p style="font-size:0.72rem;color:#888;margin-top:6px;font-style:italic;">La pre-seduta in studio è consigliata. Il video è riservato a chi non può raggiungere Roma.</p>
+                                <div id="whatsappMotivo" style="display:none;margin-top:8px;">
+                                    <label for="motivoVideo" style="font-size:0.82rem;">Perché non puoi venire in studio? *</label>
+                                    <input type="text" id="motivoVideo" name="motivoVideo" placeholder="Es: Abito a Milano" style="margin-top:4px;">
+                                </div>
+                            </div>
+
+                            <!-- Note (opzionale) -->
+                            <div class="form-group">
+                                <label for="note">Note aggiuntive <span class="label-optional">(opzionale)</span></label>
+                                <textarea id="note" name="note" rows="3"
+                                    placeholder="Eventuali domande o informazioni aggiuntive..."></textarea>
+                            </div>
+
+                            <!-- GDPR -->
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="gdpr" name="gdpr" required>
+                                    <span>Accetto ciò che ho letto e acconsento al trattamento dei miei dati personali ai sensi del Regolamento UE 2016/679 (GDPR). I dati forniti saranno utilizzati esclusivamente per gestire la mia richiesta di contatto/prenotazione e non saranno condivisi con terze parti. Posso esercitare i diritti di accesso, rettifica e cancellazione dei miei dati in qualsiasi momento. *</span>
+                                </label>
+                            </div>
+
+                            <!-- No Date Warning -->
+                            <div id="noDateWarning" class="no-date-warning hidden">
+                                <i class="fas fa-calendar-times"></i>
+                                Seleziona prima una data e un orario dal calendario a sinistra
+                            </div>
+
+                            <!-- Submit -->
+                            <button type="submit" id="submitBtn" class="btn btn-primary btn-lg submit-btn">
+                                <i class="fas fa-check"></i> Conferma Pre-Seduta
+                            </button>
+
+                            <p id="formMsg" class="form-message"></p>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SUCCESS STATE -->
+            <div id="successState" class="success-state hidden">
+                <div class="success-card">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>Pre-Seduta Confermata!</h2>
+                    <p class="success-subtitle">Riceverai una email di conferma da Cal.com.<br>
+                        Se non la ricevi controlla la cartella spam.</p>
+                    <div id="bookingDetails" class="booking-details-box"></div>
+                    <div class="success-actions">
+                        <a href="dashboard.html" class="btn btn-primary">
+                            <i class="fas fa-arrow-left"></i> Torna alla Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Menu</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#about">Chi Sono</a></li>
+                        <li><a href="index.html#gallery">Portfolio</a></li>
+                        <li><a href="index.html#processo">Processo</a></li>
+                        <li><a href="consultation.html">Prenota Consulenza</a></li>
+                        <li><a href="pre-session.html">Prenota Pre-Seduta</a></li>
+                        <li><a href="voucher.html">Regala un Tatuaggio</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contatti Rapidi</h3>
+                    <ul>
+                        <li><a href="https://wa.me/393471648654">WhatsApp</a></li>
+                        <li><a href="mailto:irenegipsytattoo@gmail.com">Email</a></li>
+                        <li><a href="https://instagram.com/irenegipsytattoo">Instagram</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Lingue</h3>
+                    <div class="lang-links">
+                        <span class="active">🇮🇹 Italiano</span> | <a href="en/pre-session.html">🇬🇧 English</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Irene Gipsy Tattoo - Realistic Tattoo Artist Roma</p>
+                <div class="footer-legal-links">
+                    <a href="legal.html">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#cookie">Cookie Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#termini">Termini e Condizioni</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- intl-tel-input -->
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script src="js/preseduta.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,1525 @@
+{
+  "name": "Consulenza — Crea Account e Invia Link Accesso",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const nomeRaw    = $input.first().json.query.nome    || '';\n  const cognomeRaw = $input.first().json.query.cognome || '';\n\n  // Normalizza: UPPER + trim + single spaces\n  const nomeNorm    = nomeRaw.trim().toUpperCase().replace(/\\s+/g, ' ');\n  const cognomeNorm = cognomeRaw.trim().toUpperCase().replace(/\\s+/g, ' ');\n\n  // Chiave unica combinata\n  const chiaveNorm = `${nomeNorm} ${cognomeNorm}`.trim();\n\n  // Normalizza email: lower + trim\n  const emailRaw      = $input.first().json.query.email || '';\n  const email_cliente = emailRaw.trim().toLowerCase();\n\n  // Telefono\n  const telefono = ($input.first().json.query.telefono || '').trim();\n\n  // Dati appuntamento\n  const datetime_iso        = $input.first().json.query.datetime_iso        || '';\n  const data_appuntamento   = $input.first().json.query.data_appuntamento   || '';\n  const ora_appuntamento    = $input.first().json.query.ora_appuntamento    || '';\n\n  // Genera password casuale 10 caratteri\n  const chars    = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#';\n  const password = Array.from({ length: 10 }, () =>\n    chars[Math.floor(Math.random() * chars.length)]\n  ).join('');\n\n  return {\n    json: {\n      nome_norm:          nomeNorm,\n      cognome_norm:       cognomeNorm,\n      full_name:          `${nomeNorm} ${cognomeNorm}`.trim(),\n      chiave_norm:        chiaveNorm,\n      email_cliente:      email_cliente,\n      telefono:           telefono,\n      password:           password,\n      datetime_iso:       datetime_iso,\n      data_appuntamento:  data_appuntamento,\n      ora_appuntamento:   ora_appuntamento,\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2672,
+        9776
+      ],
+      "id": "ac88a507-6149-40e4-a722-2b9d8ace159d",
+      "name": "Prepara Dati e Password"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "da775e7d-f7ab-4dad-b4ef-cbe0c04baa36",
+              "name": "nome",
+              "value": "={{ $json.nome_norm }}",
+              "type": "string"
+            },
+            {
+              "id": "f144d4e9-f429-4fca-a88f-c4cd1c8c08c9",
+              "name": "cognome",
+              "value": "={{ $json.cognome_norm }}",
+              "type": "string"
+            },
+            {
+              "id": "d02704b4-763a-4ca0-880c-36a2da420f8d",
+              "name": "email",
+              "value": "={{ $json.email_cliente }}",
+              "type": "string"
+            },
+            {
+              "id": "3bf2851b-97f2-4a93-95ef-121a10e5f984",
+              "name": "telefono",
+              "value": "={{ $json.telefono }}",
+              "type": "string"
+            },
+            {
+              "id": "a3f06b1d-43e1-4614-8898-ac035669a57b",
+              "name": "note",
+              "value": "={{ $('Webhook Cal').item.json.query.descrizione_idea }}",
+              "type": "string"
+            },
+            {
+              "id": "d202c57f-a36a-4ece-bbd4-ec73a01673fa",
+              "name": "startTime",
+              "value": "={{ $('Webhook Cal').item.json.query.data_appuntamento }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2896,
+        9776
+      ],
+      "id": "e3705f72-9cc6-46a2-ad27-a04e25d6c19f",
+      "name": "Edit Fields Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dc4275f9-bee2-427e-96ef-7cbf9c92b5a9",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        2064,
+        10336
+      ],
+      "id": "d8f24987-60ee-4423-9b63-f0ea658ac62d",
+      "name": "Webhook Cal",
+      "webhookId": "dc4275f9-bee2-427e-96ef-7cbf9c92b5a9"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo",
+          "mode": "list",
+          "cachedResultName": "DataBase_clienti_commercialista",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "NOME COGNOME": "={{ $('Prepara Dati e Password').item.json.full_name }}",
+            "EMAIL": "={{ $('Prepara Dati e Password').item.json.email_cliente }}",
+            "CELLULARE": "={{ $('Prepara Dati e Password').item.json.telefono }}"
+          },
+          "matchingColumns": [
+            "NOME COGNOME"
+          ],
+          "schema": [
+            {
+              "id": "NOME COGNOME",
+              "displayName": "NOME COGNOME",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "EMAIL",
+              "displayName": "EMAIL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CELLULARE",
+              "displayName": "CELLULARE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "C.F.",
+              "displayName": "C.F.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "PRESEDUTA",
+              "displayName": "PRESEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 1 SEDUTA",
+              "displayName": "DATA 1 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 1",
+              "displayName": "CONFERMA 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 2 SEDUTA",
+              "displayName": "DATA 2 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 2",
+              "displayName": "CONFERMA 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 3 SEDUTA",
+              "displayName": "DATA 3 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 3",
+              "displayName": "CONFERMA 3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 4 SEDUTA",
+              "displayName": "DATA 4 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 4",
+              "displayName": "CONFERMA 4",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 5 SEDUTA",
+              "displayName": "DATA 5 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 5",
+              "displayName": "CONFERMA 5",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3120,
+        9776
+      ],
+      "id": "0c458fbc-1334-4df7-afc8-7a963683f39a",
+      "name": "Salva Commercialista Webhook",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hWHUDoqB9c7bIPOk",
+          "name": "Google Sheets - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4d937b3f-b96c-48cc-b31b-4543e9412a0d",
+              "name": "nome cognome",
+              "value": "={{ $('Webhook Cal').item.json.query.nome }} {{ $('Webhook Cal').item.json.query.cognome }}",
+              "type": "string"
+            },
+            {
+              "id": "b73f5419-8b69-450d-bd5f-7a73d3d8bdf8",
+              "name": "foto",
+              "value": "={{ $('Webhook Cal').item.json.body.foto }}",
+              "type": "array"
+            },
+            {
+              "id": "49ea1f10-93e3-4bb9-b2dd-01470d07db5c",
+              "name": "email",
+              "value": "={{ $('Webhook Cal').item.json.query.email }}",
+              "type": "string"
+            },
+            {
+              "id": "17b2b32f-1620-461c-a55a-ec6520f1e5e3",
+              "name": "pagamento",
+              "value": "={{ $('Webhook Cal').item.json.query.preferenza_pagamento }}",
+              "type": "string"
+            },
+            {
+              "id": "73e3f477-abce-4d9a-8c5e-69f45f54a347",
+              "name": "newsletters",
+              "value": "={{ $('Webhook Cal').item.json.query.newsletter }}",
+              "type": "string"
+            },
+            {
+              "id": "2e63c0d5-fb3f-4a4a-acda-45338a95d033",
+              "name": "descrizione",
+              "value": "={{ $('Webhook Cal').item.json.query.descrizione_idea }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4832,
+        9312
+      ],
+      "id": "62fd874d-e4d7-437e-8f54-46b8378c5175",
+      "name": "Edit Fields Foto Webhook",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const SUPABASE_URL = 'https://ptoerfxyydlcjstiqqwb.supabase.co';\nconst SERVICE_ROLE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM';\n\n\n// Recupera folder_id da Crea Cartella Webhook (accessibile da Code node anche se in branch parallelo)\nlet folderId = '';\ntry {\n  const folderData = $('Crea Cartella Webhook').item.json;\n  folderId = folderData.id || folderData.folderId || '';\n  console.log('[n8n] folder_id recuperato:', folderId || '(VUOTO)');\n} catch(e) {\n  console.warn('[n8n] Crea Cartella Webhook non accessibile:', e.message);\n}\n// Le foto arrivano nel body del webhook (POST)\nconst fotoArray = ($('Webhook Cal').item.json.body || {}).foto || [];\nif (!Array.isArray(fotoArray) || fotoArray.length === 0) return [];\n\nconst userId = $input.item.json.id;\nif (!userId) console.warn('[n8n] userId non trovato');\n\nconst results = [];\nfor (const foto of fotoArray) {\n  const b64Raw = foto.data_base64 || '';\n  const b64 = b64Raw.includes(',') ? b64Raw.split(',')[1] : b64Raw;\n  if (!b64) continue;\n\n  const fileName = foto.nome || 'foto.jpg';\n  const mimeType = foto.tipo || 'image/jpeg';\n  const buffer   = Buffer.from(b64, 'base64');\n  const title    = fileName.replace(/\\.[^.]+$/, '');\n  const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');\n  const storagePath = userId ? (userId + '/' + Date.now() + '_' + safeName) : '';\n\n  console.log('[n8n] Foto:', fileName, '| MIME:', mimeType, '| bytes:', buffer.length, '| userId:', userId ? 'ok' : 'MANCANTE');\n\n  if (userId && storagePath) {\n    try {\n      await this.helpers.httpRequest({\n        method: 'POST',\n        url: SUPABASE_URL + '/rest/v1/tattoo_gallery',\n        headers: {\n          'apikey':        SERVICE_ROLE,\n          'Authorization': 'Bearer ' + SERVICE_ROLE,\n          'Content-Type':  'application/json',\n          'Prefer':        'return=minimal',\n        },\n        body: JSON.stringify({ client_id: userId, storage_path: storagePath, title }),\n      });\n      console.log('[n8n] DB insert ok. storagePath:', storagePath);\n    } catch(e) {\n      console.error('[n8n] DB insert fallito:', e.message);\n    }\n  }\n\n  const binary = await this.helpers.prepareBinaryData(buffer, fileName, mimeType);\n  results.push({\n    json:   { nome: fileName, storagePath, mimeType, title, folder_id: folderId },\n    binary: { data: binary },\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5504,
+        9216
+      ],
+      "id": "fadebb3c-5ee5-47d5-a0ef-1f01e712167d",
+      "name": "Carica Foto Supabase",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://ptoerfxyydlcjstiqqwb.supabase.co/storage/v1/object/client-gallery/' + $json.storagePath }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "x-upsert",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        5728,
+        9120
+      ],
+      "id": "94f8f40d-a2ea-48ad-bed3-880b2e1f64f0",
+      "name": "Upload Foto Storage",
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Webhook Cal').item.json.query.nome }} {{ $('Webhook Cal').item.json.query.cognome }} {{ $now.toFormat('dd-MM-yyyy') }}\n",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1vYwsJ1ii2P7BzdX0NqgwRcwTiFKaXISx",
+          "mode": "list",
+          "cachedResultName": "Immagini_clienti",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1vYwsJ1ii2P7BzdX0NqgwRcwTiFKaXISx"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        4608,
+        9312
+      ],
+      "id": "46509a0f-b9cd-473b-839f-4763a12db98b",
+      "name": "Crea Cartella Webhook",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wjqOSD4C3O75g7oL",
+          "name": "Google Drive - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.folder_id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5728,
+        9312
+      ],
+      "id": "9ccdba14-0cdb-4768-9ea7-8f5d2e9ae1cb",
+      "name": "Upload Foto Drive",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wjqOSD4C3O75g7oL",
+          "name": "Google Drive - Irene"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "={{ $('Webhook Cal').item.json.query.descrizione_idea }}",
+        "name": "Descrizione",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Crea Cartella Webhook').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5056,
+        9120
+      ],
+      "id": "9238d896-5a4f-49a2-a33f-fd181c118297",
+      "name": "Crea File Descrizione Webhook",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wjqOSD4C3O75g7oL",
+          "name": "Google Drive - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5056,
+        9312
+      ],
+      "id": "0fe1a391-2354-407b-8995-d6ff3d31b781",
+      "name": "Attendi Webhook",
+      "webhookId": "f967e15a-bf2c-4550-a9aa-99eeb1e546c0"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "22627db0-509f-47da-8eb4-016026707a33",
+              "leftValue": "={{ Array.isArray($('Edit Fields Foto Webhook').item.json.foto) ? $('Edit Fields Foto Webhook').item.json.foto.length : 0 }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5280,
+        9312
+      ],
+      "id": "33ea3723-78c7-4e8f-b72f-ada656d450dd",
+      "name": "Foto Presenti Webhook",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "=Nessuna foto caricata in data {{ $today.toFormat('dd/MM/yyyy') }}",
+        "name": "=Nessuna foto {{ $today.toFormat('dd/MM/yyyy') }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Crea Cartella Webhook').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5504,
+        9504
+      ],
+      "id": "3d44470a-222a-4d43-8d1a-4f7edec106a4",
+      "name": "Crea File No Foto Webhook",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wjqOSD4C3O75g7oL",
+          "name": "Google Drive - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "16Uk21Vug-jUXjk8kfoCm9YekT1lFAIcvTF_kqBrjTxw",
+          "mode": "list",
+          "cachedResultName": "DataBase_info_clienti",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uk21Vug-jUXjk8kfoCm9YekT1lFAIcvTF_kqBrjTxw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uk21Vug-jUXjk8kfoCm9YekT1lFAIcvTF_kqBrjTxw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "P_PAGAMENTO": "={{ $json.pagamento }}",
+            "EMAIL": "={{ $json.email_cliente }}",
+            "NL": "={{ $json.newsletters }}",
+            "NOME COGNOME": "={{ $json.nome_cliente }}"
+          },
+          "matchingColumns": [
+            "NOME COGNOME"
+          ],
+          "schema": [
+            {
+              "id": "NOME COGNOME",
+              "displayName": "NOME COGNOME",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "P_PAGAMENTO",
+              "displayName": "P_PAGAMENTO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "EMAIL",
+              "displayName": "EMAIL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NL",
+              "displayName": "NL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        5280,
+        9504
+      ],
+      "id": "8a7aea30-ed42-4ba5-8638-50c3dcba5297",
+      "name": "Salva Info Clienti Webhook",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hWHUDoqB9c7bIPOk",
+          "name": "Google Sheets - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const nome_cognomeRaw = $input.first().json['nome cognome'] || '';\n  \n  // Normalizza nome: UPPER + trim + spazi singoli\n  const nome_cliente = nome_cognomeRaw\n    .trim()\n    .toUpperCase()\n    .replace(/\\s+/g, ' ');\n  \n  // Normalizza email: lower + trim\n  const emailRaw = $input.first().json['email'] || '';\n  const email_cliente = emailRaw\n    .trim()\n    .toLowerCase();\n  \n  return {\n    json: {\n      ...item.json,\n      nome_cliente: nome_cliente,\n      email_cliente: email_cliente\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5056,
+        9600
+      ],
+      "id": "9cff7a94-4596-462c-8948-62ea6767c7df",
+      "name": "Normalizza Dati Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo",
+          "mode": "list",
+          "cachedResultName": "DataBase_clienti_commercialista",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "NOME COGNOME": "={{ $json.nome_cliente }}",
+            "EMAIL": "={{ $json.email_cliente }}"
+          },
+          "matchingColumns": [
+            "NOME COGNOME"
+          ],
+          "schema": [
+            {
+              "id": "NOME COGNOME",
+              "displayName": "NOME COGNOME",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "EMAIL",
+              "displayName": "EMAIL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CELLULARE",
+              "displayName": "CELLULARE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "C.F.",
+              "displayName": "C.F.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "PRESEDUTA",
+              "displayName": "PRESEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 1 SEDUTA",
+              "displayName": "DATA 1 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 1",
+              "displayName": "CONFERMA 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 2 SEDUTA",
+              "displayName": "DATA 2 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 2",
+              "displayName": "CONFERMA 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 3 SEDUTA",
+              "displayName": "DATA 3 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 3",
+              "displayName": "CONFERMA 3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 4 SEDUTA",
+              "displayName": "DATA 4 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 4",
+              "displayName": "CONFERMA 4",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 5 SEDUTA",
+              "displayName": "DATA 5 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 5",
+              "displayName": "CONFERMA 5",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        5280,
+        9696
+      ],
+      "id": "845eb3d2-71f0-4429-9882-3ac7d89fde06",
+      "name": "Salva Commercialista Sheet2",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hWHUDoqB9c7bIPOk",
+          "name": "Google Sheets - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/auth/v1/admin/users",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "1000"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e0307cbf-6cfc-42ed-be1b-cef37f1ae3e8",
+      "name": "Cerca Utente per Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3200,
+        10464
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.item.json;\n\n// Priorità 1: utente appena creato\nconst createdId = $('Crea Utente Auth').item.json.id;\nconst email = $('Estrai Dati Webhook').item.json.email;\n\nif (createdId) {\n  return [{ json: { id: createdId, email, isNewUser: true } }];\n}\n\n// Priorità 2: cerca nell'elenco utenti (GET /admin/users?per_page=1000)\nconst users = data.users || (Array.isArray(data) ? data : []);\nconst found = users.find(u => u.email === email);\n\nif (!found?.id) {\n  throw new Error('ID utente non trovato per: ' + email);\n}\n\nreturn [{ json: { id: found.id, email: found.email, isNewUser: false } }];"
+      },
+      "id": "527f1b6e-3e4c-47b9-bcea-af136dbe21df",
+      "name": "Estrai ID Utente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3424,
+        10464
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Estrae i query params dal webhook e li passa come campi stabili.\n// Tutti i nodi successivi referenziano QUESTO nodo (non il Webhook)\n// così il nome del webhook non conta.\nconst q = $input.item.json.query;\nreturn [{ json: {\n  email:              q.email             || '',\n  nome:               q.nome              || '',\n  cognome:            q.cognome           || '',\n  telefono:           q.telefono          || '',\n  datetime_iso:       q.datetime_iso      || '',\n  cal_booking_uid:    q.cal_booking_uid   || '',\n  cal_booking_id:     q.cal_booking_id    || '',\n  cal_booking_status: q.cal_booking_status || 'ACCEPTED',\n  pagamento:          q.preferenza_pagamento || q.pagamento || null,\n  luogo:              q.luogo             || q.location    || null,\n  descrizione_idea:   q.descrizione_idea  || null\n} }];"
+      },
+      "id": "30ca04ad-9f6c-45d6-8a24-1b032987f017",
+      "name": "Estrai Dati Webhook",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2528,
+        10464
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Genera una password temporanea robusta (8 caratteri misti)\n// e la aggiunge ai dati del webhook.\nconst d = $input.item.json;\n\nconst upper  = 'ABCDEFGHJKMNPQRSTUVWXYZ';\nconst lower  = 'abcdefghjkmnpqrstuvwxyz';\nconst digits = '23456789';\n\nlet pwd = '';\nfor (let i = 0; i < 3; i++) pwd += upper[Math.floor(Math.random() * upper.length)];\nfor (let i = 0; i < 3; i++) pwd += lower[Math.floor(Math.random() * lower.length)];\nfor (let i = 0; i < 2; i++) pwd += digits[Math.floor(Math.random() * digits.length)];\n\n// Mescola i caratteri\npwd = pwd.split('').sort(() => Math.random() - 0.5).join('');\n\nreturn [{ json: { ...d, temp_password: pwd } }];"
+      },
+      "id": "755fefdc-208e-4f90-bae9-5be29d851428",
+      "name": "Genera Password",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2752,
+        10464
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/auth/v1/admin/users",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ email: $('Estrai Dati Webhook').item.json.email, password: $('Genera Password').item.json.temp_password, user_metadata: { first_name: $('Estrai Dati Webhook').item.json.nome, last_name: $('Estrai Dati Webhook').item.json.cognome, phone: $('Estrai Dati Webhook').item.json.telefono, must_change_password: true }, email_confirm: true }) }}",
+        "options": {}
+      },
+      "id": "97f7c18f-6c16-4c62-b508-789f28272395",
+      "name": "Crea Utente Auth",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2976,
+        10464
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ id: $('Estrai ID Utente').item.json.id, email: $('Estrai Dati Webhook').item.json.email, first_name: $('Estrai Dati Webhook').item.json.nome, last_name: $('Estrai Dati Webhook').item.json.cognome, phone: $('Estrai Dati Webhook').item.json.telefono || null }) }}",
+        "options": {}
+      },
+      "id": "6790c4dc-8f8a-4483-a44c-02c6e71dbaa6",
+      "name": "Salva Profilo Cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4352,
+        10528
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/auth/v1/admin/generateLink",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: 'magiclink', email: $('Estrai Dati Webhook').item.json.email, options: { redirect_to: 'https://irenegipsytattoo.com/dashboard.html' } }) }}",
+        "options": {}
+      },
+      "id": "0260351d-0c91-46a7-97eb-c45da92c5bb5",
+      "name": "Genera Magic Link",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5008,
+        10528
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/appointments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ client_id: $('Estrai ID Utente').item.json.id, scheduled_at: $('Estrai Dati Webhook').item.json.datetime_iso, type: 'consulenza', status: 'confirmed', cal_booking_uid: $('Estrai Dati Webhook').item.json.cal_booking_uid || null, payment_method: $('Estrai Dati Webhook').item.json.pagamento || null, consultation_mode: $('Estrai Dati Webhook').item.json.luogo || null, notes: $('Estrai Dati Webhook').item.json.descrizione_idea || null }) }}",
+        "options": {}
+      },
+      "id": "496d29fa-d735-41fe-a5ca-7cc4daef70d0",
+      "name": "Salva Appuntamento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4576,
+        10528
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, magic_link: $('Genera Magic Link').item.json.action_link || null }) }}",
+        "options": {}
+      },
+      "id": "75737cd6-7c53-4382-ac69-5d0972058ca4",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        5232,
+        10528
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Estrai Dati Webhook').item.json.email }}",
+        "subject": "🔐 Le tue credenziali di accesso — Irene Gipsy Tattoo",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n\n  <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n  <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n  <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap\" rel=\"stylesheet\">\n\n  <style>\n    body { margin:0; padding:0; background-color:#0a0a0a; font-family:'Montserrat',sans-serif; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }\n    .email-wrapper { background-color:#0a0a0a; padding:30px 10px; }\n    .container { max-width:600px; width:100%; margin:0 auto; background-color:#121212; overflow:hidden; }\n    .header { background-color:#000000; padding:40px 30px 32px; text-align:center; border-bottom:1px solid #222; }\n    .header-divider { width:60px; height:2px; background-color:#D4AF37; margin:0 auto 20px; }\n    .content { background-color:#121212; padding:36px 30px; }\n    .footer { background-color:#000000; text-align:center; padding:30px 20px; border-top:1px solid #222; }\n\n    @media only screen and (max-width:600px) {\n      .email-wrapper { padding:10px 5px !important; }\n      .header { padding:28px 16px 24px !important; }\n      .content { padding:24px 16px !important; }\n      .footer { padding:24px 16px !important; }\n      .header-script { font-size:1.3rem !important; }\n      .header-h1 { font-size:1.4rem !important; }\n      .password-code { font-size:1.4rem !important; letter-spacing:4px !important; }\n      .btn-mobile { display:block !important; width:85% !important; max-width:300px !important; margin:0 auto !important; box-sizing:border-box !important; padding:14px 20px !important; }\n    }\n    @media only screen and (max-width:400px) {\n      .header-h1 { font-size:1.2rem !important; }\n      .password-code { font-size:1.2rem !important; }\n      .btn-mobile { width:92% !important; font-size:0.85rem !important; }\n    }\n  </style>\n</head>\n<body style=\"margin:0;padding:0;background-color:#0a0a0a;\">\n  <div class=\"email-wrapper\" style=\"background-color:#0a0a0a;padding:30px 10px;\">\n    <div class=\"container\" style=\"max-width:600px;width:100%;margin:0 auto;background-color:#121212;overflow:hidden;\">\n\n      <!-- HEADER -->\n      <div class=\"header\" style=\"background-color:#000000;padding:40px 30px 32px;text-align:center;border-bottom:1px solid #222;\">\n        <span class=\"header-script\" style=\"font-family:'Playfair Display',serif;font-size:1.6rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:6px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#F5F5DC;letter-spacing:3px;text-transform:uppercase;display:block;margin-bottom:20px;\">Realistic Tattoo Artist</span>\n        <div class=\"header-divider\" style=\"width:60px;height:2px;background-color:#D4AF37;margin:0 auto 20px;\"></div>\n        <h1 class=\"header-h1\" style=\"font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:400;color:#D4AF37;margin:0;letter-spacing:0.5px;\">✅ Consulenza Confermata</h1>\n      </div>\n\n      <!-- CONTENT -->\n      <div class=\"content\" style=\"background-color:#121212;padding:36px 30px;\">\n\n        <p style=\"font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;color:#D4AF37;margin-bottom:14px;font-style:italic;\">Ciao {{ $('Estrai Dati Webhook').item.json.nome }},</p>\n\n        <p style=\"font-size:0.95rem;margin-bottom:28px;color:#F5F5DC;font-weight:300;line-height:1.7;font-family:'Montserrat',sans-serif;text-align:justify;\">\n          La tua prenotazione per la consulenza è confermata. Il tuo <strong style=\"color:#D4AF37;font-weight:600;\">account personale</strong> è pronto. Qui sotto trovi le tue credenziali di accesso.\n        </p>\n\n        <!-- CREDENZIALI BOX -->\n        <div style=\"background-color:#1a160a;border:1px solid #D4AF37;padding:28px 24px;margin:0 0 24px;\">\n          <p style=\"font-family:'Playfair Display',serif;font-size:1rem;font-weight:400;color:#D4AF37;margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid #3a2e10;\">🔐 Le Tue Credenziali</p>\n\n          <div style=\"display:flex;align-items:flex-start;margin:10px 0;line-height:1.5;\">\n  <span style=\"font-size:16px;margin-right:12px;min-width:24px;flex-shrink:0;margin-top:1px;\">📧</span>\n  <div style=\"overflow:hidden;\">\n    <span style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:10px;\">Email</span>\n    <span style=\"font-family:'Courier New',monospace;font-size:1.2rem;font-weight:700;color:#D4AF37;letter-spacing:px;display:block;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">{{ $('Estrai Dati Webhook').item.json.email }}</span>\n  </div>\n</div>\n\n          <div style=\"height:1px;background-color:#3a2e10;margin:16px 0;\"></div>\n\n          <div style=\"display:flex;align-items:flex-start;margin:10px 0;line-height:1.5;\">\n            <span style=\"font-size:16px;margin-right:12px;min-width:24px;flex-shrink:0;margin-top:1px;\">🔑</span>\n            <div style=\"width:100%;\">\n              <span style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:10px;\">Password Temporanea</span>\n              <span class=\"password-code\" style=\"font-family:'Courier New',monospace;font-size:1.6rem;font-weight:700;color:#D4AF37;letter-spacing:6px;display:block;line-height:1;\">{{ $('Genera Password').item.json.temp_password }}</span>\n            </div>\n          </div>\n        </div>\n\n        <!-- INFO BOX -->\n        <div style=\"background-color:#0d0d0d;padding:24px 20px;margin:0 0 28px;border-left:2px solid #D4AF37;\">\n          <p style=\"font-family:'Playfair Display',serif;font-size:1rem;font-weight:400;color:#D4AF37;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;\">ℹ️ Primo Accesso</p>\n          <p style=\"font-family:'Montserrat',sans-serif;font-size:0.9rem;color:#F5F5DC;font-weight:300;line-height:1.7;margin:0;text-align:justify;\">\n            Al primo accesso ti verrà chiesto di <strong style=\"color:#D4AF37;font-weight:600;\">scegliere una nuova password</strong> personale. Conserva questa email: in caso di necessità puoi sempre richiedere il reset dalla pagina di accesso.\n          </p>\n        </div>\n\n        <!-- CTA -->\n        <div style=\"text-align:center;margin:0 0 28px;\">\n          <p style=\"font-size:0.8rem;color:#888888;text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;font-family:'Montserrat',sans-serif;\">Accedi subito alla tua area riservata</p>\n          <a href=\"https://irenegipsytattoo.com/login.html\" class=\"btn-mobile\" style=\"display:inline-block;padding:12px 30px;border:1px solid #D4AF37;text-transform:uppercase;font-family:'Montserrat',sans-serif;font-size:0.9rem;letter-spacing:1px;background-color:#D4AF37;color:#000000;font-weight:600;text-decoration:none;border-radius:0;\">\n            🔑 Accedi alla Tua Area Personale\n          </a>\n        </div>\n\n        <!-- NOTE -->\n        <div style=\"background-color:#1a1a1a;padding:20px;border:1px solid #333333;\">\n          <p style=\"font-size:0.85rem;color:#888888;font-style:italic;margin:0;line-height:1.7;font-family:'Montserrat',sans-serif;text-align:justify;\">\n            💡 Conserva questa email come riferimento per le tue credenziali. Se non hai effettuato questa prenotazione, ignora questo messaggio in tutta sicurezza.\n          </p>\n        </div>\n\n      </div>\n\n      <!-- FOOTER -->\n      <div class=\"footer\" style=\"background-color:#000000;text-align:center;padding:30px 20px;border-top:1px solid #222222;\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.1rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:4px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.7rem;text-transform:uppercase;letter-spacing:3px;color:#F5F5DC;display:block;margin-bottom:16px;\">Realistic Tattoo Artist</span>\n        <p style=\"margin:0;\">\n          <a href=\"mailto:irenegipsytattoo@gmail.com\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Email</a> |\n          <a href=\"https://www.instagram.com/irenegipsytattoo/\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Instagram</a> |\n          <a href=\"https://wa.me/393471648654\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Whatsapp</a>\n<p style=\"margin:0 0 16px;\">\n          <a href=\"https://www.irenegipsytattoo.com\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">www.irenegipsytattoo.com</a>\n        </p>\n        </p>\n        <p style=\"margin-top:16px;font-size:0.7rem;color:#333333;letter-spacing:0.5px;font-family:'Montserrat',sans-serif;\">© 2026 Tutti i diritti riservati</p>\n      </div>\n\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "b58f2897-7f76-487d-bc6c-43484d12942c",
+      "name": "Invia Email Benvenuto",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        4816,
+        10576
+      ],
+      "webhookId": "4b0ea9d6-2815-464a-8a46-9219b1720b3b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZmFlwpy10UFOwY00",
+          "name": "Gmail - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://ptoerfxyydlcjstiqqwb.supabase.co/auth/v1/admin/users/' + $('Estrai ID Utente').item.json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ password: $('Genera Password').item.json.temp_password }) }}",
+        "options": {}
+      },
+      "id": "4062bacc-6ac7-4330-9313-1f49507909df",
+      "name": "Aggiorna Password Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3632,
+        10464
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "485403d6-eba5-42a9-9aa1-ff5856376c4e",
+              "leftValue": "={{ $json.isNewUser }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "83b9e26c-8a44-44b3-8a40-9335d31f07d4",
+      "name": "Nuovo Cliente?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3536,
+        10464
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "98475de5-2f7c-431e-879d-5f3c762c5e89",
+              "leftValue": "={{ $('Estrai ID Utente').item.json.isNewUser }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cdea26e0-5aae-4b77-a460-2df80a3bee40",
+      "name": "Manda Email?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4816,
+        10464
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prepara Dati e Password": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields Webhook": {
+      "main": [
+        [
+          {
+            "node": "Salva Commercialista Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Cal": {
+      "main": [
+        [
+          {
+            "node": "Prepara Dati e Password",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Crea Cartella Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Estrai Dati Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields Foto Webhook": {
+      "main": [
+        [
+          {
+            "node": "Crea File Descrizione Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Attendi Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Normalizza Dati Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Carica Foto Supabase": {
+      "main": [
+        [
+          {
+            "node": "Upload Foto Drive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload Foto Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crea Cartella Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields Foto Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attendi Webhook": {
+      "main": [
+        [
+          {
+            "node": "Foto Presenti Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Foto Presenti Webhook": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Crea File No Foto Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizza Dati Webhook": {
+      "main": [
+        [
+          {
+            "node": "Salva Info Clienti Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Salva Commercialista Sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cerca Utente per Email": {
+      "main": [
+        [
+          {
+            "node": "Estrai ID Utente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estrai ID Utente": {
+      "main": [
+        [
+          {
+            "node": "Carica Foto Supabase",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Nuovo Cliente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggiorna Password Supabase": {
+      "main": [
+        [
+          {
+            "node": "Salva Profilo Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estrai Dati Webhook": {
+      "main": [
+        [
+          {
+            "node": "Genera Password",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Genera Password": {
+      "main": [
+        [
+          {
+            "node": "Crea Utente Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crea Utente Auth": {
+      "main": [
+        [
+          {
+            "node": "Cerca Utente per Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salva Profilo Cliente": {
+      "main": [
+        [
+          {
+            "node": "Salva Appuntamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Genera Magic Link": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salva Appuntamento": {
+      "main": [
+        [
+          {
+            "node": "Manda Email?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invia Email Benvenuto": {
+      "main": [
+        [
+          {
+            "node": "Genera Magic Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nuovo Cliente?": {
+      "main": [
+        [
+          {
+            "node": "Aggiorna Password Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Salva Profilo Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manda Email?": {
+      "main": [
+        [
+          {
+            "node": "Invia Email Benvenuto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a008b8f7-c8ec-418c-84ea-0f61cb3dccd8",
+  "meta": {
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "id": "QNxKFw4aswKnVuBf",
+  "tags": []
+}

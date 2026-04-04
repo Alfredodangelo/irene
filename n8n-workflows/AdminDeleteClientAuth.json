@@ -1,0 +1,152 @@
+{
+  "name": "Admin — Elimina Accesso Cliente",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "admin-delete-client-auth",
+        "responseMode": "responseNode",
+        "options": { "allowedOrigins": "*" }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 300],
+      "id": "a1000001-0000-0000-0000-000000000001",
+      "name": "Webhook",
+      "webhookId": "admin-delete-client-auth"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst clientId   = body.client_id   || null;\nconst userId     = body.user_id     || null;\nconst clientEmail = (body.client_email || '').trim();\nconst clientName  = (body.client_name  || '').trim() || clientEmail;\nif (!clientId) throw new Error('client_id obbligatorio');\nreturn [{ json: { client_id: clientId, user_id: userId, client_email: clientEmail, client_name: clientName } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "id": "a1000001-0000-0000-0000-000000000002",
+      "name": "Prepara Dati"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "has-user-id",
+              "leftValue": "={{ $json.user_id }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "id": "a1000001-0000-0000-0000-000000000003",
+      "name": "Ha user_id?"
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/auth/v1/admin/users/{{ $json.user_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
+            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 180],
+      "id": "a1000001-0000-0000-0000-000000000004",
+      "name": "Elimina Auth User",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients?id=eq.{{ $('Prepara Dati').item.json.client_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
+            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "Prefer",        "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"user_id\": null, \"deletion_requested_at\": null }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300],
+      "id": "a1000001-0000-0000-0000-000000000005",
+      "name": "Aggiorna Profilo Cliente",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Prepara Dati').item.json.client_email }}",
+        "subject": "Arrivederci da Irene Gipsy Tattoo",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap\" rel=\"stylesheet\">\n</head>\n<body style=\"margin:0;padding:0;background-color:#0a0a0a;font-family:'Montserrat',sans-serif;\">\n  <div style=\"background-color:#0a0a0a;padding:30px 10px;\">\n    <div style=\"max-width:600px;width:100%;margin:0 auto;background-color:#121212;\">\n\n      <div style=\"background-color:#000;padding:36px 30px 28px;text-align:center;border-bottom:1px solid #222;\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.5rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-size:0.7rem;color:#F5F5DC;letter-spacing:3px;text-transform:uppercase;display:block;margin-bottom:18px;\">Realistic Tattoo Artist</span>\n        <div style=\"width:50px;height:2px;background:#D4AF37;margin:0 auto;\"></div>\n      </div>\n\n      <div style=\"padding:36px 30px;\">\n        <p style=\"font-family:'Playfair Display',serif;font-size:1.3rem;color:#D4AF37;margin-bottom:16px;font-style:italic;\">Ciao {{ $('Prepara Dati').item.json.client_name }},</p>\n\n        <p style=\"font-size:0.93rem;color:#F5F5DC;line-height:1.75;margin-bottom:20px;font-weight:300;\">\n          Il tuo account su <strong style=\"color:#D4AF37;\">Irene Gipsy Tattoo</strong> è stato eliminato come richiesto.\n          L'accesso all'area personale non è più disponibile.\n        </p>\n\n        <p style=\"font-size:0.93rem;color:#F5F5DC;line-height:1.75;margin-bottom:20px;font-weight:300;\">\n          È stato un vero piacere averti come cliente. Spero di aver lasciato il segno sulla tua pelle così come tu hai lasciato il segno nella nostra storia condivisa.\n        </p>\n\n        <div style=\"background:#1a160a;border:1px solid rgba(212,175,55,0.3);padding:20px 22px;margin-bottom:24px;\">\n          <p style=\"font-size:0.88rem;color:#D4AF37;margin:0 0 10px;font-weight:600;\">💛 Sei sempre il/la benvenuto/a</p>\n          <p style=\"font-size:0.85rem;color:#aaa;line-height:1.7;margin:0;\">\n            Se un giorno vorresti fare un nuovo tatuaggio o hai semplicemente curiosità sui nostri lavori, puoi sempre contattarci — sarà un piacere ritrovarci.\n          </p>\n        </div>\n\n        <p style=\"font-size:0.85rem;color:#888;line-height:1.6;margin-bottom:6px;\">📋 I dati relativi ai consensi firmati sono conservati per obbligo di legge (minimo 5 anni).</p>\n\n        <div style=\"text-align:center;margin-top:28px;\">\n          <a href=\"https://www.instagram.com/irenegipsytattoo/\" style=\"color:#D4AF37;text-decoration:none;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;\">Seguimi su Instagram</a>\n          &nbsp;&nbsp;·&nbsp;&nbsp;\n          <a href=\"https://wa.me/393471648654\" style=\"color:#D4AF37;text-decoration:none;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;\">Scrivimi su WhatsApp</a>\n        </div>\n      </div>\n\n      <div style=\"background:#000;text-align:center;padding:24px;border-top:1px solid #222;\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1rem;color:#D4AF37;text-transform:uppercase;letter-spacing:2px;\">Irene Gipsy Tattoo</span>\n        <p style=\"margin:8px 0 0;font-size:0.65rem;color:#444;\">© 2026 Tutti i diritti riservati</p>\n      </div>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": { "appendAttribution": false }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1340, 300],
+      "id": "a1000001-0000-0000-0000-000000000006",
+      "name": "Invia Email Arrivederci",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZmFlwpy10UFOwY00",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"success\": true }",
+        "options": { "responseCode": 200 }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1560, 300],
+      "id": "a1000001-0000-0000-0000-000000000007",
+      "name": "Risposta OK"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Prepara Dati", "type": "main", "index": 0 }]]
+    },
+    "Prepara Dati": {
+      "main": [[{ "node": "Ha user_id?", "type": "main", "index": 0 }]]
+    },
+    "Ha user_id?": {
+      "main": [
+        [{ "node": "Elimina Auth User", "type": "main", "index": 0 }],
+        [{ "node": "Aggiorna Profilo Cliente", "type": "main", "index": 0 }]
+      ]
+    },
+    "Elimina Auth User": {
+      "main": [[{ "node": "Aggiorna Profilo Cliente", "type": "main", "index": 0 }]]
+    },
+    "Aggiorna Profilo Cliente": {
+      "main": [[{ "node": "Invia Email Arrivederci", "type": "main", "index": 0 }]]
+    },
+    "Invia Email Arrivederci": {
+      "main": [[{ "node": "Risposta OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}

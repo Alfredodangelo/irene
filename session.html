@@ -1,0 +1,382 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prenota Seduta - Irene Gipsy Tattoo</title>
+    <meta name="description"
+        content="Prenota la tua seduta tatuaggio con Irene Gipsy Tattoo. Seleziona una o più date e versa l'acconto per bloccare il giorno.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Pinyon+Script&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- intl-tel-input -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
+
+    <!-- Supabase + Auth Guard (⚠️ WIP: disabilitato — riabilitare prima del lancio) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <!-- <script src="js/auth-guard.js"></script> -->
+    <script>(async()=>{const{data}=await db.auth.getSession();if(data.session)window.__authUser=data.session.user;document.documentElement.style.visibility='';})();</script>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Irene Gipsy Tattoo</a>
+
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#about" class="nav-link">Chi Sono</a></li>
+                <li><a href="index.html#gallery" class="nav-link">Portfolio</a></li>
+                <li><a href="index.html#processo" class="nav-link">Processo</a></li>
+                <li><a href="consultation.html" class="nav-link">Prenota</a></li>
+                <li><a href="index.html#contatti" class="nav-link">Contatti</a></li>
+                <li><a href="login.html" class="nav-link" id="navAreaLink"><i class="fas fa-user-circle" style="margin-right:5px;font-size:0.85em;"></i>Area Personale</a></li>
+                <li class="lang-switch">
+                    <a href="en/session.html" class="lang-link" aria-label="Switch to English"><span class="lang-flag-gb"></span> EN</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="hero-bg" style="background-image: url('images/img1.jpeg');"></div>
+        <div class="overlay"></div>
+        <div class="stars-container">
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+        </div>
+        <div class="page-header-content container">
+            <h1 class="fade-in">Prenota la tua Seduta</h1>
+            <p class="fade-in delay-1">Seleziona una o più date.<br>
+                Ogni seduta richiede un acconto di <strong>€50</strong> per bloccare la data.</p>
+            <a href="index.html" class="back-link fade-in delay-2">
+                <i class="fas fa-arrow-left"></i> Torna al sito
+            </a>
+        </div>
+    </header>
+
+    <!-- Config Warning -->
+    <div id="configWarning" class="config-warning hidden">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Configurazione richiesta:</strong> Apri <code>js/seduta.js</code> e inserisci
+        <code>CAL_API_KEY</code> e <code>PAYPAL_CLIENT_ID</code>.
+    </div>
+
+    <!-- Booking Section -->
+    <section class="consulenza-section section-padding bg-dark-grey">
+        <div class="container">
+
+            <!-- ⚠️ WIP: ribloccare prima del lancio -->
+            <div style="background:#7c4a00;color:#ffd580;padding:10px 20px;font-size:0.85rem;text-align:center;margin-bottom:18px;border-radius:6px;">
+                ⚠️ <strong>WIP</strong> — Pagina sbloccata per lavorazione. Ribloccare prima del lancio (PayPal + webhook).
+            </div>
+
+            <div class="booking-grid" id="bookingGrid">
+
+                <!-- ===== LEFT: Calendar + Time Slots ===== -->
+                <div class="calendar-side">
+
+                    <!-- Calendar Card -->
+                    <div class="booking-card">
+                        <h3 class="booking-card-title">
+                            <i class="far fa-calendar-alt"></i> Seleziona le Date
+                        </h3>
+                        <p class="cal-subtitle">Puoi selezionare più date: 2 giorni consecutivi <em>oppure</em> date distanti almeno 14 giorni l'una dall'altra.</p>
+                        <p class="cal-subtitle" style="color:#888; font-style:italic; margin-top:6px;">⚠️ Le disponibilità possono essere a distanza di mesi — ti consigliamo di controllare più avanti nel calendario.</p>
+
+                        <!-- Calendar Navigation -->
+                        <div class="cal-header">
+                            <button id="prevMonth" class="cal-nav-btn" aria-label="Mese precedente">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="monthYearLabel" class="cal-month-label"></span>
+                            <button id="nextMonth" class="cal-nav-btn" aria-label="Mese successivo">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <!-- Day Names -->
+                        <div class="cal-days-header">
+                            <span>Lu</span><span>Ma</span><span>Me</span>
+                            <span>Gi</span><span>Ve</span><span>Sa</span><span>Do</span>
+                        </div>
+
+                        <!-- Calendar Grid -->
+                        <div id="calendarGrid" class="cal-grid"></div>
+
+                        <!-- Loading -->
+                        <div id="calLoading" class="cal-loading hidden">
+                            <span class="loading-spinner"></span>
+                            Caricamento disponibilità...
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="cal-legend">
+                            <span class="legend-item"><span class="legend-dot dot-available"></span> Disponibile</span>
+                            <span class="legend-item"><span class="legend-dot dot-unavailable"></span> Non disponibile</span>
+                            <span class="legend-item"><span class="legend-dot dot-selected"></span> Selezionata</span>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots Card -->
+                    <div id="timeSlotsCard" class="booking-card hidden">
+                        <h3 class="booking-card-title" id="timeSlotsTitle">
+                            <i class="far fa-clock"></i> Orari disponibili
+                        </h3>
+                        <div id="timeSlotsGrid" class="time-slots-grid"></div>
+                    </div>
+
+                </div>
+
+                <!-- ===== RIGHT: Form ===== -->
+                <div class="form-side">
+                    <div class="booking-card" id="formCard">
+
+                        <!-- Date validation error -->
+                        <div id="dateError" class="date-error-msg hidden">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span id="dateErrorText"></span>
+                        </div>
+
+                        <!-- Selected appointments chips -->
+                        <div id="appointmentsSection" class="appointments-section hidden">
+                            <h4 class="appointments-title">
+                                <i class="fas fa-calendar-check"></i> Sedute selezionate
+                            </h4>
+                            <div id="appointmentChips" class="appointment-chips"></div>
+                        </div>
+
+                        <h3 id="personalDataTitle" class="booking-card-title">
+                            <i class="fas fa-pen-nib"></i> I Tuoi Dati
+                        </h3>
+                        <p id="bookingAsText" style="display:none; font-size:0.82rem; color:#aaa; margin-bottom:14px; padding:9px 13px; background:rgba(212,175,55,0.05); border-left:2px solid rgba(212,175,55,0.3); border-radius:6px;"></p>
+
+                        <form id="sedutaForm" novalidate>
+
+                            <!-- Info seduta -->
+                            <div class="seduta-info-box">
+                                <i class="fas fa-clock"></i>
+                                <div>
+                                    <strong>Durata della seduta</strong>
+                                    <p>La seduta può essere <strong>intera (~8 ore)</strong> oppure <strong>mezza seduta (~4 ore)</strong>, come concordato durante la consulenza. La sessione inizia generalmente alle 11:00.</p>
+                                </div>
+                            </div>
+
+                            <div id="personalDataSection">
+                            <!-- Nome + Cognome -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nome">Nome *</label>
+                                    <input type="text" id="nome" name="nome" placeholder="Mario" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cognome">Cognome *</label>
+                                    <input type="text" id="cognome" name="cognome" placeholder="Rossi" required>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" name="email" placeholder="mario@email.it" required>
+                            </div>
+
+                            <!-- Telefono -->
+                            <div class="form-group">
+                                <label for="telefono">Numero di Cellulare *</label>
+                                <input type="tel" id="telefono" name="telefono" placeholder="347 000 0000" required>
+                            </div>
+                            </div><!-- /personalDataSection -->
+
+
+                            <!-- Info Caparra -->
+                            <div class="caparra-info">
+                                <h4><i class="fas fa-info-circle"></i> Caparra e Prenotazione</h4>
+                                <p>La caparra blocca la tua data. Per ogni seduta serve una caparra separata.</p>
+                                <p><strong>Condizioni annullamento/spostamento:</strong></p>
+                                <ul>
+                                    <li>Entro 14 giorni prima: caparra rimborsata 100%</li>
+                                    <li>Meno di 14 giorni dalla data: perdi la caparra</li>
+                                    <li>Spostamento entro 14 giorni: perdi la caparra</li>
+                                    <li>Spostamento oltre 14 giorni: caparra convertita in credito</li>
+                                </ul>
+                            </div>
+
+                            <!-- Deposit + PayPal -->
+                            <div id="depositSection" class="deposit-section hidden">
+                                <div class="deposit-header">
+                                    <i class="fas fa-euro-sign"></i>
+                                    <strong>Acconto da versare</strong>
+                                </div>
+                                <div class="deposit-breakdown">
+                                    <span>€50 × <span id="depositCount">0</span> seduta/e</span>
+                                    <span class="deposit-total" id="depositTotal">€0</span>
+                                </div>
+                                <p class="deposit-note">Il pagamento dell'acconto è necessario per bloccare le date selezionate.</p>
+
+                                <!-- Paga e Conferma (PayPal) -->
+                                <p class="paypal-label">Clicca per pagare e confermare la prenotazione:</p>
+                                <div id="paypalButtonContainer" class="paypal-container"></div>
+
+                                <!-- Shown when PayPal not configured -->
+                                <div id="paypalNotConfigured" class="paypal-not-configured hidden">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Pagamento PayPal non ancora configurato — il pulsante verrà attivato a breve.
+                                </div>
+
+                                <!-- TEST MODE: pulsante visibile solo quando PayPal non è configurato -->
+                                <button type="button" id="testSubmitBtn" class="btn-test-mode hidden" onclick="testSubmitWithoutPayment()">
+                                    <i class="fas fa-flask"></i> MODALITÀ TEST — Prenota senza pagamento
+                                </button>
+
+                                <!-- TOKEN BOOKING (QR / sblocco): paga in contanti in studio -->
+                                <button type="button" id="cashBookingBtn" class="btn-test-mode hidden" onclick="handleCashBooking()" style="background:rgba(109,192,124,0.15);border-color:rgba(109,192,124,0.5);color:#6dc07c;">
+                                    <i class="fas fa-money-bill-wave"></i> Prenota — acconto €50 in contanti
+                                </button>
+
+                                <!-- Shown after payment -->
+                                <div id="paymentSuccess" class="payment-success hidden">
+                                    <i class="fas fa-check-circle"></i>
+                                    Acconto versato — prenotazione in corso...
+                                </div>
+                            </div>
+
+                            <!-- No Date Warning -->
+                            <div id="noDateWarning" class="no-date-warning hidden">
+                                <i class="fas fa-calendar-times"></i>
+                                Seleziona prima almeno una data e un orario dal calendario a sinistra
+                            </div>
+
+
+                            <!-- GDPR -->
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="gdpr" name="gdpr" required>
+                                    <span>Accetto ciò che ho letto e acconsento al trattamento dei miei dati personali ai sensi del Regolamento UE 2016/679 (GDPR). I dati forniti saranno utilizzati esclusivamente per gestire la mia richiesta di contatto/prenotazione e non saranno condivisi con terze parti. Posso esercitare i diritti di accesso, rettifica e cancellazione dei miei dati in qualsiasi momento. *</span>
+                                </label>
+                            </div>
+
+                            <p id="formMsg" class="form-message"></p>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- LOCKED STATE — visibile solo se seduta_booking_enabled = false -->
+            <div id="lockedState" style="display:none; padding: 60px 20px; text-align:center;">
+                <div class="success-card" style="max-width:480px; margin:0 auto;">
+                    <div class="success-icon" style="color:#D4AF37;">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h2 style="font-family:'Playfair Display',serif; color:#D4AF37; margin-bottom:12px;">Prenotazione non ancora disponibile</h2>
+                    <p style="color:#aaa; font-size:0.92rem; line-height:1.7; margin-bottom:24px;">
+                        La prenotazione della seduta viene abilitata da Irene dopo la tua consulenza.<br>
+                        Una volta sbloccata, potrai accedere a questa pagina direttamente dalla tua area personale.
+                    </p>
+                    <div class="success-actions">
+                        <a href="dashboard.html" class="btn btn-primary">
+                            <i class="fas fa-arrow-left"></i> Torna alla Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUCCESS STATE -->
+            <div id="successState" class="success-state hidden">
+                <div class="success-card">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>Prenotazione Confermata!</h2>
+                    <p class="success-subtitle">Riceverai una email di conferma da Cal.com per ogni seduta.<br>
+                        Se non la ricevi controlla la cartella spam.</p>
+                    <div id="bookingDetails" class="booking-details-box"></div>
+                    <div class="success-actions">
+                        <a href="dashboard.html" class="btn btn-primary">
+                            <i class="fas fa-arrow-left"></i> Torna alla Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Menu</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#about">Chi Sono</a></li>
+                        <li><a href="index.html#gallery">Portfolio</a></li>
+                        <li><a href="consultation.html">Prenota Consulenza</a></li>
+                        <li><a href="voucher.html">Regala un Tatuaggio</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contatti Rapidi</h3>
+                    <ul>
+                        <li><a href="https://wa.me/393471648654">WhatsApp</a></li>
+                        <li><a href="mailto:irenegipsytattoo@gmail.com">Email</a></li>
+                        <li><a href="https://instagram.com/irenegipsytattoo">Instagram</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Lingue</h3>
+                    <div class="lang-links">
+                        <span class="active">🇮🇹 Italiano</span> | <a href="en/index.html">🇬🇧 English</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Irene Gipsy Tattoo - Realistic Tattoo Artist Roma</p>
+                <div class="footer-legal-links">
+                    <a href="legal.html">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#cookie">Cookie Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#termini">Termini e Condizioni</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- intl-tel-input -->
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script src="js/seduta.js"></script>
+
+
+</body>
+
+</html>

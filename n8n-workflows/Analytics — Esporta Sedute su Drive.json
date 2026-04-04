@@ -1,0 +1,81 @@
+{
+  "name": "Analytics — Esporta Sedute su Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "export-sedute-drive",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-480, 0],
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567801",
+      "name": "Webhook",
+      "webhookId": "export-sedute-drive"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst filename = body.filename || ('registro_sedute_' + new Date().toISOString().substring(0,10).replace(/-/g,'') + '.csv');\nconst csvContent = body.csv_content || '';\n// Convert string to binary buffer for Google Drive upload\nconst buffer = Buffer.from(csvContent, 'utf-8');\nreturn [{ json: { filename, date_from: body.date_from, date_to: body.date_to, total_rows: body.total_rows }, binary: { data: { data: buffer.toString('base64'), mimeType: 'text/csv', fileName: filename } } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-240, 0],
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567802",
+      "name": "Prepara File"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "name": "={{ $json.filename }}",
+        "driveId": { "__rl": true, "mode": "list", "value": "My Drive" },
+        "folderId": { "__rl": true, "mode": "list", "value": "root", "cachedResultName": "/ (Root)" },
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [0, 0],
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567803",
+      "name": "Carica su Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wjqOSD4C3O75g7oL",
+          "name": "Google Drive - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true, \"filename\": \"{{ $('Prepara File').item.json.filename }}\", \"drive_id\": \"{{ $json.id }}\" }"
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [240, 0],
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567804",
+      "name": "Risposta OK"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Prepara File", "type": "main", "index": 0 }]]
+    },
+    "Prepara File": {
+      "main": [[{ "node": "Carica su Drive", "type": "main", "index": 0 }]]
+    },
+    "Carica su Drive": {
+      "main": [[{ "node": "Risposta OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

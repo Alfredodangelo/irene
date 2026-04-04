@@ -1,0 +1,136 @@
+{
+  "name": "Cal.com Proxy — Bookings",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cal-bookings",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f20db085-753f-4446-a69c-c9ceadf36f93",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        976
+      ],
+      "webhookId": "cal-bookings"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Trasforma body v1 → v2\nconst b = $json.body;\nconst attendee = {\n  name:     b.responses?.name     || '',\n  email:    b.responses?.email    || '',\n  timeZone: b.timeZone            || 'Europe/Rome',\n  language: b.language            || 'it'\n};\nif (b.responses?.attendeePhoneNumber) attendee.phoneNumber = b.responses.attendeePhoneNumber;\nconst v2body = {\n  start:       b.start,\n  eventTypeId: b.eventTypeId,\n  attendee\n};\n// Forward ALL booking field responses (notes, location, numeroseduta, accompagnatore, etc.)\nconst skip = new Set(['name','email','attendeePhoneNumber']);\nconst bfr = {};\nif (b.responses) {\n  for (const [k, v] of Object.entries(b.responses)) {\n    if (skip.has(k) || v === undefined || v === null || v === '') continue;\n    if (k === 'location') { bfr[k] = (typeof v === 'object' && v.value) ? v.value : v; }\n    else { bfr[k] = v; }\n  }\n}\nif (Object.keys(bfr).length) v2body.bookingFieldsResponses = bfr;\nif (b.metadata && Object.keys(b.metadata).length) v2body.metadata = b.metadata;\nreturn [{ json: { v2body: JSON.stringify(v2body) } }];"
+      },
+      "id": "b1c2d3e4-f5a6-7890-bcde-f01234567890",
+      "name": "Trasforma Body v2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cal.com/v2/bookings",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer cal_live_c63016ee51343f3492c2759c4a0d5c93"
+            },
+            {
+              "name": "cal-api-version",
+              "value": "2024-08-13"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.v2body }}",
+        "options": {}
+      },
+      "id": "78a17f16-70f8-47a4-80d8-de72e5f6f790",
+      "name": "Create Cal Booking",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        976
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "2dafd2b2-b0d9-44c1-b7f3-a9f576002d62",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1984,
+        976
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Trasforma Body v2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trasforma Body v2": {
+      "main": [
+        [
+          {
+            "node": "Create Cal Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Cal Booking": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "fCzJrySoSEPcF6vp"
+  },
+  "versionId": "cc7b1760-c584-4baa-b2b2-88946b808952",
+  "meta": {
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "id": "aVPTpasoes3EWUUp",
+  "tags": []
+}

@@ -1,0 +1,210 @@
+{
+  "name": "Newsletter — Conferma Consenso",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "newsletter-consent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "cc669c73-e7f9-4d20-83b1-b7e9b2a54724",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        368,
+        496
+      ],
+      "webhookId": "newsletter-consent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst consent      = b.consent;      // true | false\nconst client_email = b.client_email || '';\nconst client_name  = b.client_name  || client_email;\nif (!client_email) throw new Error('client_email mancante');\nreturn [{ json: { consent, client_email, client_name } }];"
+      },
+      "id": "5a167478-2585-4d62-811a-09970ef2438d",
+      "name": "Estrai Dati",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.consent }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "c881e71d-a46d-4e26-b2b3-1a4b7f688359",
+      "name": "Consenso?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        784,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.client_email }}",
+        "subject": "✅ Iscrizione newsletter confermata — Irene Gipsy Tattoo",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n  <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n  <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap\" rel=\"stylesheet\">\n  <style>\n    body { margin:0; padding:0; background-color:#0a0a0a; font-family:'Montserrat',sans-serif; }\n    .email-wrapper { background-color:#0a0a0a; padding:30px 10px; }\n    .container { max-width:600px; width:100%; margin:0 auto; background-color:#121212; overflow:hidden; }\n    .header { background-color:#000000; padding:40px 30px 32px; text-align:center; border-bottom:1px solid #222; }\n    .header-divider { width:60px; height:2px; background-color:#D4AF37; margin:0 auto 20px; }\n    .content { background-color:#121212; padding:36px 30px; }\n    .privacy-box { background-color:#0d0d0d; border-top:1px solid #1e1e1e; padding:20px 30px; }\n    .footer { background-color:#000000; text-align:center; padding:30px 20px; border-top:1px solid #222; }\n    @media only screen and (max-width:600px) {\n      .header { padding:28px 16px 24px !important; }\n      .content { padding:24px 16px !important; }\n      .privacy-box { padding:16px !important; }\n    }\n  </style>\n</head>\n<body style=\"margin:0;padding:0;background-color:#0a0a0a;\">\n  <div class=\"email-wrapper\">\n    <div class=\"container\">\n\n      <!-- HEADER -->\n      <div class=\"header\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.6rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:6px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#F5F5DC;letter-spacing:3px;text-transform:uppercase;display:block;margin-bottom:20px;\">Realistic Tattoo Artist</span>\n        <div class=\"header-divider\"></div>\n        <h1 style=\"font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:400;color:#D4AF37;margin:0;\">✅ Iscrizione confermata</h1>\n      </div>\n\n      <!-- CONTENT -->\n      <div class=\"content\">\n        <p style=\"font-family:'Playfair Display',serif;font-size:1.4rem;color:#D4AF37;margin-bottom:14px;font-style:italic;\">Ciao {{ $json.client_name }},</p>\n        <p style=\"font-size:0.95rem;color:#F5F5DC;font-weight:300;line-height:1.7;margin-bottom:20px;\">La tua iscrizione alla newsletter di <strong style=\"color:#D4AF37;\">Irene Gipsy Tattoo</strong> è stata confermata con successo. Da ora riceverai aggiornamenti sullo studio, nuovi lavori, ispirazione e disponibilità speciali.</p>\n        <p style=\"font-size:0.88rem;color:#aaa;line-height:1.7;margin-bottom:0;\">Puoi <strong style=\"color:#ccc;\">cancellarti in qualsiasi momento</strong> dalla sezione <strong style=\"color:#ccc;\">Impostazioni → Newsletter</strong> della tua area personale.</a></p>\n      </div>\n\n      <!-- PRIVACY -->\n      <div class=\"privacy-box\">\n        <p style=\"font-size:0.72rem;color:#555;line-height:1.65;margin:0 0 8px;\"><strong style=\"color:#666;\">Informativa sulla privacy (GDPR)</strong></p>\n        <p style=\"font-size:0.72rem;color:#444;line-height:1.65;margin:0 0 6px;\">In conformità al Regolamento UE 2016/679 (GDPR), i tuoi dati personali (nome ed indirizzo email) vengono trattati da Irene Gipsy Tattoo in qualità di Titolare del trattamento, con base giuridica il <strong style=\"color:#555;\">consenso esplicito</strong> da te fornito, al solo scopo di inviarti comunicazioni promozionali e aggiornamenti sullo studio.</p>\n        <p style=\"font-size:0.72rem;color:#444;line-height:1.65;margin:0 0 6px;\">I tuoi dati non saranno ceduti, venduti o condivisi con soggetti terzi non autorizzati. Li conserveremo finché manterrai il consenso attivo oppure fino a revoca.</p>\n        <p style=\"font-size:0.72rem;color:#444;line-height:1.65;margin:0;\">Hai il diritto di accedere ai tuoi dati, rettificarli, cancellarli, limitarne il trattamento o opporti al loro utilizzo in qualsiasi momento, scrivendo a <a href=\"mailto:irenegipsytattoo@gmail.com\" style=\"color:#555;text-decoration:none;\">irenegipsytattoo@gmail.com</a>.</p>\n      </div>\n\n      <!-- FOOTER -->\n      <div class=\"footer\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.1rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:4px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.7rem;text-transform:uppercase;letter-spacing:3px;color:#F5F5DC;display:block;margin-bottom:16px;\">Realistic Tattoo Artist</span>\n        <p style=\"margin:0 0 10px;\">\n          <a href=\"mailto:irenegipsytattoo@gmail.com\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;text-transform:uppercase;\">Email</a> |\n          <a href=\"https://www.instagram.com/irenegipsytattoo/\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;text-transform:uppercase;\">Instagram</a> |\n          <a href=\"https://wa.me/393471648654\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;text-transform:uppercase;\">Whatsapp</a>\n        </p>\n        <p style=\"margin:0;font-size:0.7rem;color:#333;\">© 2026 Irene Gipsy Tattoo — Tutti i diritti riservati</p>\n        <p style=\"margin:6px 0 0;font-size:0.65rem;color:#2a2a2a;\">Hai ricevuto questa email perché hai fornito il tuo consenso alla newsletter. Per cancellarti accedi alla tua area personale.</p>\n      </div>\n\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "fa0e3151-d467-4dc3-9469-11041aaada49",
+      "name": "Email Iscrizione",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        992,
+        336
+      ],
+      "webhookId": "7a11c51a-fd2e-45ba-86dd-60e0b6aa20f4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZmFlwpy10UFOwY00",
+          "name": "Gmail - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.client_email }}",
+        "subject": "👋 Disiscrizione newsletter confermata — Irene Gipsy Tattoo",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n  <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n  <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap\" rel=\"stylesheet\">\n  <style>\n    body { margin:0; padding:0; background-color:#0a0a0a; font-family:'Montserrat',sans-serif; }\n    .email-wrapper { background-color:#0a0a0a; padding:30px 10px; }\n    .container { max-width:600px; width:100%; margin:0 auto; background-color:#121212; overflow:hidden; }\n    .header { background-color:#000000; padding:40px 30px 32px; text-align:center; border-bottom:1px solid #222; }\n    .header-divider { width:60px; height:2px; background-color:#D4AF37; margin:0 auto 20px; }\n    .content { background-color:#121212; padding:36px 30px; }\n    .privacy-box { background-color:#0d0d0d; border-top:1px solid #1e1e1e; padding:20px 30px; }\n    .footer { background-color:#000000; text-align:center; padding:30px 20px; border-top:1px solid #222; }\n    @media only screen and (max-width:600px) {\n      .header { padding:28px 16px 24px !important; }\n      .content { padding:24px 16px !important; }\n      .privacy-box { padding:16px !important; }\n    }\n  </style>\n</head>\n<body style=\"margin:0;padding:0;background-color:#0a0a0a;\">\n  <div class=\"email-wrapper\">\n    <div class=\"container\">\n\n      <!-- HEADER -->\n      <div class=\"header\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.6rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:6px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#F5F5DC;letter-spacing:3px;text-transform:uppercase;display:block;margin-bottom:20px;\">Realistic Tattoo Artist</span>\n        <div class=\"header-divider\"></div>\n        <h1 style=\"font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:400;color:#D4AF37;margin:0;\">👋 Disiscrizione confermata</h1>\n      </div>\n\n      <!-- CONTENT -->\n      <div class=\"content\">\n        <p style=\"font-family:'Playfair Display',serif;font-size:1.4rem;color:#D4AF37;margin-bottom:14px;font-style:italic;\">Ciao {{ $json.client_name }},</p>\n        <p style=\"font-size:0.95rem;color:#F5F5DC;font-weight:300;line-height:1.7;margin-bottom:16px;\">La tua disiscrizione dalla newsletter di <strong style=\"color:#D4AF37;\">Irene Gipsy Tattoo</strong> è avvenuta correttamente. Non riceverai più email promozionali o aggiornamenti dalla nostra lista newsletter.</p>\n        <p style=\"font-size:0.88rem;color:#aaa;line-height:1.7;margin-bottom:0;\">Continuerai a ricevere le <strong style=\"color:#ccc;\">comunicazioni relative ai tuoi appuntamenti</strong> (conferme, promemoria, proposte di spostamento), strettamente necessarie alla gestione del servizio. Puoi reiscriverti in qualsiasi momento dalla sezione <strong style=\"color:#ccc;\">Impostazioni → Newsletter</strong> della tua area personale.</p>\n      </div>\n\n      <!-- PRIVACY -->\n      <div class=\"privacy-box\">\n        <p style=\"font-size:0.72rem;color:#555;line-height:1.65;margin:0 0 8px;\"><strong style=\"color:#666;\">Informativa sulla privacy (GDPR)</strong></p>\n        <p style=\"font-size:0.72rem;color:#444;line-height:1.65;margin:0 0 6px;\">In conformità al Regolamento UE 2016/679 (GDPR), la tua richiesta di disiscrizione è stata elaborata immediatamente. Il tuo consenso al trattamento dei dati personali per finalità promozionali è stato revocato.</p>\n        <p style=\"font-size:0.72rem;color:#444;line-height:1.65;margin:0 0 6px;\">I tuoi dati resteranno nel nostro sistema esclusivamente per la gestione degli appuntamenti attivi, in base al legittimo interesse contrattuale, e non verranno utilizzati per scopi di marketing.</p>\n        <p style=\"font-size:0.72rem;color:#444;line-height:1.65;margin:0;\">Puoi esercitare in qualsiasi momento i diritti di accesso, rettifica, cancellazione o portabilità dei tuoi dati personali scrivendo a <a href=\"mailto:irenegipsytattoo@gmail.com\" style=\"color:#555;text-decoration:none;\">irenegipsytattoo@gmail.com</a>.</p>\n      </div>\n\n      <!-- FOOTER -->\n      <div class=\"footer\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.1rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:4px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.7rem;text-transform:uppercase;letter-spacing:3px;color:#F5F5DC;display:block;margin-bottom:16px;\">Realistic Tattoo Artist</span>\n        <p style=\"margin:0 0 10px;\">\n          <a href=\"mailto:irenegipsytattoo@gmail.com\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;text-transform:uppercase;\">Email</a> |\n          <a href=\"https://www.instagram.com/irenegipsytattoo/\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;text-transform:uppercase;\">Instagram</a> |\n          <a href=\"https://wa.me/393471648654\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;text-transform:uppercase;\">Whatsapp</a>\n        </p>\n        <p style=\"margin:0;font-size:0.7rem;color:#333;\">© 2026 Irene Gipsy Tattoo — Tutti i diritti riservati</p>\n        <p style=\"margin:6px 0 0;font-size:0.65rem;color:#2a2a2a;\">Questa email conferma la tua richiesta di disiscrizione dalla newsletter. Nessuna ulteriore email promozionale ti sarà inviata.</p>\n      </div>\n\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "869d4cc5-2dbd-4831-b438-dcbab40b6b44",
+      "name": "Email Disiscrizione",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        992,
+        640
+      ],
+      "webhookId": "1fccce42-9ea4-42ec-91ad-acbdfcb32ec9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZmFlwpy10UFOwY00",
+          "name": "Gmail - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true }) }}",
+        "options": {}
+      },
+      "id": "951c05e6-894f-4958-8976-e437b8a56907",
+      "name": "Risposta OK (Si)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true }) }}",
+        "options": {}
+      },
+      "id": "9b1c834f-8525-4fd5-84a0-14e38e5a2598",
+      "name": "Risposta OK (No)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        640
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Estrai Dati",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estrai Dati": {
+      "main": [
+        [
+          {
+            "node": "Consenso?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consenso?": {
+      "main": [
+        [
+          {
+            "node": "Email Iscrizione",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Disiscrizione",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Iscrizione": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK (Si)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Disiscrizione": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK (No)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ca8ae1d2-1fa5-4dbb-bdf7-00ce3f600d17",
+  "meta": {
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "id": "Kxwz4bcatBlY4CGm",
+  "tags": []
+}

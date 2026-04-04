@@ -1,0 +1,248 @@
+{
+  "name": "Backup Consensi PDF - Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtDayOfMonth": 1,
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 280],
+      "id": "bkpdf-sch-001",
+      "name": "Schedule Mensile"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "backup-consensi-pdf",
+        "options": { "allowedOrigins": "*" }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 440],
+      "id": "bkpdf-wh-001",
+      "name": "Trigger Manuale",
+      "webhookId": "backup-consensi-pdf-trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calcola range mese precedente per backup mensile automatico\n// Se triggered dal webhook con { all: true } nel body → nessun filtro data\nconst items = $input.all();\nconst body = items[0]?.json?.body || items[0]?.json || {};\nconst backupAll = body.all === true;\n\nconst now = new Date();\nconst firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);\nconst firstOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);\n\nconst prevMonthStart = firstOfLastMonth.toISOString().split('T')[0];\nconst prevMonthEnd = firstOfThisMonth.toISOString().split('T')[0];\n\nconst mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];\nconst subfolderName = mesi[firstOfLastMonth.getMonth()] + '_' + firstOfLastMonth.getFullYear();\n\nreturn [{ json: { prevMonthStart, prevMonthEnd, backupAll, subfolderName } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 360],
+      "id": "bkpdf-code-001",
+      "name": "Calcola Range"
+    },
+    {
+      "parameters": {
+        "operation": "createFolder",
+        "name": "={{ $json.subfolderName }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1DR00NMYBesU7Yzc1aKmDI8j8GV2BbnaW",
+          "mode": "id"
+        },
+        "options": {
+          "simplifyOutput": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [680, 360],
+      "id": "bkpdf-mkdir-001",
+      "name": "Crea Sottocartella Mese",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wjqOSD4C3O75g7oL",
+          "name": "Google Drive - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Salva l'ID della sottocartella appena creata e passa i dati del range\nconst folderData = $input.first().json;\nconst rangeData = $('Calcola Range').item.json;\nreturn [{ json: { ...rangeData, subfolderId: folderData.id } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 360],
+      "id": "bkpdf-savefolder-001",
+      "name": "Salva ID Cartella"
+    },
+    {
+      "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/consent_documents?select=storage_path&order=created_at.asc{{ $json.backupAll ? '' : '&created_at=gte.' + $json.prevMonthStart + '&created_at=lt.' + $json.prevMonthEnd }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [1120, 360],
+      "id": "bkpdf-http-001",
+      "name": "Get PDF Paths"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "has-path",
+              "leftValue": "={{ $json.storage_path }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "isNotEmpty" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [1340, 360],
+      "id": "bkpdf-filter-001",
+      "name": "Salta Vuoti"
+    },
+    {
+      "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/storage/v1/object/consent-docs/{{ $json.storage_path }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [1560, 360],
+      "id": "bkpdf-http-002",
+      "name": "Scarica PDF",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "name": "={{ $binary.data.fileName || 'consenso_' + $runIndex + '.pdf' }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Salva ID Cartella').item.json.subfolderId }}",
+          "mode": "id"
+        },
+        "options": { "simplifyOutput": true }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1780, 360],
+      "id": "bkpdf-drive-001",
+      "name": "Upload Drive Backup",
+      "continueOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wjqOSD4C3O75g7oL",
+          "name": "Google Drive - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true }"
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2000, 440],
+      "id": "bkpdf-resp-001",
+      "name": "Risposta OK",
+      "continueOnFail": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Mensile": {
+      "main": [[{"node": "Calcola Range", "type": "main", "index": 0}]]
+    },
+    "Trigger Manuale": {
+      "main": [[{"node": "Calcola Range", "type": "main", "index": 0}]]
+    },
+    "Calcola Range": {
+      "main": [[{"node": "Crea Sottocartella Mese", "type": "main", "index": 0}]]
+    },
+    "Crea Sottocartella Mese": {
+      "main": [[{"node": "Salva ID Cartella", "type": "main", "index": 0}]]
+    },
+    "Salva ID Cartella": {
+      "main": [[{"node": "Get PDF Paths", "type": "main", "index": 0}]]
+    },
+    "Get PDF Paths": {
+      "main": [[{"node": "Salta Vuoti", "type": "main", "index": 0}]]
+    },
+    "Salta Vuoti": {
+      "main": [[{"node": "Scarica PDF", "type": "main", "index": 0}]]
+    },
+    "Scarica PDF": {
+      "main": [[{"node": "Upload Drive Backup", "type": "main", "index": 0}]]
+    },
+    "Upload Drive Backup": {
+      "main": [[{"node": "Risposta OK", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "backup-consensi-pdf-v2",
+  "meta": {
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "id": "",
+  "tags": []
+}

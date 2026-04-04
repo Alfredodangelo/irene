@@ -1,0 +1,198 @@
+{
+  "name": "Backup Mensile Pagamenti",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtDay": 1,
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "id": "bkp-pay-schedule-0001-0002-0003-000000000001",
+      "name": "Ogni 1° del mese"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calcola il range del mese precedente\nconst now = new Date();\nconst year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();\nconst month = now.getMonth() === 0 ? 12 : now.getMonth(); // 1-12\n\nconst startDate = `${year}-${String(month).padStart(2,'0')}-01`;\n// Ultimo giorno del mese\nconst lastDay = new Date(year, month, 0).getDate();\nconst endDate = `${year}-${String(month).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;\n\nconst mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];\nconst nomeMese = mesi[month - 1];\nconst fileName = `Pagamenti_${nomeMese}_${year}.csv`;\n\nreturn [{ json: { startDate, endDate, year, month, nomeMese, fileName } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "id": "bkp-pay-daterange-0001-0002-0003-000000000002",
+      "name": "Calcola Mese Precedente"
+    },
+    {
+      "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/appointments?select=id,scheduled_at,created_at,session_price,amount_paid,session_payment_method,acconto_payment_method,type,status,clients(first_name,last_name,codice_fiscale,indirizzo)&scheduled_at=gte.{{ $json.startDate }}T00:00:00&scheduled_at=lte.{{ $json.endDate }}T23:59:59&type=eq.seduta&order=scheduled_at.asc",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300],
+      "id": "bkp-pay-fetch-0001-0002-0003-000000000003",
+      "name": "Scarica Sedute Mese"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Costruisce il CSV dei pagamenti del mese con totali\nconst meta = $('Calcola Mese Precedente').item.json;\nconst sedute = $input.first().json;\nconst fileName = meta.fileName;\n\nif (!Array.isArray(sedute) || sedute.length === 0) {\n  const bom = '\\uFEFF';\n  const header = 'Data;Cognome;Nome;C.F.;Indirizzo;Tipo Pagamento;Importo;Metodo';\n  const totals = '\\n\\n--- RIEPILOGO ---\\nTotale Contanti;€0\\nTotale POS;€0\\nTotale Online (PayPal);€0\\nTOTALE GENERALE;€0';\n  return [{ json: { fileName, csv: bom + header + totals, isEmpty: true } }];\n}\n\nconst fmtDate = iso => {\n  if (!iso) return '';\n  const d = new Date(iso);\n  return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();\n};\nconst fmtEur = n => n != null ? Number(n).toFixed(2).replace('.', ',') : '0,00';\nconst fmtMetodo = m => m === 'contanti' ? 'Contanti' : m === 'pos' ? 'POS' : (m === 'paypal' || m) ? 'Online (PayPal)' : '';\n\nlet totContanti = 0;\nlet totPOS = 0;\nlet totOnline = 0;\nconst rows = [];\n\nfor (const s of sedute) {\n  const c = s.clients || {};\n  const nome = c.first_name || '';\n  const cognome = c.last_name || '';\n  const cf = c.codice_fiscale || '';\n  const indirizzo = c.indirizzo || '';\n  const accPaid = s.amount_paid != null ? Number(s.amount_paid) : 0;\n  const price = s.session_price != null ? Number(s.session_price) : 0;\n\n  // Riga acconto\n  if (accPaid > 0) {\n    // Fallback paypal: prenotazioni dal sito usano sempre PayPal\n    const accMetodo = s.acconto_payment_method || 'paypal';\n    rows.push([fmtDate(s.created_at || s.scheduled_at), cognome, nome, cf, indirizzo, 'Acconto', fmtEur(accPaid), fmtMetodo(accMetodo)].join(';'));\n    if (accMetodo === 'contanti') totContanti += accPaid;\n    else if (accMetodo === 'pos') totPOS += accPaid;\n    else totOnline += accPaid;\n  }\n\n  // Riga saldo\n  if (price > 0) {\n    const saldo = Math.max(0, price - accPaid);\n    if (saldo > 0) {\n      const salMetodo = s.session_payment_method || '';\n      rows.push([fmtDate(s.scheduled_at), cognome, nome, cf, indirizzo, 'Saldo seduta', fmtEur(saldo), fmtMetodo(salMetodo)].join(';'));\n      if (salMetodo === 'contanti') totContanti += saldo;\n      else if (salMetodo === 'pos') totPOS += saldo;\n      else if (salMetodo) totOnline += saldo;\n    }\n  }\n}\n\nconst totale = totContanti + totPOS + totOnline;\n\nconst bom = '\\uFEFF';\nconst header = 'Data;Cognome;Nome;C.F.;Indirizzo;Tipo Pagamento;Importo;Metodo';\nconst summary = [\n  '',\n  '',\n  '--- RIEPILOGO ' + meta.nomeMese.toUpperCase() + ' ' + meta.year + ' ---',\n  'Totale Contanti;€' + fmtEur(totContanti),\n  'Totale POS;€' + fmtEur(totPOS),\n  'Totale Online (PayPal);€' + fmtEur(totOnline),\n  'TOTALE GENERALE;€' + fmtEur(totale),\n  '',\n  'Numero sedute;' + sedute.length,\n].join('\\n');\n\nconst csv = bom + header + '\\n' + rows.join('\\n') + summary;\n\nreturn [{ json: { fileName, csv, isEmpty: false, totContanti, totPOS, totOnline, totale, numSedute: sedute.length } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "id": "bkp-pay-buildcsv-0001-0002-0003-000000000004",
+      "name": "Costruisci CSV"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Converti il CSV in file binario per upload su Drive\nconst { fileName, csv } = $input.first().json;\nconst buffer = Buffer.from(csv, 'utf-8');\nreturn [{\n  json: { fileName },\n  binary: {\n    data: {\n      data: buffer.toString('base64'),\n      mimeType: 'text/csv',\n      fileName: fileName,\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300],
+      "id": "bkp-pay-tobinary-0001-0002-0003-000000000005",
+      "name": "Converti in File"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "operation": "create",
+        "name": "=Pagamenti_{{ $('Calcola Mese Precedente').item.json.nomeMese }}_{{ $('Calcola Mese Precedente').item.json.year }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1J4DOJWM0SOOYjvRWA8b-WkeYuqJialjP",
+          "mode": "id",
+          "cachedResultName": "Backup"
+        },
+        "options": {
+          "simplifyOutput": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1340, 300],
+      "id": "bkp-pay-mkdir-0001-0002-0003-000000000010",
+      "name": "Crea Cartella Pagamenti",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wjqOSD4C3O75g7oL",
+          "name": "Google Drive - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Passa l'ID della cartella creata e i dati CSV dal nodo precedente\nconst folderId = $input.first().json.id;\nconst csvData = $('Converti in File').item;\nreturn [{ json: { ...csvData.json, folderId }, binary: csvData.binary }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1460, 300],
+      "id": "bkp-pay-savefid-0001-0002-0003-000000000011",
+      "name": "Salva ID Cartella"
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.folderId }}",
+          "mode": "id"
+        },
+        "options": {
+          "simplifyOutput": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1580, 300],
+      "id": "bkp-pay-upload-0001-0002-0003-000000000006",
+      "name": "Upload Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wjqOSD4C3O75g7oL",
+          "name": "Google Drive - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "irenegipsytattoo@gmail.com",
+        "subject": "=📊 Report pagamenti {{ $('Calcola Mese Precedente').item.json.nomeMese }} {{ $('Calcola Mese Precedente').item.json.year }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head><meta charset=\"UTF-8\"></head>\n<body style=\"margin:0;padding:0;background-color:#0a0a0a;font-family:'Montserrat',Arial,sans-serif;\">\n<div style=\"max-width:500px;margin:20px auto;background:#121212;padding:30px;\">\n  <h2 style=\"color:#D4AF37;margin:0 0 20px;font-size:1.3rem;\">📊 Report Pagamenti — {{ $('Calcola Mese Precedente').item.json.nomeMese }} {{ $('Calcola Mese Precedente').item.json.year }}</h2>\n  <div style=\"background:#1a160a;border:1px solid #D4AF37;padding:20px;margin-bottom:20px;\">\n    <div style=\"display:flex;justify-content:space-between;margin-bottom:12px;\">\n      <span style=\"color:#aaa;\">💵 Totale Contanti</span>\n      <span style=\"color:#6dc07c;font-weight:700;\">€{{ $('Costruisci CSV').item.json.totContanti ? $('Costruisci CSV').item.json.totContanti.toFixed(2).replace('.', ',') : '0,00' }}</span>\n    </div>\n    <div style=\"display:flex;justify-content:space-between;margin-bottom:12px;\">\n      <span style=\"color:#aaa;\">💳 Totale POS</span>\n      <span style=\"color:#63b3ed;font-weight:700;\">€{{ $('Costruisci CSV').item.json.totPOS ? $('Costruisci CSV').item.json.totPOS.toFixed(2).replace('.', ',') : '0,00' }}</span>\n    </div>\n    <div style=\"display:flex;justify-content:space-between;margin-bottom:12px;\">\n      <span style=\"color:#aaa;\">🌐 Totale Online (PayPal)</span>\n      <span style=\"color:#a78bfa;font-weight:700;\">€{{ $('Costruisci CSV').item.json.totOnline ? $('Costruisci CSV').item.json.totOnline.toFixed(2).replace('.', ',') : '0,00' }}</span>\n    </div>\n    <hr style=\"border-color:#333;margin:12px 0;\">\n    <div style=\"display:flex;justify-content:space-between;\">\n      <span style=\"color:#D4AF37;font-weight:600;\">TOTALE GENERALE</span>\n      <span style=\"color:#D4AF37;font-weight:700;font-size:1.2rem;\">€{{ $('Costruisci CSV').item.json.totale ? $('Costruisci CSV').item.json.totale.toFixed(2).replace('.', ',') : '0,00' }}</span>\n    </div>\n  </div>\n  <p style=\"color:#888;font-size:0.85rem;\">Sedute nel mese: <strong style=\"color:#eee;\">{{ $('Costruisci CSV').item.json.numSedute || 0 }}</strong></p>\n  <p style=\"color:#888;font-size:0.8rem;margin-top:16px;\">Il file CSV dettagliato è stato salvato su Google Drive nella cartella Backup.</p>\n</div>\n</body>\n</html>",
+        "options": { "appendAttribution": false }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1560, 300],
+      "id": "bkp-pay-email-0001-0002-0003-000000000007",
+      "name": "Email Riepilogo Irene",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZmFlwpy10UFOwY00",
+          "name": "Gmail - Irene"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Ogni 1° del mese": {
+      "main": [[{ "node": "Calcola Mese Precedente", "type": "main", "index": 0 }]]
+    },
+    "Calcola Mese Precedente": {
+      "main": [[{ "node": "Scarica Sedute Mese", "type": "main", "index": 0 }]]
+    },
+    "Scarica Sedute Mese": {
+      "main": [[{ "node": "Costruisci CSV", "type": "main", "index": 0 }]]
+    },
+    "Costruisci CSV": {
+      "main": [[{ "node": "Converti in File", "type": "main", "index": 0 }]]
+    },
+    "Converti in File": {
+      "main": [[{ "node": "Crea Cartella Pagamenti", "type": "main", "index": 0 }]]
+    },
+    "Crea Cartella Pagamenti": {
+      "main": [[{ "node": "Salva ID Cartella", "type": "main", "index": 0 }]]
+    },
+    "Salva ID Cartella": {
+      "main": [[{ "node": "Upload Drive", "type": "main", "index": 0 }]]
+    },
+    "Upload Drive": {
+      "main": [[{ "node": "Email Riepilogo Irene", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "meta": { "instanceId": "irene-gipsy-tattoo" },
+  "tags": []
+}

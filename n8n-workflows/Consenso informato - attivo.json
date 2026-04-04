@@ -1,0 +1,839 @@
+{
+  "name": "Consenso informato - attivo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "eee51628-cd89-4ecd-9546-ee10f341ca00",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        28864,
+        6896
+      ],
+      "id": "4476265f-c9cf-4b57-8124-5147e20f278a",
+      "name": "Webhook",
+      "webhookId": "eee51628-cd89-4ecd-9546-ee10f341ca00"
+    },
+    {
+      "parameters": {
+        "formId": "pbo95J"
+      },
+      "type": "n8n-nodes-tallyforms.tallyTrigger",
+      "typeVersion": 2,
+      "position": [
+        28880,
+        7200
+      ],
+      "id": "8355abb8-1149-4aef-a008-8dd8b326df83",
+      "name": "Tally Trigger",
+      "webhookId": "8b10f391-91dd-48cd-b612-1b8914e3da1f",
+      "retryOnFail": true,
+      "credentials": {
+        "tallyApi": {
+          "id": "kYchwiJ6aGbM7sGQ",
+          "name": "Tally - Lupolavoro5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalizza i dati dal form Tally → campi comuni\nconst items = $input.all();\nreturn items.map(item => {\n  const j = item.json;\n  const nome_raw = j.question_48G8rb?.value || '';\n  const nome_cliente = nome_raw.trim().toUpperCase().replace(/\\s+/g, ' ');\n  const dn_raw = j.question_jyEyPR?.value || '';\n  const data_nascita = dn_raw ? dn_raw.split('-').reverse().join('/') : '________________';\n  const email_raw = j.question_N6O6oG?.value || '';\n  const email = email_raw.trim().toLowerCase();\n  const cf_raw = j.question_9WrWDG?.value || '';\n  const codice_fiscale = cf_raw.trim().toUpperCase();\n  const df_raw = j.question_a6l6Y9?.value || '';\n  const data_firma = df_raw ? df_raw.split('-').reverse().join('/') : new Date().toLocaleDateString('it-IT');\n  return {\n    json: {\n      nome_cliente,\n      data_nascita,\n      citta: j.question_2eRePp?.value || '________________',\n      residenza: j.question_xp6pYG?.value || '________________',\n      telefono: j.question_ZNQNa0?.value || '________________',\n      email,\n      tipo_documento: j.question_qdNdV2?.value || '________________',\n      numero_documento: j.question_QDEDVg?.value || '________________',\n      codice_fiscale,\n      parte_corpo: j.question_WNZN5J?.value || '________________',\n      data_firma,\n      firma_url: j.question_67V72e?.value || '',\n      autorizza_immagini: 'Si',\n      lang: 'it',\n      source: 'tally'\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        29184,
+        7200
+      ],
+      "id": "4bcff1eb-e2f3-4d57-9214-d93288941c7e",
+      "name": "Normalize Tally"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.firma_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        29408,
+        7200
+      ],
+      "id": "36805531-09db-4cb2-82af-647cc7258d9e",
+      "name": "Fetch Firma Tally",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recupera i dati normalizzati da Tally\n// Usa l'URL della firma direttamente come src dell'img — PDFShift la scarica da solo\nconst normalizedData = $('Normalize Tally').item.json;\nconst firma_base64 = normalizedData.firma_url || '';\nreturn [{ json: { ...normalizedData, firma_base64 } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        29632,
+        7200
+      ],
+      "id": "8c423f1f-555c-4fed-81ed-b823cb18d7a3",
+      "name": "Embed Firma Base64"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalizza i dati dal webhook della pagina HTML → campi comuni\nconst items = $input.all();\nreturn items.map(item => {\n  let body = item.json.body || item.json;\n  // text/plain → body arriva come stringa, serve JSON.parse\n  if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) {} }\n  const nome_raw = body.nome_cognome || '';\n  const nome_cliente = nome_raw.trim().toUpperCase().replace(/\\s+/g, ' ');\n  const dn_raw = body.data_nascita || '';\n  let data_nascita = dn_raw;\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(dn_raw)) {\n    data_nascita = dn_raw.split('-').reverse().join('/');\n  }\n  const cf_raw = body.codice_fiscale || '';\n  const codice_fiscale = cf_raw.trim().toUpperCase();\n  const email_raw = body.email || '';\n  const email = email_raw.trim().toLowerCase();\n  const lang = body.lang || (body.source === 'website_consenso_en' ? 'en' : 'it');\n  const df_raw = body.data_firma || '';\n  let data_firma = df_raw;\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(df_raw)) {\n    data_firma = df_raw.split('-').reverse().join('/');\n  }\n  return {\n    json: {\n      nome_cliente,\n      data_nascita: data_nascita || '________________',\n      citta: body.citta_nascita || '________________',\n      residenza: body.indirizzo || '________________',\n      telefono: body.telefono || '________________',\n      email,\n      tipo_documento: body.tipo_documento || '________________',\n      numero_documento: body.numero_documento || '________________',\n      codice_fiscale,\n      parte_corpo: body.parte_corpo || '________________',\n      data_firma: data_firma || new Date().toLocaleDateString(lang === 'en' ? 'en-GB' : 'it-IT'),\n      firma_base64: body.firma_base64 || '',\n      autorizza_immagini: body.autorizza_immagini || 'No',\n      lang,\n      source: body.source || 'website'\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        29184,
+        6896
+      ],
+      "id": "80d30b6b-a2a7-4fd9-83e4-ea5af173e5fe",
+      "name": "Normalize Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Costruisce l'HTML del consenso in IT o EN\nconst item = $input.first().json;\nconst lang = item.lang || 'it';\nconst isEN = lang === 'en';\nconst f = v => v || '________________';\nconst nome = f(item.nome_cliente);\nconst dn = f(item.data_nascita);\nconst citta = f(item.citta);\nconst res = f(item.residenza);\nconst tel = f(item.telefono);\nconst mail = f(item.email);\nconst tipoDoc = f(item.tipo_documento);\nconst numDoc = f(item.numero_documento);\nconst cf = f(item.codice_fiscale);\nconst corpo = f(item.parte_corpo);\nconst firma_data = f(item.data_firma);\nconst showAutorizzo = item.autorizza_immagini === 'Si' || item.autorizza_immagini === 'Yes';\n\nconst css = `*{margin:0;padding:0;box-sizing:border-box}@page{size:A4;margin:12mm 10mm}body{font-family:'Times New Roman',Times,serif;max-width:800px;margin:0 auto;line-height:1.6;color:#000;font-size:10.5pt;background:white}.header{text-align:center;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #000}.title{font-size:16pt;font-weight:bold;text-transform:uppercase;letter-spacing:2px}.content{text-align:justify;margin-bottom:10px}.section-title{text-align:center;font-weight:bold;margin:14px 0 7px;text-transform:uppercase;font-size:10.5pt;letter-spacing:1px}.bullet-list{margin-left:18px;margin-bottom:10px}.bullet-list li{margin-bottom:3px}.data-field{font-weight:bold}.divider{border-top:1px solid #000;margin:20px 0 15px}.footer{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}.label-text{font-weight:bold;font-size:10.5pt;margin-bottom:8px}.consenso{text-align:center;font-weight:bold;text-transform:uppercase;font-size:10.5pt;margin:18px 0;padding:8px;border:2px solid #000}.nota{font-size:9pt;margin-top:15px;padding:8px;line-height:1.4;font-style:italic}`;\n\nconst firmaLine = `<div style='display:inline-block;width:200px;border-top:1px solid #000;margin-top:30px'></div>`;\nconst firmaImg = item.firma_base64 || '';\nconst firmaTag = firmaImg ? `<img src='${firmaImg}' style='max-width:200px;max-height:80px;display:inline-block;margin-top:8px'>` : firmaLine;\n\nconst autorizzoIT = `<div class='section-title'>AUTORIZZO INOLTRE IRENE GIPSY TATTOO</div><div class='content'><p>a titolo gratuito, senza limiti di tempo, anche ai sensi degli artt. 10 e 320 cod. civ. e degli artt. 96 e 97 legge 22.4.1941, n.633, Legge sul diritto d&apos;autore, alla pubblicazione e/o diffusione in qualsiasi delle mie immagini sul sito Internet di Irene Gipsy Tattoo, su carta stampata e/o qualsiasi altro mezzo di diffusione, nonch&eacute; autorizzo la conservazione delle foto e dei video stessi negli archivi informatici della Societ&agrave;/Ente e prendo atto che la finalit&agrave; di tali pubblicazioni sono meramente di carattere informativo ed eventualmente promozionale.</p></div>`;\n\nconst autorizzoEN = `<div class='section-title'>I FURTHERMORE AUTHORISE IRENE GIPSY TATTOO</div><div class='content'><p>free of charge, without time limits, also pursuant to arts. 10 and 320 of the Civil Code and arts. 96 and 97 of Law 22.4.1941, n.633 (Copyright Law), to publish and/or distribute any of my images on the Irene Gipsy Tattoo website, in print and/or any other medium, and I also authorise the storage of said photos and videos in the Company&apos;s digital archives, acknowledging that the purpose of such publications is purely informational and potentially promotional.</p></div>`;\n\nlet html;\nif (isEN) {\n  html = `<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><title>Consent Form</title><style>${css}</style></head><body><div class='header'><div class='title'>CONSENT FORM</div></div><div class='content'><p>I the undersigned <span class='data-field'>${nome}</span>, born on <span class='data-field'>${dn}</span> in <span class='data-field'>${citta}</span>, residing at <span class='data-field'>${res}</span>, phone <span class='data-field'>${tel}</span>, e-mail <span class='data-field'>${mail}</span>, ID type <span class='data-field'>${tipoDoc}</span> n. <span class='data-field'>${numDoc}</span>, tax code <span class='data-field'>${cf}</span></p></div><div class='section-title'>I REQUEST:</div><div class='content'><p>The execution of a tattoo on: <span class='data-field'>${corpo}</span></p></div><div class='section-title'>I HAVE BEEN INFORMED OF:</div><ul class='bullet-list'><li>Treatment methods</li><li>Potential health risks</li><li>Correct aftercare of the tattooed area</li><li>Difficulties of removal</li></ul><div class='section-title'>I FURTHER DECLARE:</div><ul class='bullet-list'><li>I have disclosed any conditions that may contraindicate the procedure.</li><li>I have fully understood all information provided.</li><li>I acknowledge that <strong>it is not permitted to bring accompaniers during the tattoo session</strong>.</li></ul>${autorizzoEN}<div class='consenso'>THEREFORE I CONSENT TO THE EXECUTION OF THE TATTOO</div><div class='nota'>Any touch-ups may be carried out free of charge within one month of the session. After this period, a touch-up will be possible upon payment of a fee to be agreed with the artist following a prior consultation.</div><div class='divider'></div><div class='footer'><div><div class='label-text'>DATE: ${firma_data}</div></div><div style='text-align:right'><div class='label-text'>SIGNATURE<br><span style='font-size:9pt;font-weight:normal'>(Parent/guardian if minor)</span></div>${firmaTag}</div></div></body></html>`;\n} else {\n  html = `<!DOCTYPE html><html lang='it'><head><meta charset='UTF-8'><title>Modulo di Consenso</title><style>${css}</style></head><body><div class='header'><div class='title'>MODULO DI CONSENSO</div></div><div class='content'><p>Io sottoscritto/a <span class='data-field'>${nome}</span>, nato/a il <span class='data-field'>${dn}</span> a <span class='data-field'>${citta}</span>, residente in <span class='data-field'>${res}</span>, telefono <span class='data-field'>${tel}</span>, e-mail <span class='data-field'>${mail}</span>, tipo documento <span class='data-field'>${tipoDoc}</span> n. <span class='data-field'>${numDoc}</span>, codice fiscale <span class='data-field'>${cf}</span></p></div><div class='section-title'>RICHIEDO:</div><div class='content'><p>La realizzazione di un tatuaggio nella seguente parte del corpo: <span class='data-field'>${corpo}</span></p></div><div class='section-title'>DICHIARO DI ESSERE STATO INFORMATO SU:</div><ul class='bullet-list'><li>Modalit&agrave; del trattamento</li><li>Rischi potenziali per la salute</li><li>Corretto trattamento della zona tatuata</li><li>Difficolt&agrave; di rimozione</li></ul><div class='section-title'>DICHIARO INOLTRE:</div><ul class='bullet-list'><li>Di aver riferito eventuali condizioni che possono controindicare il trattamento.</li><li>Di aver ben compreso tutte le informazioni fornite.</li><li>Di essere a conoscenza che <strong>non &egrave; consentito portare accompagnatori durante la seduta di tatuaggio</strong>.</li></ul>${autorizzoIT}<div class='consenso'>PERTANTO ACCONSENTO ALL'ESECUZIONE DEL TATUAGGIO</div><div class='nota'>Eventuali ritocchi potranno essere effettuati gratuitamente entro un mese dalla seduta. Decorso tale periodo, il ritocco sar&agrave; possibile previo pagamento di un corrispettivo economico da concordare con il tatuatore a seguito di preventiva consulenza.</div><div class='divider'></div><div class='footer'><div><div class='label-text'>DATA: ${firma_data}</div></div><div style='text-align:right'><div class='label-text'>FIRMA<br><span style='font-size:9pt;font-weight:normal'>(Di genitore in caso di minore)</span></div>${firmaTag}</div></div></body></html>`;\n}\n\nreturn [{ json: { ...item, html } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        29840,
+        7056
+      ],
+      "id": "85886c57-a9b5-4869-bd11-9afce5b3a08a",
+      "name": "Build HTML"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pre-genera il nome file PDF pulito (evita regex nella URL del nodo upload)\nconst item = $input.first().json;\nconst nome = (item.nome_cliente || 'unknown').replace(/[^a-zA-Z0-9]/g, '_');\nconst now = new Date();\nconst year = now.getFullYear();\nconst month = String(now.getMonth() + 1).padStart(2, '0');\nconst day = String(now.getDate()).padStart(2, '0');\nconst hours = String(now.getHours()).padStart(2, '0');\nconst mins = String(now.getMinutes()).padStart(2, '0');\nconst ts = year + month + day + '_' + hours + mins;\nconst pdf_filename = nome + '_' + ts + '.pdf';\nreturn [{ json: { ...item, pdf_filename } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        30064,
+        7056
+      ],
+      "id": "2a56bf95-549d-49af-8e97-606c6ae0b85b",
+      "name": "Genera Filename"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calcola l'header Authorization per PDFShift\nconst apiKey = 'sk_434182abf85c8ac8be982c4427d8c949bf41785c';\nconst encoded = Buffer.from('api:' + apiKey).toString('base64');\nconst item = $input.first();\nreturn [{ json: { ...item.json, _pdfshift_auth: 'Basic ' + encoded } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        30288,
+        7056
+      ],
+      "id": "79a8fe52-a3b7-4f03-ad3e-a0841b9ae5be",
+      "name": "PDFShift Auth"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pdfshift.io/v3/convert/pdf",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $json._pdfshift_auth }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "source",
+              "value": "={{ $json.html }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        30512,
+        7056
+      ],
+      "id": "9aba7cd4-46ee-4c00-9e43-12415affe911",
+      "name": "PDFShift PDF",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Genera Filename').item.json.pdf_filename }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1n0fObnMHJVreWsm-Oi3K_Vlb1K2zCiPH",
+          "mode": "list",
+          "cachedResultName": "Consensi",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1n0fObnMHJVreWsm-Oi3K_Vlb1K2zCiPH"
+        },
+        "options": {
+          "simplifyOutput": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        30752,
+        6944
+      ],
+      "id": "b606b33a-ea0c-4ae5-ad84-84e37c5fa747",
+      "name": "Upload Drive",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wjqOSD4C3O75g7oL",
+          "name": "Google Drive - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "76f1f407-cad5-48ea-b42e-58d859f85bfb",
+              "name": "nome",
+              "value": "={{ $json.nome_cliente }}",
+              "type": "string"
+            },
+            {
+              "id": "59e1184c-c2db-4854-875d-5ad55b0813b7",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "47a21c7e-20fd-43c9-92ac-4fcd99558ba6",
+              "name": "telefono",
+              "value": "={{ $json.telefono }}",
+              "type": "string"
+            },
+            {
+              "id": "202c1306-a070-47dc-b6f8-c3ce167c8d3b",
+              "name": "CF",
+              "value": "={{ $json.codice_fiscale }}",
+              "type": "string"
+            },
+            {
+              "id": "f1a2b3c4-d5e6-7890-abcd-indirizzo001",
+              "name": "indirizzo",
+              "value": "={{ $json.residenza }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        29840,
+        7296
+      ],
+      "id": "e3b0a936-7b6e-441d-b95c-c3bfb7e1ba80",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo",
+          "mode": "list",
+          "cachedResultName": "DataBase_clienti_commercialista",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "EMAIL": "={{ $json.email }}",
+            "C.F.": "={{ $json.CF }}",
+            "INDIRIZZO": "={{ $json.indirizzo }}"
+          },
+          "matchingColumns": [
+            "EMAIL"
+          ],
+          "schema": [
+            {
+              "id": "NOME COGNOME",
+              "displayName": "NOME COGNOME",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "EMAIL",
+              "displayName": "EMAIL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CELLULARE",
+              "displayName": "CELLULARE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "C.F.",
+              "displayName": "C.F.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PRESEDUTA",
+              "displayName": "PRESEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 1 SEDUTA",
+              "displayName": "DATA 1 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 1",
+              "displayName": "CONFERMA 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 2 SEDUTA",
+              "displayName": "DATA 2 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 2",
+              "displayName": "CONFERMA 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 3 SEDUTA",
+              "displayName": "DATA 3 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 3",
+              "displayName": "CONFERMA 3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 4 SEDUTA",
+              "displayName": "DATA 4 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 4",
+              "displayName": "CONFERMA 4",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATA 5 SEDUTA",
+              "displayName": "DATA 5 SEDUTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CONFERMA 5",
+              "displayName": "CONFERMA 5",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "INDIRIZZO",
+              "displayName": "INDIRIZZO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        30064,
+        7296
+      ],
+      "id": "424de12a-d776-46d3-b781-06e582f7abb9",
+      "name": "Dati commercialista",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hWHUDoqB9c7bIPOk",
+          "name": "Google Sheets - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/storage/v1/object/consent-docs/{{ $('Genera Filename').item.json.pdf_filename }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/pdf"
+            },
+            {
+              "name": "x-upsert",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        30752,
+        7184
+      ],
+      "id": "ebf888f9-4464-4606-a9d5-e840318debd7",
+      "name": "Upload Supabase Storage",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepara dati per Supabase\n// Usa il filename pre-generato come fallback se l'upload non restituisce Key\nconst buildData = $('Build HTML').item.json;\nconst storageData = $input.first().json;\nconst genFilename = $('Genera Filename').item.json.pdf_filename || '';\n\n// Supabase Storage returns { Key: 'consent-doc/filename.pdf' } on success\n// Try both casing variants\nconst storageKey = storageData.Key || storageData.key || '';\nconst storagePath = storageKey.replace(/^consent-docs\\//, '') || genFilename;\n\nconst email = buildData.email || '';\nconst codice_fiscale = buildData.codice_fiscale || '';\nconst indirizzo = buildData.residenza || '';\nconst today = new Date().toISOString().split('T')[0];\n\nreturn [{ json: { email, codice_fiscale, indirizzo, storage_path: storagePath, session_date: today } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        30992,
+        7184
+      ],
+      "id": "284d19c7-12b2-4d44-8775-864838dc86b3",
+      "name": "Prepara Dati Supabase"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients?email=eq.{{ encodeURIComponent($json.email) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ codice_fiscale: $json.codice_fiscale, indirizzo: $json.indirizzo || null }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        31232,
+        7056
+      ],
+      "id": "7382e27e-0c76-41fa-9f04-e57c5c983382",
+      "name": "Aggiorna CF Supabase",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients?email=eq.{{ encodeURIComponent($('Prepara Dati Supabase').item.json.email) }}&select=id",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        31472,
+        7056
+      ],
+      "id": "01014c70-e8b6-465a-8933-618dd8ae2df8",
+      "name": "Cerca Client ID",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/consent_documents",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ client_id: ($input.first().json[0]?.id || null), email: $('Prepara Dati Supabase').item.json.email, storage_path: $('Prepara Dati Supabase').item.json.storage_path, session_date: $('Prepara Dati Supabase').item.json.session_date }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        31712,
+        7056
+      ],
+      "id": "a6eedd2b-8940-420a-afe7-536bcc9063ae",
+      "name": "Salva Consenso Supabase",
+      "continueOnFail": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tally Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalize Tally",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Tally": {
+      "main": [
+        [
+          {
+            "node": "Fetch Firma Tally",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Firma Tally": {
+      "main": [
+        [
+          {
+            "node": "Embed Firma Base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embed Firma Base64": {
+      "main": [
+        [
+          {
+            "node": "Build HTML",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build HTML",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build HTML": {
+      "main": [
+        [
+          {
+            "node": "Genera Filename",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Genera Filename": {
+      "main": [
+        [
+          {
+            "node": "PDFShift Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDFShift Auth": {
+      "main": [
+        [
+          {
+            "node": "PDFShift PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDFShift PDF": {
+      "main": [
+        [
+          {
+            "node": "Upload Drive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload Supabase Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Supabase Storage": {
+      "main": [
+        [
+          {
+            "node": "Prepara Dati Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Dati commercialista",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara Dati Supabase": {
+      "main": [
+        [
+          {
+            "node": "Aggiorna CF Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggiorna CF Supabase": {
+      "main": [
+        [
+          {
+            "node": "Cerca Client ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cerca Client ID": {
+      "main": [
+        [
+          {
+            "node": "Salva Consenso Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "fCzJrySoSEPcF6vp"
+  },
+  "versionId": "21a38ec1-045f-497e-bbbe-77d6ac9c0ce3",
+  "meta": {
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "id": "unuvNzUDbRId9Vmk",
+  "tags": []
+}

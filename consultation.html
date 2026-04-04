@@ -1,0 +1,408 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prenota Consulenza - Irene Gipsy Tattoo</title>
+    <meta name="description"
+        content="Prenota la tua consulenza gratuita con Irene Gipsy Tattoo. Seleziona data e orario disponibili e compila il form.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Pinyon+Script&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- intl-tel-input -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Irene Gipsy Tattoo</a>
+
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#about" class="nav-link">Chi Sono</a></li>
+                <li><a href="index.html#gallery" class="nav-link">Portfolio</a></li>
+                <li><a href="index.html#processo" class="nav-link">Processo</a></li>
+                <li><a href="consultation.html" class="nav-link active-page">Prenota Consulenza</a></li>
+                <li><a href="voucher.html" class="nav-link">Regala un Tatuaggio</a></li>
+                <li><a href="faq.html" class="nav-link">FAQ</a></li>
+                <li><a href="index.html#contatti" class="nav-link">Contatti</a></li>
+                <li><a href="login.html" class="nav-link" id="navAreaLink"><i class="fas fa-user-circle" style="margin-right:5px;font-size:0.85em;"></i>Area Personale</a></li>
+                <li class="lang-switch">
+                    <a href="en/consultation.html" class="lang-link" aria-label="Switch to English"><span class="lang-flag-gb"></span> EN</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="hero-bg" style="background-image: url('images/img1.jpeg');"></div>
+        <div class="overlay"></div>
+        <div class="stars-container">
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+        </div>
+        <div class="page-header-content container">
+            <h1 class="fade-in">Prenota una Consulenza</h1>
+            <p class="fade-in delay-1">Seleziona data e orario, compila il form con la tua idea.<br>Ti risponderò con conferma entro 24 ore.</p>
+            <a href="index.html" class="back-link fade-in delay-2">
+                <i class="fas fa-arrow-left"></i> Torna al sito
+            </a>
+        </div>
+    </header>
+
+    <!-- Config Warning (shown only if API key is not configured) -->
+    <div id="configWarning" class="config-warning hidden">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Configurazione richiesta:</strong> Apri <code>js/consulenza.js</code> e inserisci
+        <code>CAL_API_KEY</code>, <code>CAL_EVENT_TYPE_ID</code> e <code>N8N_WEBHOOK_URL</code>.
+    </div>
+
+    <!-- Booking Section -->
+    <section class="consulenza-section section-padding bg-dark-grey">
+        <div class="container">
+
+            <!-- Main Booking Grid -->
+            <div class="booking-grid" id="bookingGrid">
+
+                <!-- ===== LEFT: Calendar + Time Slots ===== -->
+                <div class="calendar-side">
+
+                    <!-- Calendar Card -->
+                    <div class="booking-card">
+                        <h3 class="booking-card-title">
+                            <i class="far fa-calendar-alt"></i> Seleziona una Data
+                        </h3>
+
+                        <!-- Calendar Navigation -->
+                        <div class="cal-header">
+                            <button id="prevMonth" class="cal-nav-btn" aria-label="Mese precedente">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="monthYearLabel" class="cal-month-label"></span>
+                            <button id="nextMonth" class="cal-nav-btn" aria-label="Mese successivo">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <!-- Day Names Header -->
+                        <div class="cal-days-header">
+                            <span>Lu</span>
+                            <span>Ma</span>
+                            <span>Me</span>
+                            <span>Gi</span>
+                            <span>Ve</span>
+                            <span>Sa</span>
+                            <span>Do</span>
+                        </div>
+
+                        <!-- Calendar Grid -->
+                        <div id="calendarGrid" class="cal-grid"></div>
+
+                        <!-- Loading Indicator -->
+                        <div id="calLoading" class="cal-loading hidden">
+                            <span class="loading-spinner"></span>
+                            Caricamento disponibilità...
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="cal-legend">
+                            <span class="legend-item">
+                                <span class="legend-dot dot-available"></span> Disponibile
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-dot dot-unavailable"></span> Non disponibile
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-dot dot-selected"></span> Selezionata
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots Card (hidden until date selected) -->
+                    <div id="timeSlotsCard" class="booking-card hidden">
+                        <h3 class="booking-card-title" id="timeSlotsTitle">
+                            <i class="far fa-clock"></i> Orari disponibili
+                        </h3>
+                        <div id="timeSlotsGrid" class="time-slots-grid"></div>
+                    </div>
+
+                </div>
+
+                <!-- ===== RIGHT: Form ===== -->
+                <div class="form-side">
+                    <div class="booking-card" id="formCard">
+
+                        <!-- Selected Date/Time Summary -->
+                        <div id="selectedInfo" class="selected-info hidden">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="selectedInfoText"></span>
+                            <button type="button" id="changeDateTime" class="change-link">Modifica</button>
+                        </div>
+
+                        <h3 id="personalDataTitle" class="booking-card-title">
+                            <i class="fas fa-pen-nib"></i> I Tuoi Dati
+                        </h3>
+                        <p id="bookingAsText" style="display:none; font-size:0.82rem; color:#aaa; margin-bottom:14px; padding:9px 13px; background:rgba(212,175,55,0.05); border-left:2px solid rgba(212,175,55,0.3); border-radius:6px;"></p>
+
+                        <form id="consulenzaForm" novalidate>
+
+                            <div id="personalDataSection">
+                            <!-- Nome + Cognome -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nome">Nome *</label>
+                                    <input type="text" id="nome" name="nome" placeholder="Mario" required autocomplete="given-name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cognome">Cognome *</label>
+                                    <input type="text" id="cognome" name="cognome" placeholder="Rossi" required autocomplete="family-name">
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" name="email" placeholder="mario@email.it" required autocomplete="email">
+                            </div>
+
+                            <!-- Telefono -->
+                            <div class="form-group">
+                                <label for="telefono">Numero di Cellulare *</label>
+                                <input type="tel" id="telefono" name="telefono" placeholder="347 000 0000" required>
+                            </div>
+                            </div><!-- /personalDataSection -->
+
+                            <!-- Luogo Consulenza -->
+                            <div class="form-group">
+                                <label>Dove preferisci la consulenza? *</label>
+                                <div class="payment-options">
+                                    <label class="payment-card">
+                                        <input type="radio" name="luogo" value="inPerson" required checked>
+                                        <span>
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            In Studio (Roma)
+                                        </span>
+                                    </label>
+                                    <label class="payment-card">
+                                        <input type="radio" name="luogo" value="integrations:whatsapp_video">
+                                        <span>
+                                            <i class="fab fa-whatsapp"></i>
+                                            Video su WhatsApp
+                                        </span>
+                                    </label>
+                                </div>
+                                <p style="font-size:0.72rem;color:#888;margin-top:6px;font-style:italic;">La consulenza in studio è consigliata. Il video è riservato a chi non può raggiungere Roma.</p>
+                                <div id="whatsappMotivo" style="display:none;margin-top:8px;">
+                                    <label for="motivoVideo" style="font-size:0.82rem;">Perché non puoi venire in studio? *</label>
+                                    <input type="text" id="motivoVideo" name="motivoVideo" placeholder="Es: Abito a Milano" style="margin-top:4px;">
+                                </div>
+                            </div>
+
+                            <!-- Descrizione idea -->
+                            <div class="form-group">
+                                <label for="descrizione">Descrizione della tua idea *</label>
+                                <textarea id="descrizione" name="descrizione" rows="4"
+                                    placeholder="Medusa con uno sguardo penetrante dipinta sul mio braccio..."
+                                    required></textarea>
+                            </div>
+
+                            <!-- Foto Upload -->
+                            <div class="form-group">
+                                <label>Carica foto di riferimento <span class="label-optional">(facoltativo, min 2 - max 4)</span></label>
+                                <div class="upload-area" id="uploadArea">
+                                    <input type="file" id="fotoInput" name="foto" accept="image/*" multiple
+                                        style="display:none;">
+                                    <div class="upload-placeholder" id="uploadPlaceholder">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Trascina le foto qui o <strong>clicca per caricarle</strong></p>
+                                        <small>Facoltativo · Se carichi, minimo 2 e massimo 4 · Max 10 MB ciascuna</small>
+                                    </div>
+                                    <div id="photoPreview" class="photo-preview hidden"></div>
+                                </div>
+                                <small class="form-hint">Facoltativo — se hai riferimenti visivi, inserisci fronte/retro/lato con buona illuminazione</small>
+                            </div>
+
+                            <!-- Preferenza Pagamento -->
+                            <div class="form-group">
+                                <label>Preferenza Pagamento *</label>
+                                <div class="payment-options">
+                                    <label class="payment-card">
+                                        <input type="radio" name="pagamento" value="Contanti" required>
+                                        <span>
+                                            <i class="fas fa-money-bill-wave"></i>
+                                            Contanti
+                                        </span>
+                                    </label>
+                                    <label class="payment-card">
+                                        <input type="radio" name="pagamento" value="POS">
+                                        <span>
+                                            <i class="fas fa-credit-card"></i>
+                                            POS
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Info Caparra -->
+                            <div class="caparra-info">
+                                <h4><i class="fas fa-info-circle"></i> Caparra e Prenotazione</h4>
+                                <p>La caparra blocca la tua data. Per ogni seduta serve una caparra separata.</p>
+                                <p><strong>Condizioni annullamento/spostamento:</strong></p>
+                                <ul>
+                                    <li>Entro 14 giorni prima: caparra rimborsata 100%</li>
+                                    <li>Meno di 14 giorni dalla data: perdi la caparra</li>
+                                    <li>Spostamento entro 14 giorni: perdi la caparra</li>
+                                    <li>Spostamento oltre 14 giorni: caparra convertita in credito</li>
+                                </ul>
+                                <p><strong>Quanto costa il tatuaggio?</strong><br>
+                                Il prezzo dipende da dimensioni, complessità, colori e numero di sedute.<br>
+                                Il preventivo sarà concordato durante la consulenza.</p>
+                            </div>
+
+                            <!-- GDPR -->
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="gdpr" name="gdpr" required>
+                                    <span>Accetto ciò che ho letto e acconsento al trattamento dei miei dati personali ai sensi del Regolamento UE 2016/679 (GDPR). I dati forniti saranno utilizzati esclusivamente per gestire la mia richiesta di contatto/prenotazione e non saranno condivisi con terze parti. Posso esercitare i diritti di accesso, rettifica e cancellazione dei miei dati in qualsiasi momento. *</span>
+                                </label>
+                            </div>
+
+                            <!-- Newsletter -->
+                            <div class="form-group">
+                                <label>Vuoi ricevere aggiornamenti e novità?</label>
+                                <div class="newsletter-options">
+                                    <label class="radio-option">
+                                        <input type="radio" name="newsletter" value="Si" required>
+                                        <span>Sì</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="newsletter" value="No">
+                                        <span>No</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- No Date Warning -->
+                            <div id="noDateWarning" class="no-date-warning hidden">
+                                <i class="fas fa-calendar-times"></i>
+                                Seleziona prima una data e un orario dal calendario a sinistra
+                            </div>
+
+                            <!-- Submit -->
+                            <button type="submit" id="submitBtn" class="btn btn-primary btn-lg submit-btn">
+                                <i class="fas fa-check"></i> Conferma Prenotazione
+                            </button>
+
+                            <p id="formMsg" class="form-message"></p>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== SUCCESS STATE ===== -->
+            <div id="successState" class="success-state hidden">
+                <div class="success-card">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>Prenotazione Confermata!</h2>
+                    <p class="success-subtitle">
+                        Riceverai a breve due email:<br>
+                        <strong>1.</strong> Conferma della consulenza con data e orario<br>
+                        <strong>2.</strong> Credenziali per accedere alla tua <strong>Area Personale</strong>, dove troverai già la tua consulenza e potrai prenotare le sedute successive<br>
+                        <small style="opacity:0.7;">Controlla anche la cartella spam.</small>
+                    </p>
+                    <div id="bookingDetails" class="booking-details-box"></div>
+                    <div class="success-actions">
+                        <a href="index.html" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Torna al Sito
+                        </a>
+                        <a id="btnDashboard" href="dashboard.html" class="btn btn-primary">
+                            <i class="fas fa-user-circle"></i> Accedi alla tua Area Personale
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Menu</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#about">Chi Sono</a></li>
+                        <li><a href="index.html#gallery">Portfolio</a></li>
+                        <li><a href="consultation.html">Prenota Consulenza</a></li>
+                        <li><a href="voucher.html">Regala un Tatuaggio</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contatti Rapidi</h3>
+                    <ul>
+                        <li><a href="https://wa.me/393471648654">WhatsApp</a></li>
+                        <li><a href="mailto:irenegipsytattoo@gmail.com">Email</a></li>
+                        <li><a href="https://instagram.com/irenegipsytattoo">Instagram</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Lingue</h3>
+                    <div class="lang-links">
+                        <span class="active">🇮🇹 Italiano</span> | <a href="en/index.html">🇬🇧 English</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Irene Gipsy Tattoo - Realistic Tattoo Artist Roma</p>
+                <div class="footer-legal-links">
+                    <a href="legal.html">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#cookie">Cookie Policy</a>
+                    <span>·</span>
+                    <a href="legal.html#termini">Termini e Condizioni</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- intl-tel-input -->
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/consulenza.js"></script>
+
+</body>
+
+</html>
