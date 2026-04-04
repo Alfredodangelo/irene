@@ -617,7 +617,6 @@ async function handleSubmit(e) {
     }
 
     const submitBtn = document.getElementById('submitBtn');
-    const formMsg = document.getElementById('formMsg');
 
     // Stato loading
     state.isSubmitting = true;
