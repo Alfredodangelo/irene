@@ -579,7 +579,7 @@ async function handleSubmit(e) {
     const descrizione = document.getElementById('descrizione').value.trim();
     const luogo = document.querySelector('input[name="luogo"]:checked')?.value || '';
     const pagamento = document.querySelector('input[name="pagamento"]:checked')?.value || '';
-    const gdpr = document.getElementById('gdprCheckbox')?.checked;
+    const gdpr = document.getElementById('gdpr')?.checked;
     const newsletter = document.querySelector('input[name="newsletter"]:checked')?.value || 'No';
 
     const missing = [];
