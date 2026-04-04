@@ -425,10 +425,34 @@ function isFormValid() {
     const luogo = document.querySelector('input[name="luogo"]:checked');
     const gdpr = document.getElementById('gdpr').checked;
     const dateTimeOk = state.selectedDate && state.selectedTime;
-    // Phone optional if logged in (fields are hidden, profile may not have phone)
     const telefonoOk = window.__authUser ? true : !!telefono;
 
-    return !!(nome && cognome && email && emailValid && telefonoOk && luogo && gdpr && dateTimeOk);
+    const missing = [];
+    if (!dateTimeOk)  missing.push('Select date and time');
+    if (!nome)        missing.push('Name');
+    if (!cognome)     missing.push('Surname');
+    if (!email || !emailValid) missing.push('Valid email');
+    if (!telefonoOk)  missing.push('Phone number');
+    if (!luogo)       missing.push('Pre-session location preference');
+    if (!gdpr)        missing.push('Privacy consent (GDPR)');
+
+    if (missing.length > 0) {
+        const formMsg = document.getElementById('formMsg');
+        formMsg.textContent = 'Required fields missing: ' + missing.join(', ');
+        formMsg.className = 'form-message error';
+        formMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+
+    if (iti && !iti.isValidNumber()) {
+        const formMsg = document.getElementById('formMsg');
+        formMsg.textContent = 'Please enter a valid phone number (with international prefix).';
+        formMsg.className = 'form-message error';
+        document.getElementById('telefono').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+
+    return true;
 }
 
 // =============================================

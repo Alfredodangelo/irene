@@ -503,13 +503,34 @@ function isFormValid() {
     const email = document.getElementById('email').value.trim();
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     const telefono = iti ? iti.getNumber() : document.getElementById('telefono').value.trim();
-    const numeroSeduta = document.getElementById('numeroSeduta').value;
-    const accompagnatore = document.querySelector('input[name="accompagnatore"]:checked');
     const gdpr = document.getElementById('gdpr').checked;
     const datesOk = state.selectedDates.length > 0 && state.selectedDates.every(d => state.selectedTimes[d]);
 
-    return !!(nome && cognome && email && emailValid && telefono && numeroSeduta &&
-              accompagnatore && gdpr && datesOk);
+    const missing = [];
+    if (!datesOk)    missing.push('Select date and time');
+    if (!nome)       missing.push('Name');
+    if (!cognome)    missing.push('Surname');
+    if (!email || !emailValid) missing.push('Valid email');
+    if (!telefono)   missing.push('Phone number');
+    if (!gdpr)       missing.push('Privacy consent (GDPR)');
+
+    if (missing.length > 0) {
+        const formMsg = document.getElementById('formMsg');
+        formMsg.textContent = 'Required fields missing: ' + missing.join(', ');
+        formMsg.className = 'form-message error';
+        formMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+
+    if (iti && !iti.isValidNumber()) {
+        const formMsg = document.getElementById('formMsg');
+        formMsg.textContent = 'Please enter a valid phone number (with international prefix).';
+        formMsg.className = 'form-message error';
+        document.getElementById('telefono').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+
+    return true;
 }
 
 // =============================================

@@ -570,35 +570,48 @@ async function handleSubmit(e) {
         return;
     }
 
-    // Validazione HTML5 nativa
-    const form = document.getElementById('consulenzaForm');
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-
-    // Raccogli valori
+    // Validazione campi obbligatori con messaggi specifici
+    const formMsg = document.getElementById('formMsg');
     const nome = document.getElementById('nome').value.trim();
     const cognome = document.getElementById('cognome').value.trim();
     const email = document.getElementById('email').value.trim();
     const telefonoRaw = iti ? iti.getNumber() : document.getElementById('telefono').value.trim();
-    // Valida il numero: iti.isValidNumber() controlla formato E.164
+    const descrizione = document.getElementById('descrizione').value.trim();
+    const luogo = document.querySelector('input[name="luogo"]:checked')?.value || '';
+    const pagamento = document.querySelector('input[name="pagamento"]:checked')?.value || '';
+    const gdpr = document.getElementById('gdprCheckbox')?.checked;
+    const newsletter = document.querySelector('input[name="newsletter"]:checked')?.value || 'No';
+
+    const missing = [];
+    if (!nome)       missing.push('Nome');
+    if (!cognome)    missing.push('Cognome');
+    if (!email)      missing.push('Email');
+    if (!telefonoRaw) missing.push('Numero di cellulare');
+    if (!luogo)      missing.push('Dove preferisci la consulenza');
+    if (!descrizione) missing.push('Descrizione della tua idea');
+    if (!pagamento)  missing.push('Preferenza pagamento');
+    if (!gdpr)       missing.push('Consenso privacy (GDPR)');
+
+    if (missing.length > 0) {
+        formMsg.textContent = 'Campi obbligatori mancanti: ' + missing.join(', ');
+        formMsg.className = 'form-message error';
+        formMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
     if (iti && !iti.isValidNumber()) {
-        document.getElementById('formMsg').textContent = 'Inserisci un numero di telefono valido (con prefisso internazionale).';
-        document.getElementById('formMsg').className = 'form-message error';
+        formMsg.textContent = 'Inserisci un numero di telefono valido (con prefisso internazionale).';
+        formMsg.className = 'form-message error';
         document.getElementById('telefono').scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
     }
     const telefono = telefonoRaw;
-    const descrizione = document.getElementById('descrizione').value.trim();
-    const pagamento = document.querySelector('input[name="pagamento"]:checked')?.value || '';
-    const luogo = document.querySelector('input[name="luogo"]:checked')?.value || '';
-    const newsletter = document.querySelector('input[name="newsletter"]:checked')?.value || 'No';
 
     // Validazione motivazione video WhatsApp
     const motivoVideo = (document.getElementById('motivoVideo')?.value || '').trim();
     if (luogo === 'integrations:whatsapp_video' && !motivoVideo) {
-        showToast('Indica il motivo per cui non puoi venire in studio.');
+        formMsg.textContent = 'Indica il motivo per cui non puoi venire in studio.';
+        formMsg.className = 'form-message error';
         document.getElementById('motivoVideo').scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
     }

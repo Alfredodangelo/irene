@@ -599,7 +599,31 @@ function isFormValid() {
     const gdpr = document.getElementById('gdpr').checked;
     const datesOk = state.selectedDates.length > 0 && state.selectedDates.every(d => state.selectedTimes[d]);
 
-    return !!(nome && cognome && email && emailValid && telefono && gdpr && datesOk);
+    const missing = [];
+    if (!datesOk)    missing.push('Seleziona data e orario');
+    if (!nome)       missing.push('Nome');
+    if (!cognome)    missing.push('Cognome');
+    if (!email || !emailValid) missing.push('Email valida');
+    if (!telefono)   missing.push('Numero di cellulare');
+    if (!gdpr)       missing.push('Consenso privacy (GDPR)');
+
+    if (missing.length > 0) {
+        const formMsg = document.getElementById('formMsg');
+        formMsg.textContent = 'Campi obbligatori mancanti: ' + missing.join(', ');
+        formMsg.className = 'form-message error';
+        formMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+
+    if (iti && !iti.isValidNumber()) {
+        const formMsg = document.getElementById('formMsg');
+        formMsg.textContent = 'Inserisci un numero di telefono valido (con prefisso internazionale).';
+        formMsg.className = 'form-message error';
+        document.getElementById('telefono').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+
+    return true;
 }
 
 // =============================================

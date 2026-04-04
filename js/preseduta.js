@@ -443,10 +443,34 @@ function isFormValid() {
     const luogo = document.querySelector('input[name="luogo"]:checked');
     const gdpr = document.getElementById('gdpr').checked;
     const dateTimeOk = state.selectedDate && state.selectedTime;
-    // Telefono opzionale se loggato (i campi sono nascosti e il profilo potrebbe non avere il numero)
     const telefonoOk = window.__authUser ? true : !!telefono;
 
-    return !!(nome && cognome && email && emailValid && telefonoOk && luogo && gdpr && dateTimeOk);
+    const missing = [];
+    if (!dateTimeOk)  missing.push('Seleziona data e orario');
+    if (!nome)        missing.push('Nome');
+    if (!cognome)     missing.push('Cognome');
+    if (!email || !emailValid) missing.push('Email valida');
+    if (!telefonoOk)  missing.push('Numero di cellulare');
+    if (!luogo)       missing.push('Dove preferisci la pre-seduta');
+    if (!gdpr)        missing.push('Consenso privacy (GDPR)');
+
+    if (missing.length > 0) {
+        const formMsg = document.getElementById('formMsg');
+        formMsg.textContent = 'Campi obbligatori mancanti: ' + missing.join(', ');
+        formMsg.className = 'form-message error';
+        formMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+
+    if (iti && !iti.isValidNumber()) {
+        const formMsg = document.getElementById('formMsg');
+        formMsg.textContent = 'Inserisci un numero di telefono valido (con prefisso internazionale).';
+        formMsg.className = 'form-message error';
+        document.getElementById('telefono').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+
+    return true;
 }
 
 // =============================================

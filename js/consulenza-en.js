@@ -438,36 +438,52 @@ async function handleSubmit(e) {
         return;
     }
 
-    const form = document.getElementById('consulenzaForm');
-    if (!form.checkValidity()) { form.reportValidity(); return; }
-
+    const formMsg = document.getElementById('formMsg');
     const nome = document.getElementById('nome').value.trim();
     const cognome = document.getElementById('cognome').value.trim();
     const email = document.getElementById('email').value.trim();
-    const telefono = iti ? iti.getNumber() : document.getElementById('telefono').value.trim();
+    const telefonoRaw = iti ? iti.getNumber() : document.getElementById('telefono').value.trim();
+    const descrizione = document.getElementById('descrizione').value.trim();
+    const luogo = document.querySelector('input[name="luogo"]:checked')?.value || '';
+    const pagamento = document.querySelector('input[name="pagamento"]:checked')?.value || '';
+    const gdpr = document.getElementById('gdprCheckbox')?.checked;
+    const newsletter = document.querySelector('input[name="newsletter"]:checked')?.value || 'No';
 
-    // Validate phone number (E.164 format)
-    if (iti && !iti.isValidNumber()) {
-        showToast('Please enter a valid phone number (with international prefix).');
-        document.getElementById('telefono').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const missing = [];
+    if (!nome)       missing.push('Name');
+    if (!cognome)    missing.push('Surname');
+    if (!email)      missing.push('Email');
+    if (!telefonoRaw) missing.push('Phone number');
+    if (!luogo)      missing.push('Consultation preference');
+    if (!descrizione) missing.push('Description of your idea');
+    if (!pagamento)  missing.push('Payment preference');
+    if (!gdpr)       missing.push('Privacy consent (GDPR)');
+
+    if (missing.length > 0) {
+        formMsg.textContent = 'Required fields missing: ' + missing.join(', ');
+        formMsg.className = 'form-message error';
+        formMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
     }
 
-    const descrizione = document.getElementById('descrizione').value.trim();
-    const pagamento = document.querySelector('input[name="pagamento"]:checked')?.value || '';
-    const luogo = document.querySelector('input[name="luogo"]:checked')?.value || '';
-    const newsletter = document.querySelector('input[name="newsletter"]:checked')?.value || 'No';
+    if (iti && !iti.isValidNumber()) {
+        formMsg.textContent = 'Please enter a valid phone number (with international prefix).';
+        formMsg.className = 'form-message error';
+        document.getElementById('telefono').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+    const telefono = telefonoRaw;
 
     // Validate WhatsApp reason
     const motivoVideo = (document.getElementById('motivoVideo')?.value || '').trim();
     if (luogo === 'integrations:whatsapp_video' && !motivoVideo) {
-        showToast('Please explain why you cannot come to the studio.');
+        formMsg.textContent = 'Please explain why you cannot come to the studio.';
+        formMsg.className = 'form-message error';
         document.getElementById('motivoVideo').scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
     }
 
     const submitBtn = document.getElementById('submitBtn');
-    const formMsg = document.getElementById('formMsg');
 
     state.isSubmitting = true;
     submitBtn.disabled = true;

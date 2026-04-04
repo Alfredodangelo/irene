@@ -537,6 +537,13 @@
             const email = document.getElementById('emailInput').value.trim();
             if (!email) { showMsg('Inserisci prima la tua email nel campo sopra.', 'error'); return; }
 
+            // Verifica che l'email sia registrata
+            const { data: isRegistered } = await db.rpc('email_is_registered', { check_email: email });
+            if (!isRegistered) {
+                showMsg('Utente non registrato. Per registrarti usa Google oppure prenota una consulenza.', 'error');
+                return;
+            }
+
             const { error } = await db.auth.resetPasswordForEmail(email, {
                 redirectTo: window.location.href
             });
@@ -598,7 +605,7 @@
             // Verifica che l'email sia già registrata prima di inviare il codice
             const { data: isRegistered } = await db.rpc('email_is_registered', { check_email: email });
             if (!isRegistered) {
-                showMsg('Email non trovata. Per accedere devi prima prenotare una consulenza con Irene.', 'error');
+                showMsg('Utente non registrato. Per registrarti usa Google oppure prenota una consulenza.', 'error');
                 btn.textContent = 'Invia codice di accesso';
                 btn.disabled = false;
                 return;
