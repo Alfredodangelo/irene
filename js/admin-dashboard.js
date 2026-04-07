@@ -1440,14 +1440,19 @@ function renderCalendar() {
         const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         const isBlocked = isDateBlocked(dateStr);
 
+        const isHoliday = typeof isItalianHoliday === 'function' && isItalianHoliday(dateStr);
+
         day.className = 'cal-day' +
             (isToday ? ' today' : '') +
             (isBlocked ? ' blocked-day' : '') +
+            (isHoliday ? ' holiday' : '') +
             (appts.length > 0 ? ' has-appointments' : '') +
             (selectedCalDay === d ? ' selected' : '');
 
         day.innerHTML = `<span>${d}</span>
             ${appts.length > 0 ? `<div class="cal-dots">${appts.slice(0,4).map(() => '<div class="cal-dot"></div>').join('')}</div>` : ''}`;
+
+        if (isHoliday) day.title = 'Giorno festivo';
 
         if (appts.length > 0) {
             day.addEventListener('click', () => showCalDayDetail(d, appts));

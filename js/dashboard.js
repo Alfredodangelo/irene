@@ -1532,7 +1532,8 @@ function rschRenderCalendar() {
         const dStr = rschFmtDate(d);
         const isPast     = dStr < minStr;
         const isSelected = dStr === selectedDate;
-        const hasSlots   = slots[dStr] && slots[dStr].length > 0;
+        const isHoliday  = typeof isItalianHoliday === 'function' && isItalianHoliday(dStr);
+        const hasSlots   = !isHoliday && slots[dStr] && slots[dStr].length > 0;
 
         const cell = document.createElement('div');
         cell.textContent = day;
@@ -1541,6 +1542,9 @@ function rschRenderCalendar() {
             cell.className = 'rsch-day selected';
         } else if (isPast) {
             cell.className = 'rsch-day past';
+        } else if (isHoliday) {
+            cell.className = 'rsch-day unavail holiday';
+            cell.title = 'Giorno festivo — studio chiuso';
         } else if (hasSlots) {
             cell.className = 'rsch-day avail' + (dStr === todayStr ? ' today-avail' : '');
             cell.title = `${slots[dStr].length} orari disponibili`;

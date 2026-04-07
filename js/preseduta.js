@@ -293,16 +293,20 @@ function renderCalendar() {
         cell.textContent = d;
 
         const isPast = dateObj < today;
+        const isHoliday = typeof isItalianHoliday === 'function' && isItalianHoliday(dateStr);
         const isToday = dateObj.getTime() === today.getTime();
         const isAfterDeadline = maxBookingDateStr !== null && dateStr > maxBookingDateStr;
         const isLocked = maxBookingDateStr === null; // nessuna data prima seduta impostata
-        const hasSlots = state.availableSlots[dateStr] && state.availableSlots[dateStr].length > 0;
+        const hasSlots = !isHoliday && state.availableSlots[dateStr] && state.availableSlots[dateStr].length > 0;
         const isSelected = state.selectedDate === dateStr;
 
         if (isToday) cell.classList.add('today');
 
         if (isPast) {
             cell.classList.add('past');
+        } else if (isHoliday) {
+            cell.classList.add('unavailable', 'holiday');
+            cell.title = 'Giorno festivo — studio chiuso';
         } else if (isLocked || isAfterDeadline) {
             cell.classList.add('unavailable');
         } else if (isSelected) {

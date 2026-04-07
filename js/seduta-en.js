@@ -223,8 +223,9 @@ function renderCalendar() {
         cell.textContent = d;
 
         const isPast = dateObj < today;
+        const isHoliday = typeof isItalianHoliday === 'function' && isItalianHoliday(dateStr);
         const isToday = dateObj.getTime() === today.getTime();
-        const hasSlots = state.availableSlots[dateStr] && state.availableSlots[dateStr].length > 0;
+        const hasSlots = !isHoliday && state.availableSlots[dateStr] && state.availableSlots[dateStr].length > 0;
         const isSelected = state.selectedDates.includes(dateStr);
         const isFocused = state.focusedDate === dateStr;
 
@@ -232,6 +233,9 @@ function renderCalendar() {
 
         if (isPast) {
             cell.classList.add('past');
+        } else if (isHoliday) {
+            cell.classList.add('unavailable', 'holiday');
+            cell.title = 'Public holiday — studio closed';
         } else if (isSelected) {
             cell.classList.add('selected');
             if (isFocused) cell.classList.add('focused');

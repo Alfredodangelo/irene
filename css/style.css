@@ -1881,6 +1881,21 @@ img {
     border: 1px dashed #444;
 }
 
+.cal-day.holiday {
+    background: rgba(212,175,55,0.06);
+    border: 1px dashed rgba(212,175,55,0.3);
+    color: #666;
+    position: relative;
+}
+.cal-day.holiday::after {
+    content: '★';
+    position: absolute;
+    top: 2px;
+    right: 3px;
+    font-size: 0.5rem;
+    color: rgba(212,175,55,0.5);
+}
+
 .cal-day.selected {
     background: var(--secondary-color) !important;
     color: #000 !important;

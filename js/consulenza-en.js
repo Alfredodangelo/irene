@@ -211,23 +211,27 @@ function renderCalendar() {
         const date = new Date(currentYear, currentMonth, day);
         const dateStr = formatDate(date);
         const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const isHoliday = typeof isItalianHoliday === 'function' && isItalianHoliday(dateStr);
         const isToday = dateStr === todayStr;
         const isSelected = dateStr === selectedDate;
-        const hasSlots = availableSlots[dateStr] && availableSlots[dateStr].length > 0;
+        const hasSlots = !isHoliday && availableSlots[dateStr] && availableSlots[dateStr].length > 0;
 
         const cell = document.createElement('div');
         cell.textContent = day;
 
         let classes = ['cal-day'];
-        if (isSelected) classes.push('selected');
+        if (isSelected && !isHoliday) classes.push('selected');
         else if (isPast) classes.push('past');
+        else if (isHoliday) classes.push('unavailable holiday');
         else if (isToday) classes.push(hasSlots ? 'today available' : 'today unavailable');
         else if (hasSlots) classes.push('available');
         else classes.push('unavailable');
 
         cell.className = classes.join(' ');
 
-        if (!isPast && hasSlots) {
+        if (isHoliday && !isPast) {
+            cell.title = 'Public holiday — studio closed';
+        } else if (!isPast && hasSlots) {
             cell.addEventListener('click', () => selectDate(dateStr));
             const count = availableSlots[dateStr].length;
             cell.title = `${count} slot${count > 1 ? 's' : ''} available`;

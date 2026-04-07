@@ -268,19 +268,22 @@ function renderCalendar() {
         const dateStr = formatDate(date);
 
         const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const isHoliday = typeof isItalianHoliday === 'function' && isItalianHoliday(dateStr);
         const isToday = dateStr === todayStr;
         const isSelected = dateStr === selectedDate;
-        const hasSlots = availableSlots[dateStr] && availableSlots[dateStr].length > 0;
+        const hasSlots = !isHoliday && availableSlots[dateStr] && availableSlots[dateStr].length > 0;
 
         const cell = document.createElement('div');
         cell.textContent = day;
 
         let classes = ['cal-day'];
 
-        if (isSelected) {
+        if (isSelected && !isHoliday) {
             classes.push('selected');
         } else if (isPast) {
             classes.push('past');
+        } else if (isHoliday) {
+            classes.push('unavailable holiday');
         } else if (isToday) {
             classes.push(hasSlots ? 'today available' : 'today unavailable');
         } else if (hasSlots) {
@@ -291,13 +294,15 @@ function renderCalendar() {
 
         cell.className = classes.join(' ');
 
-        // Aggiungi click solo per giorni con slot disponibili
-        if (!isPast && hasSlots) {
+        // Aggiungi click solo per giorni con slot disponibili (no festivi)
+        if (!isPast && !isHoliday && hasSlots) {
             cell.addEventListener('click', () => selectDate(dateStr));
         }
 
-        // Tooltip con numero slot
-        if (!isPast && hasSlots) {
+        // Tooltip
+        if (isHoliday && !isPast) {
+            cell.title = 'Giorno festivo — studio chiuso';
+        } else if (!isPast && hasSlots) {
             const count = availableSlots[dateStr].length;
             cell.title = `${count} orario${count > 1 ? 'i' : ''} disponibile${count > 1 ? 'i' : ''}`;
         }

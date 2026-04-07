@@ -902,6 +902,8 @@
         .rsch-day.empty { visibility: hidden; }
         .rsch-day.past  { color: rgba(255,255,255,0.18); }
         .rsch-day.unavail { color: rgba(255,255,255,0.28); }
+        .rsch-day.holiday { background: rgba(212,175,55,0.06); border: 1px dashed rgba(212,175,55,0.3); position: relative; }
+        .rsch-day.holiday::after { content: '★'; position: absolute; top: 1px; right: 2px; font-size: 0.45rem; color: rgba(212,175,55,0.5); }
         .rsch-day.avail {
             color: var(--text); cursor: pointer;
             background: rgba(212,175,55,0.06);
@@ -1494,6 +1496,7 @@
     <!-- Scripts -->
     <script src="js/supabase-client.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
+    <script src="js/holidays.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
 </html>

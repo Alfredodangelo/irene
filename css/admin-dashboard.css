@@ -674,6 +674,10 @@ body {
 .cal-day.blocked-day { background: rgba(248,113,113,0.07); color: #f87171; position: relative; }
 .cal-day.blocked-day::after { content: ''; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); width: 16px; height: 2px; background: rgba(248,113,113,0.5); border-radius: 1px; }
 .cal-day.blocked-day:hover { background: rgba(248,113,113,0.12); }
+.cal-day.holiday { background: rgba(212,175,55,0.06); border: 1px dashed rgba(212,175,55,0.3); color: #999; position: relative; }
+.cal-day.holiday::after { content: '★'; position: absolute; top: 2px; right: 3px; font-size: 0.5rem; color: rgba(212,175,55,0.5); }
+.cal-day.holiday.has-appointments { color: #ccc; }
+.cal-day.holiday:hover { background: rgba(212,175,55,0.12); }
 
 .cal-dots {
     display: flex; gap: 3px;
