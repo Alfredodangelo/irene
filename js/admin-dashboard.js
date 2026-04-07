@@ -259,18 +259,20 @@ function filterWlClients() {
     const filtered = allClients.filter(c => {
         if (inWl.has(c.id)) return false;
         if (!q) return true;
-        return (`${c.first_name} ${c.last_name}`).toLowerCase().includes(q) ||
-               (c.email || '').toLowerCase().includes(q);
-    });
+        return (`${c.first_name} ${c.last_name} ${c.last_name} ${c.first_name}`).toLowerCase().includes(q);
+    }).sort((a, b) => (a.last_name || '').localeCompare(b.last_name || ''));
     const list = document.getElementById('wlModalClientList');
     if (filtered.length === 0) {
         list.innerHTML = '<div style="padding:8px;color:#666;font-size:0.82rem;">Nessun risultato</div>';
         return;
     }
-    list.innerHTML = filtered.slice(0, 8).map(c => `
-        <div class="wl-modal-client-row" onclick="selectWlClient('${c.id}','${(c.first_name+' '+c.last_name).trim().replace(/'/g,"\\'")}')">
-            ${c.first_name} ${c.last_name} <span style="color:#666;font-size:0.78rem;">${c.email || ''}</span>
-        </div>`).join('');
+    list.innerHTML = filtered.slice(0, 8).map(c => {
+        const displayName = `${c.last_name || ''} ${c.first_name || ''}`.trim();
+        return `
+        <div class="wl-modal-client-row" onclick="selectWlClient('${c.id}','${displayName.replace(/'/g,"\\'")}')">
+            ${displayName}
+        </div>`;
+    }).join('');
 }
 
 function selectWlClient(id, name) {
@@ -661,16 +663,14 @@ function filterCreateApptClients() {
     _caCtx.clientId = null;
     if (!q) { dd.style.display = 'none'; return; }
     const matches = allClients.filter(c =>
-        (`${c.first_name} ${c.last_name}`).toLowerCase().includes(q) ||
-        (c.email || '').toLowerCase().includes(q)
-    ).slice(0, 8);
+        (`${c.first_name} ${c.last_name} ${c.last_name} ${c.first_name}`).toLowerCase().includes(q)
+    ).sort((a, b) => (a.last_name || '').localeCompare(b.last_name || '')).slice(0, 8);
     if (!matches.length) { dd.style.display = 'none'; return; }
     dd.innerHTML = matches.map(c => `
         <div onclick="selectCreateApptClient('${c.id}')"
             style="padding:8px 12px;cursor:pointer;font-size:0.85rem;border-bottom:1px solid #2a2a2a;"
             onmouseover="this.style.background='#2a2a2a'" onmouseout="this.style.background=''">
-            <strong style="color:#fff;">${c.first_name} ${c.last_name}</strong>
-            <span style="color:#666;font-size:0.78rem;margin-left:8px;">${c.email || ''}</span>
+            <strong style="color:#fff;">${c.last_name || ''} ${c.first_name || ''}</strong>
         </div>`).join('');
     dd.style.display = 'block';
 }
@@ -2137,12 +2137,12 @@ let currentChannel = 'whatsapp';
 let currentBulkCh  = 'whatsapp';
 
 function setupComunicazioni() {
-    // Popola select clienti
+    // Popola select clienti (ordinati per cognome)
     const sel = document.getElementById('commRecipient');
-    allClients.forEach(c => {
+    [...allClients].sort((a, b) => (a.last_name || '').localeCompare(b.last_name || '')).forEach(c => {
         const opt = document.createElement('option');
         opt.value = c.id;
-        opt.textContent = `${c.first_name || ''} ${c.last_name || ''} — ${c.phone || c.email || '—'}`;
+        opt.textContent = `${c.last_name || ''} ${c.first_name || ''}`.trim();
         sel.appendChild(opt);
     });
 
@@ -3498,16 +3498,19 @@ function freedSlotBackToChoices() {
 function renderFreedSlotClientList(query) {
     const q = (query || '').toLowerCase();
     const filtered = allClients
-        .filter(c => `${c.first_name || ''} ${c.last_name || ''}`.toLowerCase().includes(q))
+        .filter(c => `${c.first_name || ''} ${c.last_name || ''} ${c.last_name || ''} ${c.first_name || ''}`.toLowerCase().includes(q))
+        .sort((a, b) => (a.last_name || '').localeCompare(b.last_name || ''))
         .slice(0, 10);
     document.getElementById('freedSlotClientList').innerHTML = filtered.length
-        ? filtered.map(c => `
-            <div onclick="freedSlotSelectClient('${c.id}','${(c.first_name||'') + ' ' + (c.last_name||'')}'.trim())"
+        ? filtered.map(c => {
+            const displayName = `${c.last_name || ''} ${c.first_name || ''}`.trim();
+            return `
+            <div onclick="freedSlotSelectClient('${c.id}','${displayName.replace(/'/g,"\\'")}')"
                 style="padding:9px 12px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);font-size:0.85rem;color:#ddd;transition:background 0.15s;"
                 onmouseover="this.style.background='rgba(212,175,55,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
-                ${c.first_name || ''} ${c.last_name || ''}
-                ${c.email ? `<span style="font-size:0.75rem;color:#666;margin-left:6px;">${c.email}</span>` : ''}
-            </div>`).join('')
+                ${displayName}
+            </div>`;
+        }).join('')
         : '<p style="font-size:0.82rem;color:#555;text-align:center;padding:12px 0;">Nessun cliente trovato</p>';
 }
 
