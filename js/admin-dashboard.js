@@ -165,7 +165,6 @@ async function loadWaitlistRequests() {
 // ============================================
 // LISTA D'ATTESA — render & azioni
 // ============================================
-const WL_PRIORITY_LABELS = { 1: '🔴 Urgente', 2: '🟢 Normale' };
 const WL_NOTIFY_URL = 'https://n8n.srv1204993.hstgr.cloud/webhook/waitlist-request-response';
 
 function renderWaitlist() {
@@ -181,15 +180,12 @@ function renderWaitlist() {
         const client  = w.clients || {};
         const name    = `${client.first_name || ''} ${client.last_name || ''}`.trim() || '—';
         const pos     = w.position != null ? w.position : (idx + 1);
-        const dotCls  = w.priority === 1 ? 'wl-dot-urgent' : 'wl-dot-normal';
-        const dotTitle= w.priority === 1 ? 'Urgente' : 'Normale';
         const isFirst = idx === 0;
         const isLast  = idx === allWaitlist.length - 1;
         const cid     = client.id || '';
         return `
         <div class="wl-item">
             <div class="wl-pos">#${pos}</div>
-            <span class="wl-dot ${dotCls}" title="${dotTitle}"></span>
             <div class="wl-client-name wl-client-link" onclick="if('${cid}')openClientDetail('${cid}')">${name}</div>
             <div class="wl-actions">
                 <button class="wl-action-btn" title="Sposta su" onclick="wlMoveUp('${cid}')" ${isFirst ? 'disabled' : ''}><i class="fas fa-chevron-up"></i></button>
@@ -245,10 +241,8 @@ async function wlRemove(clientId) {
 function openAddToWaitlistModal() {
     document.getElementById('wlModalSearch').value = '';
     document.getElementById('wlModalClientList').innerHTML = '';
-    document.getElementById('wlModalPriority').value = '';
     document.getElementById('wlModalMsg').textContent = '';
     document.getElementById('wlModalSelectedClient').textContent = '';
-    document.querySelectorAll('.wl-modal-priority-btn').forEach(b => b.classList.remove('selected'));
     document.getElementById('addToWaitlistModal').style.display = 'flex';
     setTimeout(() => document.getElementById('wlModalSearch').focus(), 50);
 }
@@ -286,23 +280,14 @@ function selectWlClient(id, name) {
     document.getElementById('wlModalSearch').value = name;
 }
 
-function selectWlModalPriority(val) {
-    document.getElementById('wlModalPriority').value = val;
-    document.querySelectorAll('.wl-modal-priority-btn').forEach(b => {
-        b.classList.toggle('selected', b.dataset.value === String(val));
-    });
-}
-
 async function saveAddToWaitlist() {
     const clientId = _wlSelectedClientId;
-    const priority = parseInt(document.getElementById('wlModalPriority').value || '0');
     const msg = document.getElementById('wlModalMsg');
     if (!clientId) { msg.textContent = 'Seleziona un cliente.'; return; }
-    if (!priority) { msg.textContent = 'Seleziona la priorità.'; return; }
 
     const maxPos = allWaitlist.reduce((m, w) => Math.max(m, w.position ?? 0), 0);
     const { error } = await db.from('waitlist').upsert(
-        { client_id: clientId, priority, active: true, position: maxPos + 1 },
+        { client_id: clientId, active: true, position: maxPos + 1 },
         { onConflict: 'client_id' }
     );
     if (error) { msg.textContent = 'Errore: ' + error.message; return; }
@@ -329,12 +314,11 @@ function renderWlRequests() {
                 const client = r.clients || {};
                 const name = `${client.first_name || ''} ${client.last_name || ''}`.trim() || '—';
                 const typeLabel = r.request_type === 'join' ? 'entrare in lista' : 'uscire dalla lista';
-                const pLabel = r.priority ? ` · ${WL_PRIORITY_LABELS[r.priority] || ''}` : '';
                 return `
                 <div class="wl-req-item">
                     <div style="flex:1;">
                         <span style="font-size:0.85rem;font-weight:500;color:#eee;">${name}</span>
-                        <span style="font-size:0.78rem;color:#999;margin-left:8px;">vuole ${typeLabel}${pLabel}</span>
+                        <span style="font-size:0.78rem;color:#999;margin-left:8px;">vuole ${typeLabel}</span>
                     </div>
                     <div style="display:flex;gap:6px;">
                         <button class="wl-action-btn" style="font-size:0.78rem;padding:0 10px;width:auto;" onclick="approveWlRequest('${r.id}')">✓ Approva</button>
@@ -352,7 +336,7 @@ async function approveWlRequest(requestId) {
     if (req.request_type === 'join') {
         const maxPos = allWaitlist.reduce((m, w) => Math.max(m, w.position ?? 0), 0);
         await db.from('waitlist').upsert(
-            { client_id: clientId, priority: req.priority || 2, active: true, position: maxPos + 1 },
+            { client_id: clientId, active: true, position: maxPos + 1 },
             { onConflict: 'client_id' }
         );
     } else {
@@ -363,7 +347,7 @@ async function approveWlRequest(requestId) {
     fetch(WL_NOTIFY_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ request_id: requestId, action: 'approved', client_id: clientId, request_type: req.request_type, priority: req.priority }),
+        body: JSON.stringify({ request_id: requestId, action: 'approved', client_id: clientId, request_type: req.request_type }),
     }).catch(() => {});
     allWaitlistRequests = allWaitlistRequests.filter(r => r.id !== requestId);
     updateNotifBadge();
@@ -1178,12 +1162,10 @@ async function openClientDetail(clientId) {
     const wlEl = document.getElementById('clientDetailWaitlist');
     if (wl?.active) {
         const pos = allWaitlist.findIndex(w => w.client_id === clientId) + 1;
-        const dotColor = wl.priority === 1 ? '#f87171' : '#6dc07c';
         wlEl.innerHTML = `
             <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                 <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#e8e8e8;">
-                    <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;display:inline-block;"></span>
-                    Lista Prioritaria — Posizione <strong style="color:#D4AF37;">#${pos}</strong>
+                    Lista d'attesa — Posizione <strong style="color:#D4AF37;">#${pos}</strong>
                 </div>
                 <button onclick="adminWlRemoveFromDetail('${clientId}')"
                     title="Rimuovi dalla lista"

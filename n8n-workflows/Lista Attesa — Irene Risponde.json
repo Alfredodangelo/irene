@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst action       = b.action       || 'denied';\nconst client_id    = b.client_id    || '';\nconst request_type = b.request_type || 'join';\nconst priority     = b.priority     || null;\nif (!client_id) throw new Error('client_id mancante');\nreturn [{ json: { action, client_id, request_type, priority } }];"
+        "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst action       = b.action       || 'denied';\nconst client_id    = b.client_id    || '';\nconst request_type = b.request_type || 'join';\nif (!client_id) throw new Error('client_id mancante');\nreturn [{ json: { action, client_id, request_type } }];"
       },
       "id": "la-rsp-002",
       "name": "Estrai Dati",

@@ -2228,30 +2228,6 @@ img {
     background: rgba(212,175,55,0.08);
 }
 
-/* ── Waitlist Priority Circles ── */
-.wl-priority-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px 4px;
-    border: 1px solid #2a2a2a;
-    border-radius: 8px;
-    background: rgba(0,0,0,0.3);
-    transition: border-color 0.15s, background 0.15s;
-}
-.wl-radio-input:checked + .wl-priority-item {
-    border-color: #D4AF37;
-    background: rgba(212,175,55,0.1);
-}
-.wl-dot { font-size: 1.3rem; line-height: 1; }
-.wl-num {
-    font-size: 0.7rem;
-    color: #666;
-    margin-top: 4px;
-    font-family: var(--font-body);
-}
-.wl-radio-input:checked + .wl-priority-item .wl-num { color: #D4AF37; }
-
 /* ── GDPR Checkbox ── */
 .checkbox-label {
     display: flex !important;

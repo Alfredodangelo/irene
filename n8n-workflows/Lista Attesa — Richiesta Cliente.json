@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst client_id    = b.client_id    || '';\nconst request_type = b.request_type || 'join';\nconst priority     = b.priority     || null;\nif (!client_id) throw new Error('client_id mancante');\nconst typeLabel = request_type === 'join' ? 'entrare in lista anticipa' : 'uscire dalla lista anticipa';\nconst prioLabel = priority === 1 ? ' (\\uD83D\\uDD34 Urgente)' : priority === 2 ? ' (\\uD83D\\uDFE2 Normale)' : '';\nreturn [{ json: { client_id, request_type, priority, typeLabel, prioLabel } }];"
+        "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst client_id    = b.client_id    || '';\nconst request_type = b.request_type || 'join';\nif (!client_id) throw new Error('client_id mancante');\nconst typeLabel = request_type === 'join' ? 'entrare in lista d\\'attesa' : 'uscire dalla lista d\\'attesa';\nreturn [{ json: { client_id, request_type, typeLabel } }];"
       },
       "id": "la-req-002",
       "name": "Estrai Dati",
@@ -58,7 +58,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ type: 'waitlist_request', title: 'Richiesta lista attesa', body: 'Un cliente vuole ' + $('Estrai Dati').item.json.typeLabel + $('Estrai Dati').item.json.prioLabel + '.', client_id: $('Estrai Dati').item.json.client_id, read: false }) }}",
+        "jsonBody": "={{ JSON.stringify({ type: 'waitlist_request', title: 'Richiesta lista attesa', body: 'Un cliente vuole ' + $('Estrai Dati').item.json.typeLabel + '.', client_id: $('Estrai Dati').item.json.client_id, read: false }) }}",
         "options": {}
       },
       "id": "la-req-003",

@@ -2467,18 +2467,16 @@ function closeWlJoinModal() {
 }
 
 async function submitWlJoinRequest() {
-    const priority = 1; // lista d'attesa = sempre priorità 1
     const msg = document.getElementById('wlJoinMsg');
     const { error } = await db.from('waitlist_requests').insert({
         client_id: currentUser.id,
         request_type: 'join',
-        priority,
     });
     if (error) { msg.textContent = 'Errore: ' + error.message; return; }
     fetch(WL_REQUEST_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ client_id: currentUser.id, request_type: 'join', priority }),
+        body: JSON.stringify({ client_id: currentUser.id, request_type: 'join' }),
     }).catch(() => {});
     closeWlJoinModal();
     showToast('Richiesta inviata. Irene risponderà a breve.');
