@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Disallow: /dashboard.html
+Disallow: /admin-dashboard.html
+Disallow: /login.html
+Disallow: /js/
+Disallow: /css/
+Disallow: /n8n-workflows/
+
+Sitemap: https://irenegipsytattoo.com/sitemap.xml
