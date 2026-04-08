@@ -1538,7 +1538,7 @@ function rschRenderCalendar() {
         const cell = document.createElement('div');
         cell.textContent = day;
 
-        if (isSelected) {
+        if (isSelected && !isHoliday) {
             cell.className = 'rsch-day selected';
         } else if (isPast) {
             cell.className = 'rsch-day past';
