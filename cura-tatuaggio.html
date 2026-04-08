@@ -330,8 +330,8 @@
 
     <!-- Barra download -->
     <div class="download-bar" style="justify-content:space-between;">
-        <a href="dashboard.html" class="btn-back-dash">
-            <i class="fas fa-arrow-left"></i> Dashboard
+        <a id="backBtn" href="index.html" class="btn-back-dash">
+            <i class="fas fa-arrow-left"></i> Torna al sito
         </a>
         <button class="btn-print" onclick="window.print()">
             <i class="fas fa-download"></i> Scarica PDF
@@ -464,6 +464,18 @@
         </div>
 
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script>
+    (async function() {
+        var s = await db.auth.getSession();
+        if (s.data.session) {
+            var btn = document.getElementById('backBtn');
+            btn.href = 'dashboard.html';
+            btn.innerHTML = '<i class="fas fa-arrow-left"></i> Dashboard';
+        }
+    })();
+    </script>
     <script src="js/chat-widget.js" data-mode="public"></script>
 </body>
 </html>
