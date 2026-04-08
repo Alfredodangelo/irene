@@ -330,7 +330,7 @@
 
     <!-- Barra download -->
     <div class="download-bar" style="justify-content:space-between;">
-        <a id="backBtn" href="index.html" class="btn-back-dash">
+        <a id="backBtn" href="index.html" class="btn-back-dash" style="opacity:0;transition:opacity 0.3s;">
             <i class="fas fa-arrow-left"></i> Torna al sito
         </a>
         <button class="btn-print" onclick="window.print()">
@@ -468,12 +468,15 @@
     <script src="js/supabase-client.js"></script>
     <script>
     (async function() {
-        var s = await db.auth.getSession();
-        if (s.data.session) {
-            var btn = document.getElementById('backBtn');
-            btn.href = 'dashboard.html';
-            btn.innerHTML = '<i class="fas fa-arrow-left"></i> Dashboard';
-        }
+        var btn = document.getElementById('backBtn');
+        try {
+            var s = await db.auth.getSession();
+            if (s.data.session) {
+                btn.href = 'dashboard.html';
+                btn.innerHTML = '<i class="fas fa-arrow-left"></i> Dashboard';
+            }
+        } catch(e) {}
+        btn.style.opacity = '1';
     })();
     </script>
     <script src="js/chat-widget.js" data-mode="public"></script>

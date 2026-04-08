@@ -77,7 +77,7 @@
   border:none; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
   box-shadow:0 4px 18px rgba(212,175,55,0.35);
-  z-index:10000;
+  z-index:10002;
   transition:transform 0.2s,box-shadow 0.2s;
   animation:irc-pulse 2s ease-in-out 3;
 }
@@ -97,7 +97,7 @@
   font-size:0.82rem; white-space:nowrap;
   box-shadow:0 4px 16px rgba(0,0,0,0.4);
   border:1px solid rgba(212,175,55,0.2);
-  z-index:10000; cursor:pointer;
+  z-index:10002; cursor:pointer;
   opacity:0; transform:translateY(8px);
   transition:opacity 0.3s,transform 0.3s;
   pointer-events:none;
@@ -119,7 +119,7 @@
   border:1px solid rgba(212,175,55,0.2);
   border-radius:16px;
   display:flex; flex-direction:column; overflow:hidden;
-  z-index:10001;
+  z-index:10003;
   box-shadow:0 8px 40px rgba(0,0,0,0.5);
   opacity:0; transform:translateY(20px) scale(0.95);
   pointer-events:none;
@@ -317,6 +317,7 @@
     input.type = 'text';
     input.placeholder = S.placeholder;
     input.setAttribute('autocomplete', 'off');
+    input.setAttribute('maxlength', '500');
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -364,7 +365,7 @@
       .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
       .replace(/(https?:\/\/[^\s<]+)(?![^<]*<\/a>)/g, '<a href="$1" target="_blank" rel="noopener">link</a>')
-      .replace(/(\/(?:en\/)?[\w-]+\.html(?:#[\w-]*)?)(?![^<]*<\/a>)/g, function(m) {
+      .replace(/(\/(?:en\/)?[\w-]+\.html(?:#[\w._-]*)?)(?![^<]*<\/a>)/g, function(m) {
         var name = m.replace(/^\/(?:en\/)?/, '').replace(/\.html.*$/, '').replace(/-/g, ' ');
         return '<a href="' + m + '">' + name + '</a>';
       })
@@ -428,18 +429,24 @@
       body.client_name = ((meta.first_name || '') + ' ' + (meta.last_name || '')).trim();
     }
 
+    var controller = new AbortController();
+    var timeout = setTimeout(function () { controller.abort(); }, 30000);
+
     try {
       var res = await fetch(WEBHOOK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       var data = await res.json();
       removeTyping();
       var reply = data.reply || data.output || data.text || S.error;
       addMessage('bot', reply);
       history.push({ role: 'assistant', content: reply });
     } catch (err) {
+      clearTimeout(timeout);
       removeTyping();
       addMessage('bot', S.error);
     }
