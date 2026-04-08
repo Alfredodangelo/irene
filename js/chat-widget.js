@@ -494,9 +494,24 @@
       window.visualViewport.addEventListener('resize', handleViewport);
     }
 
-    /* Tooltip: show after 4s, hide after 12s */
-    setTimeout(function () { if (!isOpen) els.tooltip.classList.add('irc-show'); }, 4000);
-    setTimeout(function () { els.tooltip.classList.remove('irc-show'); }, 12000);
+    /* Tooltip: show after 5s idle, hide on any interaction */
+    var idleTimer = null;
+    var tooltipShown = false;
+    function hideTooltip() {
+      els.tooltip.classList.remove('irc-show');
+      tooltipShown = false;
+    }
+    function resetIdle() {
+      if (tooltipShown) hideTooltip();
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(function () {
+        if (!isOpen) { els.tooltip.classList.add('irc-show'); tooltipShown = true; }
+      }, 5000);
+    }
+    ['scroll', 'touchstart', 'mousemove', 'keydown'].forEach(function (evt) {
+      document.addEventListener(evt, resetIdle, { passive: true });
+    });
+    resetIdle();
   }
 
   if (document.readyState === 'loading') {
