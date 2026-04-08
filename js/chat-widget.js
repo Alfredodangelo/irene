@@ -162,13 +162,14 @@
 .irc-messages {
   flex:1; overflow-y:auto; padding:16px;
   display:flex; flex-direction:column; gap:12px;
+  overscroll-behavior:contain;
 }
 .irc-messages::-webkit-scrollbar { width:4px; }
 .irc-messages::-webkit-scrollbar-track { background:transparent; }
 .irc-messages::-webkit-scrollbar-thumb { background:rgba(212,175,55,0.2); border-radius:2px; }
 
 /* ---- Message bubbles ---- */
-.irc-msg { display:flex; gap:8px; max-width:85%; min-width:0; animation:irc-fadeIn 0.2s ease; overflow:hidden; }
+.irc-msg { display:flex; gap:8px; max-width:85%; min-width:0; animation:irc-fadeIn 0.2s ease; }
 .irc-msg-user { align-self:flex-end; flex-direction:row-reverse; }
 .irc-msg-bot  { align-self:flex-start; }
 .irc-msg-avatar {
@@ -346,6 +347,10 @@
       if (e.key === 'Escape' && isOpen) toggle();
     });
 
+    /* Prevent page scroll while interacting with chat */
+    win.addEventListener('wheel', function (e) { e.stopPropagation(); }, { passive: true });
+    win.addEventListener('touchmove', function (e) { e.stopPropagation(); }, { passive: true });
+
     els = { bubble: bubble, tooltip: tooltip, window: win, messages: messages, input: input, sendBtn: sendBtn };
   }
 
@@ -356,7 +361,13 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+      .replace(/(https?:\/\/[^\s<]+)(?![^<]*<\/a>)/g, '<a href="$1" target="_blank" rel="noopener">link</a>')
+      .replace(/(\/(?:en\/)?[\w-]+\.html(?:#[\w-]*)?)(?![^<]*<\/a>)/g, function(m) {
+        var name = m.replace(/^\/(?:en\/)?/, '').replace(/\.html.*$/, '').replace(/-/g, ' ');
+        return '<a href="' + m + '">' + name + '</a>';
+      })
       .replace(/\n/g, '<br>');
   }
 
