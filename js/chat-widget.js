@@ -21,6 +21,14 @@
   /* ─── Session ID (unique per page load, used by n8n memory) */
   const SESSION_ID = (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substr(2) + Date.now().toString(36));
 
+  /* ─── SVG Icons (no Font Awesome dependency) ─────────── */
+  var ICO = {
+    chat:    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    send:    '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>',
+    close:   '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+    sparkle: '<span style="font-size:0.85rem">✦</span>',
+  };
+
   /* ─── State ─────────────────────────────────────────── */
   let history = [];
   let isOpen  = false;
@@ -160,7 +168,7 @@
 .irc-messages::-webkit-scrollbar-thumb { background:rgba(212,175,55,0.2); border-radius:2px; }
 
 /* ---- Message bubbles ---- */
-.irc-msg { display:flex; gap:8px; max-width:88%; animation:irc-fadeIn 0.2s ease; }
+.irc-msg { display:flex; gap:8px; max-width:85%; min-width:0; animation:irc-fadeIn 0.2s ease; overflow:hidden; }
 .irc-msg-user { align-self:flex-end; flex-direction:row-reverse; }
 .irc-msg-bot  { align-self:flex-start; }
 .irc-msg-avatar {
@@ -172,7 +180,9 @@
 .irc-msg-avatar i { color:#D4AF37; font-size:0.65rem; }
 .irc-msg-bubble {
   padding:10px 14px; border-radius:14px;
-  font-size:0.83rem; line-height:1.55; word-wrap:break-word;
+  font-size:0.83rem; line-height:1.55;
+  word-wrap:break-word; overflow-wrap:anywhere; word-break:break-word;
+  min-width:0; max-width:100%;
 }
 .irc-msg-bot .irc-msg-bubble {
   background:rgba(255,255,255,0.05);
@@ -215,7 +225,7 @@
   flex:1; background:#1a1a1a;
   border:1px solid rgba(255,255,255,0.08);
   border-radius:20px; padding:10px 16px;
-  color:#e8e8e8; font-size:0.83rem;
+  color:#e8e8e8; font-size:16px;
   font-family:'Montserrat',sans-serif; outline:none;
   transition:border-color 0.2s;
 }
@@ -236,10 +246,12 @@
 @media (max-width:480px) {
   .irc-window {
     width:calc(100vw - 16px); height:calc(100vh - 80px);
-    bottom:8px; right:8px; border-radius:14px;
+    bottom:8px; right:8px; left:8px; border-radius:14px;
   }
+  .irc-msg { max-width:90%; }
   .irc-bubble { bottom:16px; right:16px; width:52px; height:52px; }
   .irc-tooltip { bottom:76px; right:16px; }
+  .irc-messages { padding:12px 10px; }
 }
 @supports (height:100dvh) {
   @media (max-width:480px) {
@@ -259,7 +271,7 @@
     var bubble = document.createElement('button');
     bubble.className = 'irc-bubble';
     bubble.setAttribute('aria-label', S.title);
-    bubble.innerHTML = '<i class="fas fa-comments"></i>';
+    bubble.innerHTML = '' + ICO.chat + '';
     bubble.addEventListener('click', toggle);
 
     /* Tooltip */
@@ -278,7 +290,7 @@
     var header = document.createElement('div');
     header.className = 'irc-header';
     header.innerHTML =
-      '<div class="irc-header-avatar"><i class="fas fa-wand-magic-sparkles"></i></div>' +
+      '<div class="irc-header-avatar">' + ICO.sparkle + '</div>' +
       '<div class="irc-header-info">' +
         '<div class="irc-header-title">' + S.title + '</div>' +
         '<div class="irc-header-subtitle"><span class="irc-header-dot"></span>' + S.subtitle + '</div>' +
@@ -287,7 +299,7 @@
     var closeBtn = document.createElement('button');
     closeBtn.className = 'irc-close';
     closeBtn.setAttribute('aria-label', 'Close');
-    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    closeBtn.innerHTML = '' + ICO.close + '';
     closeBtn.addEventListener('click', toggle);
     header.appendChild(closeBtn);
 
@@ -314,7 +326,7 @@
     var sendBtn = document.createElement('button');
     sendBtn.className = 'irc-send';
     sendBtn.setAttribute('aria-label', 'Send');
-    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    sendBtn.innerHTML = '' + ICO.send + '';
     sendBtn.addEventListener('click', function () { sendMessage(input.value); });
 
     inputArea.appendChild(input);
@@ -353,7 +365,7 @@
     div.className = 'irc-msg irc-msg-' + role;
     if (role === 'bot') {
       div.innerHTML =
-        '<div class="irc-msg-avatar"><i class="fas fa-wand-magic-sparkles"></i></div>' +
+        '<div class="irc-msg-avatar">' + ICO.sparkle + '</div>' +
         '<div class="irc-msg-bubble">' + formatMsg(text) + '</div>';
     } else {
       div.innerHTML = '<div class="irc-msg-bubble">' + formatMsg(text) + '</div>';
@@ -366,7 +378,7 @@
     var div = document.createElement('div');
     div.className = 'irc-msg irc-msg-bot irc-typing';
     div.innerHTML =
-      '<div class="irc-msg-avatar"><i class="fas fa-wand-magic-sparkles"></i></div>' +
+      '<div class="irc-msg-avatar">' + ICO.sparkle + '</div>' +
       '<div class="irc-msg-bubble"><div class="irc-dots"><span></span><span></span><span></span></div></div>';
     els.messages.appendChild(div);
     els.messages.scrollTop = els.messages.scrollHeight;
@@ -426,6 +438,23 @@
     els.input.focus();
   }
 
+  /* ─── Mobile keyboard handling ────────────────────────── */
+  function handleViewport() {
+    if (!isOpen || !window.visualViewport) return;
+    var vv = window.visualViewport;
+    var keyboardH = window.innerHeight - vv.height;
+    if (keyboardH > 100) {
+      /* keyboard is open */
+      els.window.style.height = (vv.height - 16) + 'px';
+      els.window.style.bottom = (keyboardH + 8) + 'px';
+    } else {
+      /* keyboard closed — reset to CSS defaults */
+      els.window.style.height = '';
+      els.window.style.bottom = '';
+    }
+    els.messages.scrollTop = els.messages.scrollHeight;
+  }
+
   /* ─── Toggle chat ───────────────────────────────────── */
   function toggle() {
     isOpen = !isOpen;
@@ -435,6 +464,9 @@
     if (isOpen) {
       els.input.focus();
       els.messages.scrollTop = els.messages.scrollHeight;
+    } else {
+      els.window.style.height = '';
+      els.window.style.bottom = '';
     }
   }
 
@@ -445,6 +477,11 @@
 
     /* Welcome message */
     addMessage('bot', S.welcome);
+
+    /* Mobile keyboard: adjust window when keyboard opens/closes */
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewport);
+    }
 
     /* Tooltip: show after 4s, hide after 12s */
     setTimeout(function () { if (!isOpen) els.tooltip.classList.add('irc-show'); }, 4000);
