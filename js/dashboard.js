@@ -1922,25 +1922,26 @@ async function openRebookModal() {
 
 function closeRebookModal() {
     document.getElementById('rebookModal').style.display = 'none';
-    // chiudi eventuali dropdown custom aperti
     document.querySelectorAll('.rb-custom-select.open').forEach(el => {
         el.classList.remove('open');
-        el.querySelector('.rb-cs-dropdown').style.display = 'none';
+        const dd = el.querySelector('.rb-cs-dropdown');
+        if (dd) dd.style.display = 'none';
     });
 }
 
 function rbToggleSelect(boxId) {
     const box = document.getElementById(boxId);
+    if (!box) return;
     const dropdown = box.querySelector('.rb-cs-dropdown');
     const isOpen = box.classList.contains('open');
-    // chiudi tutti gli altri
     document.querySelectorAll('.rb-custom-select.open').forEach(el => {
         el.classList.remove('open');
-        el.querySelector('.rb-cs-dropdown').style.display = 'none';
+        const dd = el.querySelector('.rb-cs-dropdown');
+        if (dd) dd.style.display = 'none';
     });
     if (!isOpen) {
         box.classList.add('open');
-        dropdown.style.display = 'block';
+        if (dropdown) dropdown.style.display = 'block';
     }
 }
 
@@ -1949,8 +1950,10 @@ function rbSelectOption(fieldId, value, labelHtml, event) {
     document.getElementById(fieldId).value = value;
     document.getElementById(fieldId + 'Label').innerHTML = labelHtml;
     const box = document.getElementById(fieldId + 'Box');
+    if (!box) return;
     box.classList.remove('open');
-    box.querySelector('.rb-cs-dropdown').style.display = 'none';
+    const dd = box.querySelector('.rb-cs-dropdown');
+    if (dd) dd.style.display = 'none';
 }
 
 function rbFmtDate(d) {
