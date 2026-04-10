@@ -142,6 +142,88 @@
         672,
         208
       ]
+    },
+    {
+      "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients?email=eq.{{ $('Estrai Dati').item.json.client_email }}&select=phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-5555-4aaa-bbbb-000000000099",
+      "name": "Lookup Telefono",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -48,
+        304
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_CHAKRAHQ_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: (Array.isArray($('Lookup Telefono').item.json) ? $('Lookup Telefono').item.json[0].phone : ($('Lookup Telefono').item.json.phone || '')), type: 'text', text: { body: 'Ciao ' + $('Estrai Dati').item.json.client_name + '! ✅ La tua richiesta di cambio data è stata approvata. Nuovo appuntamento: ' + $('Estrai Dati').item.json.data_formatted + ' alle ' + $('Estrai Dati').item.json.new_time + '.\\n\\nDettagli: https://www.irenegipsytattoo.com/dashboard.html\\n\\n— Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "name": "WhatsApp Approvato (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        160
+      ],
+      "id": "a1b2c3d4-5555-4aaa-bbbb-000000000001",
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ. Abilita il nodo quando pronto."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_CHAKRAHQ_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: (Array.isArray($('Lookup Telefono').item.json) ? $('Lookup Telefono').item.json[0].phone : ($('Lookup Telefono').item.json.phone || '')), type: 'text', text: { body: 'Ciao ' + $('Estrai Dati').item.json.client_name + ', la tua richiesta di cambio data non è stata approvata.' + ($('Estrai Dati').item.json.irene_notes ? ' ' + $('Estrai Dati').item.json.irene_notes : '') + '\\n\\nDettagli: https://www.irenegipsytattoo.com/dashboard.html\\n\\n— Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "name": "WhatsApp Rifiutato (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        448
+      ],
+      "id": "a1b2c3d4-5555-4aaa-bbbb-000000000002",
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ. Abilita il nodo quando pronto."
     }
   ],
   "pinData": {},
@@ -164,6 +246,11 @@
             "node": "Esito?",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Lookup Telefono",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -175,11 +262,21 @@
             "node": "Email Accettato",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "WhatsApp Approvato (ChakraHQ)",
+            "type": "main",
+            "index": 0
           }
         ],
         [
           {
             "node": "Email Rifiutato",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WhatsApp Rifiutato (ChakraHQ)",
             "type": "main",
             "index": 0
           }
@@ -207,11 +304,34 @@
           }
         ]
       ]
+    },
+    "WhatsApp Approvato (ChakraHQ)": {
+      "main": [
+        [
+          {
+            "node": "Respond Accettato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Rifiutato (ChakraHQ)": {
+      "main": [
+        [
+          {
+            "node": "Respond Rifiutato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1",
+    "binaryMode": "separate",
     "availableInMCP": false
   },
   "versionId": "507aff7f-1e48-4b0f-8ba3-d2322fc5b5a4",

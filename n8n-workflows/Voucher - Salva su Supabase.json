@@ -9,10 +9,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -528,
-        16
+        -272,
+        672
       ],
-      "id": "d72c7461-792c-4fb8-9297-dc083e0be571",
+      "id": "95f3dd82-ae9a-4cdf-b8c3-2ad3a0e87094",
       "name": "Webhook",
       "webhookId": "fd670029-1c46-4dd7-a623-492716b01fee"
     },
@@ -75,10 +75,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -320,
-        16
+        -64,
+        672
       ],
-      "id": "d599dcee-4084-48b8-8ef9-3ab0c36b3dbc",
+      "id": "3d745887-4449-424d-9da4-10fbe2c3f8e5",
       "name": "Edit Fields"
     },
     {
@@ -93,10 +93,10 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        160,
-        -64
+        416,
+        592
       ],
-      "id": "abaacc7e-62eb-47c2-b2e4-6f3d853908d0",
+      "id": "4febcb97-1a18-4c67-9f89-b9a8958c7781",
       "name": "Send a message",
       "webhookId": "dd84b3b1-ca36-4898-96cb-7d6204952b0f",
       "credentials": {
@@ -113,10 +113,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -128,
-        16
+        128,
+        672
       ],
-      "id": "af6f2c92-fda3-4314-99c2-a38dbad91527",
+      "id": "d8597e45-b858-4154-badd-b4318a6ac555",
       "name": "Code in JavaScript"
     },
     {
@@ -214,10 +214,10 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        160,
-        144
+        416,
+        800
       ],
-      "id": "e2fc922a-5f60-48ad-8dc4-c8a52d741eb2",
+      "id": "35dbc7d6-ed30-4b7c-a1ac-9d411f39a66e",
       "name": "Append row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -313,10 +313,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        16,
-        384
+        272,
+        1040
       ],
-      "id": "966cf4ff-5723-47a6-8fc6-c28f04dcfcda",
+      "id": "e66d746c-7c1c-45d0-88b6-38312f8544a1",
       "name": "Salva su Supabase",
       "continueOnFail": true
     },
@@ -327,11 +327,71 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -224,
-        384
+        32,
+        1040
       ],
-      "id": "a37e0e8b-7d9f-4419-aff1-38d49502824e",
+      "id": "476d9b4c-7b44-4bc3-9457-9dc44c85caa2",
       "name": "Normalizza Voucher1"
+    },
+    {
+      "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients?email=eq.{{ $('Code in JavaScript').item.json.email }}&select=phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-1111-4aaa-bbbb-100000000015",
+      "name": "Lookup Phone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_CHAKRAHQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: ($json[0] ? $json[0].phone : ''), type: 'text', text: { body: 'Ciao ' + $('Code in JavaScript').item.json.nome_destinatario + '! \\uD83C\\uDF81 Hai ricevuto un voucher da Irene Gipsy Tattoo! Trovi i dettagli nella tua area personale: https://www.irenegipsytattoo.com/dashboard.html\\n\\n— Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-1111-4aaa-bbbb-200000000015",
+      "name": "WhatsApp (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ.",
+      "position": [
+        656,
+        1200
+      ]
     }
   ],
   "pinData": {},
@@ -363,11 +423,6 @@
         ]
       ]
     },
-    "Send a message": {
-      "main": [
-        []
-      ]
-    },
     "Code in JavaScript": {
       "main": [
         [
@@ -378,6 +433,11 @@
           },
           {
             "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Lookup Phone",
             "type": "main",
             "index": 0
           }
@@ -394,17 +454,29 @@
           }
         ]
       ]
+    },
+    "Lookup Phone": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp (ChakraHQ)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1",
+    "binaryMode": "separate",
     "timeSavedMode": "fixed",
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false,
     "errorWorkflow": "fCzJrySoSEPcF6vp"
   },
-  "versionId": "6165df79-b285-4a89-b8d0-cf89287a884a",
+  "versionId": "bd934235-7843-4f7f-9bf5-47694136a23b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"

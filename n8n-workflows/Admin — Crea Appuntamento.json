@@ -8,13 +8,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "3e77648d-73c5-4ffc-af1b-ac52896dcd43",
+      "id": "38b0e260-9a07-44ea-bbb6-ca520c785894",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -800,
-        1904
+        -96,
+        2768
       ],
       "webhookId": "admin-create-appointment"
     },
@@ -22,13 +22,13 @@
       "parameters": {
         "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst appointment_id   = b.appointment_id   || null;\nconst client_id        = b.client_id        || null;\nconst client_email     = b.client_email     || '';\nconst client_name      = b.client_name      || 'Cliente';\nconst client_phone     = b.client_phone     || '';\nconst appointment_type = b.appointment_type || 'consulenza';\nconst scheduled_at     = b.scheduled_at     || null;\nconst notes            = b.notes            || '';\nconst location         = b.location         || 'integrations:whatsapp_video';\nif (!scheduled_at) throw new Error('scheduled_at mancante');\nconst eventTypeMap = { 'consulenza': 5147645, 'pre-seduta': 5147653, 'seduta': 5147823 };\nconst eventTypeId  = eventTypeMap[appointment_type] || 5147645;\nconst startDate    = new Date(scheduled_at);\nconst endIso       = new Date(startDate.getTime() + 60 * 60 * 1000).toISOString();\nconst typeLabel    = { 'consulenza':'Consulenza','pre-seduta':'Pre-Seduta','seduta':'Seduta' }[appointment_type] || appointment_type;\nconst dateFormatted = startDate.toLocaleDateString('it-IT', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });\nconst timeFormatted = startDate.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });\nconst attendee = { name: client_name, email: client_email, timeZone: 'Europe/Rome', language: 'it' };\nif (client_phone) attendee.phoneNumber = client_phone;\nconst calBody = { eventTypeId, start: scheduled_at, attendee, metadata: {} };\nif (notes) calBody.bookingFieldsResponses = { notes };\nconst calBodyString = JSON.stringify(calBody);\nreturn [{ json: { appointment_id, client_id, client_email, client_name, client_phone, appointment_type, typeLabel, scheduled_at, endIso, notes, eventTypeId, dateFormatted, timeFormatted, calBodyString } }];"
       },
-      "id": "81a1f32b-7474-47a8-a17f-1cfd8b21ab1c",
+      "id": "2163c859-e161-433f-9c1e-8cdd92ffd37c",
       "name": "Estrai Dati",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -576,
-        1904
+        128,
+        2768
       ]
     },
     {
@@ -53,13 +53,13 @@
         },
         "options": {}
       },
-      "id": "d996060f-c7db-4105-a462-be4549add83c",
+      "id": "3ff85ab0-9a33-4520-b4dc-1d6aca10914e",
       "name": "Conta Sedute",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -352,
-        1904
+        352,
+        2768
       ],
       "alwaysOutputData": true,
       "continueOnFail": true
@@ -68,13 +68,13 @@
       "parameters": {
         "jsCode": "const prev = $('Estrai Dati').item.json;\nlet sessionOrdinal = '1ª';\nif (prev.appointment_type === 'seduta') {\n  try {\n    const raw = $input.item.json;\n    const list = Array.isArray(raw) ? raw : [];\n    if (list.length > 0) {\n      const sorted = [...list].sort((a,b) => new Date(a.scheduled_at)-new Date(b.scheduled_at));\n      const idx = sorted.findIndex(a => a.id === prev.appointment_id);\n      const n = idx >= 0 ? idx + 1 : list.length;\n      const ord = ['1ª','2ª','3ª','4ª','5ª','6ª','7ª','8ª','9ª','10ª'];\n      sessionOrdinal = ord[n-1] || `${n}ª`;\n    }\n  } catch(e) { sessionOrdinal = '1ª'; }\n}\nreturn [{ json: { ...prev, sessionOrdinal } }];"
       },
-      "id": "90f8392d-e096-4d83-9fd1-bc0a015ab145",
+      "id": "65bbc819-7f20-4b5e-936b-a094937d4638",
       "name": "Calcola Ordinal",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -144,
-        1904
+        560,
+        2768
       ]
     },
     {
@@ -100,13 +100,13 @@
         },
         "options": {}
       },
-      "id": "4c9f84e7-b362-4efc-8883-6272bdbb33ba",
+      "id": "4d648f9c-f350-4b4c-8505-6c44fa619e76",
       "name": "Ha Email?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        80,
-        1904
+        784,
+        2768
       ]
     },
     {
@@ -135,13 +135,13 @@
         "jsonBody": "={{ $('Calcola Ordinal').item.json.calBodyString }}",
         "options": {}
       },
-      "id": "ac6c2d98-e862-472f-ae64-77b07d20688c",
+      "id": "dccb1f08-7111-4c38-82fe-948ffc42113e",
       "name": "Cal.com Crea Booking",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        304,
-        1792
+        1008,
+        2656
       ],
       "continueOnFail": true
     },
@@ -149,13 +149,13 @@
       "parameters": {
         "jsCode": "const cal = $input.item.json;\nconst uid = cal?.data?.uid || cal?.uid || null;\nreturn [{ json: { ...($('Calcola Ordinal').item.json), cal_booking_uid: uid } }];"
       },
-      "id": "4164cf52-645f-4c5b-8ade-fee830260109",
+      "id": "08344754-db72-499d-8ace-78cb59ea5285",
       "name": "Estrai UID Cal",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        528,
-        1792
+        1232,
+        2656
       ]
     },
     {
@@ -188,13 +188,13 @@
         "jsonBody": "={ \"cal_booking_uid\": \"{{ $json.cal_booking_uid }}\" }",
         "options": {}
       },
-      "id": "5af609d1-a41d-40b6-b20c-3651448cafdc",
+      "id": "ec886dd8-1198-4440-938b-4209363f3702",
       "name": "Salva UID su Supabase",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        736,
-        1792
+        1440,
+        2656
       ],
       "continueOnFail": true
     },
@@ -221,13 +221,13 @@
         },
         "options": {}
       },
-      "id": "d30df2c9-3252-470b-8ade-e39e863ddfc9",
+      "id": "dccd462a-8a17-4072-9248-84cf78889634",
       "name": "È Consulenza?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        960,
-        1792
+        1664,
+        2656
       ]
     },
     {
@@ -253,13 +253,13 @@
         },
         "options": {}
       },
-      "id": "229fc8a5-5984-404c-a66b-067db4e19eec",
+      "id": "9d0a985c-327b-4ecb-a98d-a590fa615271",
       "name": "È Pre-Seduta?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        1184,
-        1936
+        1888,
+        2800
       ]
     },
     {
@@ -271,13 +271,13 @@
           "appendAttribution": false
         }
       },
-      "id": "48810f88-3b72-4333-91ea-33df92603f10",
+      "id": "9e9d7682-a6d7-4daa-abd0-0e94dfe83915",
       "name": "Gmail Consulenza",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1184,
-        1664
+        1888,
+        2528
       ],
       "webhookId": "81b479f1-10e2-4bea-9979-27686360751d",
       "credentials": {
@@ -297,13 +297,13 @@
           "appendAttribution": false
         }
       },
-      "id": "9062fa80-9dcd-4dc2-97d4-97557a07f862",
+      "id": "ffc2d565-0788-4461-b22b-484ce7205cf2",
       "name": "Gmail Pre-Seduta",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1408,
-        1824
+        2112,
+        2688
       ],
       "webhookId": "50caeb32-1e16-4c0f-b8c0-51bbc622191e",
       "credentials": {
@@ -323,13 +323,13 @@
           "appendAttribution": false
         }
       },
-      "id": "667b1345-4829-4b5a-a8c9-e09638b1bd21",
+      "id": "7ebf49eb-83d8-4e22-b5e9-b4a0d5f6fc5b",
       "name": "Gmail Seduta",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1408,
-        2032
+        2112,
+        2896
       ],
       "webhookId": "bba99702-957a-4bc5-b398-0a0f8d65a067",
       "credentials": {
@@ -346,14 +346,95 @@
         "responseBody": "={ \"ok\": true }",
         "options": {}
       },
-      "id": "6ac8366a-eb63-4200-9f8d-4ec3aec3c3cd",
+      "id": "ee7f57e3-08b2-4dac-b01e-2f7bc45c9705",
       "name": "Risposta OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1744,
-        1920
+        2448,
+        2784
       ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_CHAKRAHQ_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: $('Calcola Ordinal').item.json.client_phone, type: 'text', text: { body: 'Ciao ' + $('Calcola Ordinal').item.json.client_name + '! \\ud83d\\udcc5 Irene ha fissato la tua consulenza per il ' + $('Calcola Ordinal').item.json.dateFormatted + ' alle ' + $('Calcola Ordinal').item.json.timeFormatted + '. Dettagli nella tua area personale: https://www.irenegipsytattoo.com/dashboard.html\\n\\n\\u2014 Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "name": "WhatsApp Consulenza (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1888,
+        2768
+      ],
+      "id": "a1b2c3d4-2222-4aaa-bbbb-000000000001",
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ. Abilita il nodo quando pronto."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_CHAKRAHQ_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: $('Calcola Ordinal').item.json.client_phone, type: 'text', text: { body: 'Ciao ' + $('Calcola Ordinal').item.json.client_name + '! \\ud83d\\udcc5 La tua pre-seduta \\u00e8 fissata per il ' + $('Calcola Ordinal').item.json.dateFormatted + ' alle ' + $('Calcola Ordinal').item.json.timeFormatted + '. Dettagli: https://www.irenegipsytattoo.com/dashboard.html\\n\\n\\u2014 Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "name": "WhatsApp Pre-Seduta (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2112,
+        2928
+      ],
+      "id": "a1b2c3d4-2222-4aaa-bbbb-000000000002",
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ. Abilita il nodo quando pronto."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_CHAKRAHQ_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: $('Calcola Ordinal').item.json.client_phone, type: 'text', text: { body: 'Ciao ' + $('Calcola Ordinal').item.json.client_name + '! \\ud83d\\udda4 La tua seduta di tatuaggio \\u00e8 fissata per il ' + $('Calcola Ordinal').item.json.dateFormatted + ' alle ' + $('Calcola Ordinal').item.json.timeFormatted + '. Dettagli: https://www.irenegipsytattoo.com/dashboard.html\\n\\n\\u2014 Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "name": "WhatsApp Seduta (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2112,
+        3136
+      ],
+      "id": "a1b2c3d4-2222-4aaa-bbbb-000000000003",
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ. Abilita il nodo quando pronto."
     }
   ],
   "pinData": {},
@@ -460,6 +541,11 @@
             "node": "Gmail Consulenza",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "WhatsApp Consulenza (ChakraHQ)",
+            "type": "main",
+            "index": 0
           }
         ],
         [
@@ -478,11 +564,21 @@
             "node": "Gmail Pre-Seduta",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "WhatsApp Pre-Seduta (ChakraHQ)",
+            "type": "main",
+            "index": 0
           }
         ],
         [
           {
             "node": "Gmail Seduta",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WhatsApp Seduta (ChakraHQ)",
             "type": "main",
             "index": 0
           }
@@ -521,13 +617,47 @@
           }
         ]
       ]
+    },
+    "WhatsApp Consulenza (ChakraHQ)": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Pre-Seduta (ChakraHQ)": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Seduta (ChakraHQ)": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
-  "versionId": "4d67709f-95de-4e0d-ae48-7a32ec9caa95",
+  "versionId": "50e68674-4c6b-47a9-b042-5839db9b0e2e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"

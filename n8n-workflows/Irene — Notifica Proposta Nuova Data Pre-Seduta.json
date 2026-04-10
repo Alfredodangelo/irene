@@ -45,8 +45,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1232,
-        208
+        1364,
+        88
       ],
       "webhookId": "dadf08f4-16fe-4a8b-8917-e03f30c15947",
       "credentials": {
@@ -67,9 +67,69 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1456,
+        1568,
         208
       ]
+    },
+    {
+      "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients?email=eq.{{ $json.client_email }}&select=phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-2001-4bbb-b002-200000000001",
+      "name": "Lookup Phone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1164,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_CHAKRAHQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: ($input.item.json[0]?.phone || $input.item.json.phone || ''), type: 'text', text: { body: 'Ciao ' + $('Estrai Dati').item.json.client_name + '! 📅 Irene ti propone una nuova data per la pre-seduta: ' + $('Estrai Dati').item.json.dateFormatted + ' alle ' + $('Estrai Dati').item.json.proposed_time + '.' + ($('Estrai Dati').item.json.reason ? ' ' + $('Estrai Dati').item.json.reason : '') + '\\n\\nAccetta o rifiuta: https://www.irenegipsytattoo.com/dashboard.html\\n\\n— Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "id": "b2c3d4e5-2001-4bbb-b002-200000000002",
+      "name": "WhatsApp (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "disabled": true,
+      "position": [
+        1364,
+        328
+      ],
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ."
     }
   ],
   "pinData": {},
@@ -89,7 +149,23 @@
       "main": [
         [
           {
+            "node": "Lookup Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Phone": {
+      "main": [
+        [
+          {
             "node": "Invia Email al Cliente",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WhatsApp (ChakraHQ)",
             "type": "main",
             "index": 0
           }
@@ -106,11 +182,23 @@
           }
         ]
       ]
+    },
+    "WhatsApp (ChakraHQ)": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
   "versionId": "3dd91ff0-45ed-4d70-9b77-0f90b525b459",
   "meta": {

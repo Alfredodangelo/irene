@@ -6,12 +6,17 @@
         "httpMethod": "POST",
         "path": "admin-crea-cliente",
         "responseMode": "responseNode",
-        "options": { "allowedOrigins": "*" }
+        "options": {
+          "allowedOrigins": "*"
+        }
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [240, 300],
-      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "position": [
+        2416,
+        1104
+      ],
+      "id": "c0ddb8b0-662f-4895-b981-30aaa59a84dd",
       "name": "Webhook",
       "webhookId": "admin-crea-cliente"
     },
@@ -21,14 +26,21 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [460, 300],
-      "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "position": [
+        2640,
+        1104
+      ],
+      "id": "121f12dc-5180-4baf-a1b6-a9dc8f4f4bb8",
       "name": "Prepara Dati e Password"
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
           "conditions": [
             {
               "id": "cond-google-oauth-01",
@@ -46,8 +58,11 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [680, 300],
-      "id": "if-google-oauth-0001-0002-0003-000000000001",
+      "position": [
+        2848,
+        1104
+      ],
+      "id": "7ebc188a-b51a-4e13-8792-84c6c6677e1d",
       "name": "Google OAuth?"
     },
     {
@@ -57,9 +72,18 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey",        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
-            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
-            { "name": "Content-Type",  "value": "application/json" }
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
@@ -69,8 +93,11 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [920, 440],
-      "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+      "position": [
+        3088,
+        1248
+      ],
+      "id": "b2d94361-1b61-4ca5-9fef-b4f460539722",
       "name": "Crea Utente Auth",
       "onError": "continueErrorOutput"
     },
@@ -80,8 +107,11 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1140, 440],
-      "id": "d4e5f6a7-b8c9-0123-defa-234567890123",
+      "position": [
+        3312,
+        1248
+      ],
+      "id": "bec5c3a6-6c7a-4907-8ec8-736814b5c1a1",
       "name": "Estrai ID Utente"
     },
     {
@@ -91,10 +121,22 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey",        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
-            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
-            { "name": "Content-Type",  "value": "application/json" },
-            { "name": "Prefer",        "value": "resolution=merge-duplicates" }
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
           ]
         },
         "sendBody": true,
@@ -104,8 +146,11 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1360, 440],
-      "id": "e5f6a7b8-c9d0-1234-efab-345678901234",
+      "position": [
+        3536,
+        1248
+      ],
+      "id": "de0abc97-e0a9-4b8f-b142-706043968da3",
       "name": "Salva Profilo Cliente",
       "onError": "continueRegularOutput"
     },
@@ -114,13 +159,19 @@
         "sendTo": "={{ $('Prepara Dati e Password').item.json.email }}",
         "subject": "🔐 Il tuo account personale — Irene Gipsy Tattoo",
         "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n  <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n  <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap\" rel=\"stylesheet\">\n  <style>\n    body { margin:0; padding:0; background-color:#0a0a0a; font-family:'Montserrat',sans-serif; }\n    @media only screen and (max-width:600px) {\n      .email-wrapper { padding:10px 5px !important; }\n      .header { padding:28px 16px 24px !important; }\n      .content { padding:24px 16px !important; }\n      .password-code { font-size:1.3rem !important; letter-spacing:3px !important; }\n      .btn-mobile { display:block !important; width:85% !important; max-width:300px !important; margin:0 auto !important; box-sizing:border-box !important; padding:14px 20px !important; }\n    }\n  </style>\n</head>\n<body style=\"margin:0;padding:0;background-color:#0a0a0a;\">\n  <div class=\"email-wrapper\" style=\"background-color:#0a0a0a;padding:30px 10px;\">\n    <div style=\"max-width:600px;width:100%;margin:0 auto;background-color:#121212;overflow:hidden;\">\n\n      <!-- HEADER -->\n      <div class=\"header\" style=\"background-color:#000000;padding:40px 30px 32px;text-align:center;border-bottom:1px solid #222;\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.6rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:6px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#F5F5DC;letter-spacing:3px;text-transform:uppercase;display:block;margin-bottom:20px;\">Realistic Tattoo Artist</span>\n        <div style=\"width:60px;height:2px;background-color:#D4AF37;margin:0 auto 20px;\"></div>\n        <h1 style=\"font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:400;color:#D4AF37;margin:0;letter-spacing:0.5px;\">✅ Il tuo account è pronto</h1>\n      </div>\n\n      <!-- CONTENT -->\n      <div class=\"content\" style=\"background-color:#121212;padding:36px 30px;\">\n\n        <p style=\"font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;color:#D4AF37;margin-bottom:14px;font-style:italic;\">Ciao {{ $('Prepara Dati e Password').item.json.first_name }},</p>\n\n        <p style=\"font-size:0.95rem;margin-bottom:28px;color:#F5F5DC;font-weight:300;line-height:1.7;\">\n          Irene ha creato il tuo <strong style=\"color:#D4AF37;font-weight:600;\">account personale</strong> su Irene Gipsy Tattoo. Qui sotto trovi le credenziali per accedere alla tua area riservata.\n        </p>\n\n        <!-- CREDENZIALI BOX -->\n        <div style=\"background-color:#1a160a;border:1px solid #D4AF37;padding:28px 24px;margin:0 0 24px;\">\n          <p style=\"font-family:'Playfair Display',serif;font-size:1rem;font-weight:400;color:#D4AF37;margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid #3a2e10;\">🔐 Le Tue Credenziali</p>\n\n          <div style=\"display:flex;align-items:flex-start;margin:10px 0;line-height:1.5;\">\n            <span style=\"font-size:16px;margin-right:12px;min-width:24px;flex-shrink:0;margin-top:1px;\">📧</span>\n            <div style=\"overflow:hidden;\">\n              <span style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;\">Email</span>\n              <span style=\"font-family:'Courier New',monospace;font-size:1rem;font-weight:700;color:#D4AF37;display:block;word-break:break-all;\">{{ $('Prepara Dati e Password').item.json.email }}</span>\n            </div>\n          </div>\n\n          <div style=\"height:1px;background-color:#3a2e10;margin:16px 0;\"></div>\n\n          <div style=\"display:flex;align-items:flex-start;margin:10px 0;line-height:1.5;\">\n            <span style=\"font-size:16px;margin-right:12px;min-width:24px;flex-shrink:0;margin-top:1px;\">🔑</span>\n            <div style=\"width:100%;\">\n              <span style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:10px;\">Password Temporanea</span>\n              <span class=\"password-code\" style=\"font-family:'Courier New',monospace;font-size:1.6rem;font-weight:700;color:#D4AF37;letter-spacing:6px;display:block;line-height:1;\">{{ $('Prepara Dati e Password').item.json.temp_password }}</span>\n            </div>\n          </div>\n        </div>\n\n        <!-- INFO BOX -->\n        <div style=\"background-color:#0d0d0d;padding:24px 20px;margin:0 0 28px;border-left:2px solid #D4AF37;\">\n          <p style=\"font-family:'Playfair Display',serif;font-size:1rem;font-weight:400;color:#D4AF37;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;\">ℹ️ Primo Accesso</p>\n          <p style=\"font-family:'Montserrat',sans-serif;font-size:0.9rem;color:#F5F5DC;font-weight:300;line-height:1.7;margin:0;\">\n            Dopo il primo accesso potrai <strong style=\"color:#D4AF37;font-weight:600;\">cambiare la password</strong> dal tuo profilo. Conserva questa email: in caso di necessità puoi richiedere il reset dalla pagina di accesso.\n          </p>\n        </div>\n\n        <!-- CTA -->\n        <div style=\"text-align:center;margin:0 0 28px;\">\n          <p style=\"font-size:0.8rem;color:#888888;text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;\">Accedi subito alla tua area riservata</p>\n          <a href=\"https://irenegipsytattoo.com/login.html\" class=\"btn-mobile\" style=\"display:inline-block;padding:12px 30px;border:1px solid #D4AF37;text-transform:uppercase;font-family:'Montserrat',sans-serif;font-size:0.9rem;letter-spacing:1px;background-color:#D4AF37;color:#000000;font-weight:600;text-decoration:none;\">\n            🔑 Accedi alla Tua Area Personale\n          </a>\n        </div>\n\n        <div style=\"background-color:#1a1a1a;padding:20px;border:1px solid #333333;\">\n          <p style=\"font-size:0.85rem;color:#888888;font-style:italic;margin:0;line-height:1.7;\">\n            💡 Se non riconosci questo account, ignora questa email in tutta sicurezza.\n          </p>\n        </div>\n\n      </div>\n\n      <!-- FOOTER -->\n      <div style=\"background-color:#000000;text-align:center;padding:30px 20px;border-top:1px solid #222222;\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.1rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:4px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.7rem;text-transform:uppercase;letter-spacing:3px;color:#F5F5DC;display:block;margin-bottom:16px;\">Realistic Tattoo Artist</span>\n        <p style=\"margin:0;\">\n          <a href=\"mailto:irenegipsytattoo@gmail.com\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Email</a> |\n          <a href=\"https://www.instagram.com/irenegipsytattoo/\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Instagram</a> |\n          <a href=\"https://wa.me/393471648654\" style=\"color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">WhatsApp</a>\n        </p>\n        <p style=\"margin:16px 0 0;font-size:0.7rem;color:#333333;letter-spacing:0.5px;\">© 2026 Tutti i diritti riservati</p>\n      </div>\n\n    </div>\n  </div>\n</body>\n</html>",
-        "options": { "appendAttribution": false }
+        "options": {
+          "appendAttribution": false
+        }
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [1580, 440],
-      "id": "f6a7b8c9-d0e1-2345-fabc-456789012345",
+      "position": [
+        3760,
+        1248
+      ],
+      "id": "fe2d6800-e3df-45d6-a149-64832373307d",
       "name": "Invia Email Benvenuto",
+      "webhookId": "1ead52c5-76b1-4a34-899d-90401daa74ea",
       "credentials": {
         "gmailOAuth2": {
           "id": "ZmFlwpy10UFOwY00",
@@ -136,20 +187,28 @@
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1800, 440],
-      "id": "a7b8c9d0-e1f2-3456-abcd-567890123456",
+      "position": [
+        3968,
+        1248
+      ],
+      "id": "e5827fbf-2a30-4511-9d44-b7ce2e77b48d",
       "name": "Risposta OK"
     },
     {
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ JSON.stringify({ success: false, error: true, message: $input.first().json.message || 'Errore nella creazione del cliente' }) }}",
-        "options": { "responseCode": 400 }
+        "options": {
+          "responseCode": 400
+        }
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1140, 640],
-      "id": "b8c9d0e1-f2a3-4567-bcde-678901234567",
+      "position": [
+        3312,
+        1440
+      ],
+      "id": "efc6b451-343a-405b-a5d8-5e982360b950",
       "name": "Risposta Errore"
     },
     {
@@ -158,8 +217,11 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [920, 160],
-      "id": "google-set-uid-0001-0002-0003-000000000001",
+      "position": [
+        3088,
+        960
+      ],
+      "id": "485874a8-d5db-475b-940c-28eb99099f22",
       "name": "Set User ID Google"
     },
     {
@@ -169,10 +231,22 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey",        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
-            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM" },
-            { "name": "Content-Type",  "value": "application/json" },
-            { "name": "Prefer",        "value": "resolution=merge-duplicates" }
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
           ]
         },
         "sendBody": true,
@@ -182,8 +256,11 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1140, 160],
-      "id": "google-salva-prof-0001-0002-0003-000000000002",
+      "position": [
+        3312,
+        960
+      ],
+      "id": "34cad0aa-445a-4325-a79a-3af35b26ccc5",
       "name": "Salva Profilo Google",
       "onError": "continueRegularOutput"
     },
@@ -195,46 +272,180 @@
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1360, 160],
-      "id": "google-risposta-ok-0001-0002-0003-000000000003",
+      "position": [
+        3536,
+        960
+      ],
+      "id": "086e2d66-d86c-46da-9a9a-abecbc33e21f",
       "name": "Risposta OK Google"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_CHAKRAHQ_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: $('Prepara Dati e Password').item.json.phone, type: 'text', text: { body: 'Ciao ' + $('Prepara Dati e Password').item.json.first_name + '! \\ud83d\\udda4 Benvenuto/a in Irene Gipsy Tattoo. Il tuo account \\u00e8 stato creato. Accedi alla tua area personale: https://www.irenegipsytattoo.com/dashboard.html\\n\\n\\u2014 Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "name": "WhatsApp Benvenuto (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3760,
+        1488
+      ],
+      "id": "a1b2c3d4-3333-4aaa-bbbb-000000000001",
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ. Abilita il nodo quando pronto."
     }
   ],
+  "pinData": {},
   "connections": {
     "Webhook": {
-      "main": [[{ "node": "Prepara Dati e Password", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Prepara Dati e Password",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Prepara Dati e Password": {
-      "main": [[{ "node": "Google OAuth?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Google OAuth?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Google OAuth?": {
       "main": [
-        [{ "node": "Set User ID Google", "type": "main", "index": 0 }],
-        [{ "node": "Crea Utente Auth", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Set User ID Google",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Crea Utente Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Set User ID Google": {
-      "main": [[{ "node": "Salva Profilo Google", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Salva Profilo Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Salva Profilo Google": {
-      "main": [[{ "node": "Risposta OK Google", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Risposta OK Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Crea Utente Auth": {
-      "main": [[{ "node": "Estrai ID Utente", "type": "main", "index": 0 }]],
-      "error": [[{ "node": "Risposta Errore", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Estrai ID Utente",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Risposta Errore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Estrai ID Utente": {
-      "main": [[{ "node": "Salva Profilo Cliente", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Salva Profilo Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Salva Profilo Cliente": {
-      "main": [[{ "node": "Invia Email Benvenuto", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Invia Email Benvenuto",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WhatsApp Benvenuto (ChakraHQ)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Invia Email Benvenuto": {
-      "main": [[{ "node": "Risposta OK", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Benvenuto (ChakraHQ)": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": { "executionOrder": "v1" },
-  "staticData": null,
-  "meta": { "instanceId": "irene-gipsy-tattoo" },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a3f98bff-4d54-4f44-91aa-37c0ac5fd71b",
+  "meta": {
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "id": "aog8q9wTZpjas38k",
   "tags": []
 }

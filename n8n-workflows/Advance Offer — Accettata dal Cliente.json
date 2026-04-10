@@ -138,6 +138,66 @@
         448,
         144
       ]
+    },
+    {
+      "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients?email=eq.{{ $('Estrai Dati').item.json.client_email }}&select=phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-1111-4aaa-bbbb-100000000012",
+      "name": "Lookup Phone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_CHAKRAHQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: ($json[0] ? $json[0].phone : ''), type: 'text', text: { body: 'Ciao ' + $('Estrai Dati').item.json.client_name + '! \\u2705 La tua seduta anticipata è confermata per il ' + $('Estrai Dati').item.json.dateFormatted + '.\\n\\nDettagli: https://www.irenegipsytattoo.com/dashboard.html\\n\\n— Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-1111-4aaa-bbbb-200000000012",
+      "name": "WhatsApp (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ.",
+      "position": [
+        448,
+        384
+      ]
     }
   ],
   "pinData": {},
@@ -178,6 +238,11 @@
             "node": "Email Conferma Cliente",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Lookup Phone",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -187,6 +252,11 @@
         [
           {
             "node": "Email Conferma Cliente",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Lookup Phone",
             "type": "main",
             "index": 0
           }
@@ -203,11 +273,23 @@
           }
         ]
       ]
+    },
+    "Lookup Phone": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp (ChakraHQ)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
   "versionId": "4328fde8-451a-49e8-a997-684559d9bfc3",
   "meta": {

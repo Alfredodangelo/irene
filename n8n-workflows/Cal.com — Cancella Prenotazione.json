@@ -10,13 +10,13 @@
           "appendAttribution": false
         }
       },
-      "id": "1a1a5a81-5f0f-4ed9-a72a-27129b0b6e41",
+      "id": "d0f76371-88f2-4060-bbd4-0ecb23615008",
       "name": "Invia Email Cancellazione",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        3344,
-        864
+        6320,
+        1976
       ],
       "webhookId": "bd3f347d-5c6f-48c2-baf1-4651a818a94f",
       "credentials": {
@@ -28,18 +28,78 @@
     },
     {
       "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients?email=eq.{{ $('Estrai Cal UID').item.json.client_email }}&select=phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e5f6a7b8-5001-4eee-b005-500000000001",
+      "name": "Lookup Phone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6112,
+        2096
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_CHAKRAHQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: ($input.item.json[0]?.phone || $input.item.json.phone || ''), type: 'text', text: { body: 'Ciao ' + $('Estrai Cal UID').item.json.client_name + ', il tuo appuntamento del ' + ($('Estrai Cal UID').item.json.scheduled_at ? new Date($('Estrai Cal UID').item.json.scheduled_at).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' }) : 'data non disponibile') + ' è stato cancellato.\\n\\nSe hai domande, scrivimi: https://www.irenegipsytattoo.com/dashboard.html\\n\\n— Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "id": "e5f6a7b8-5001-4eee-b005-500000000002",
+      "name": "WhatsApp (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "disabled": true,
+      "position": [
+        6320,
+        2216
+      ],
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ."
+    },
+    {
+      "parameters": {
         "httpMethod": "POST",
         "path": "cancel-appointment",
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "0d6915de-17a2-4aee-a52b-f785838059e1",
+      "id": "50ce34a5-3ab9-4b05-bbf2-231439384daf",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        1488,
-        928
+        4256,
+        2160
       ],
       "webhookId": "cancel-appointment"
     },
@@ -47,26 +107,26 @@
       "parameters": {
         "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst appointment_id   = b.appointment_id   || '';\nconst cal_booking_uid  = b.cal_booking_uid  || null;\nconst client_email     = b.client_email     || '';\nconst client_name      = b.client_name      || 'Cliente';\nconst scheduled_at     = b.scheduled_at     || null;\nconst appointment_type = b.appointment_type || 'consulenza';\n\nif (!appointment_id) throw new Error('appointment_id mancante');\nif (!client_email)   throw new Error('client_email mancante');\n\nreturn [{ json: { appointment_id, cal_booking_uid, client_email, client_name, scheduled_at, appointment_type } }];"
       },
-      "id": "09d5a083-3461-4a38-88dc-5046c10bd41d",
+      "id": "4ba14914-c455-4bea-ba2d-44c716a1657f",
       "name": "Estrai Dati",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1712,
-        928
+        4480,
+        2160
       ]
     },
     {
       "parameters": {
         "jsCode": "// Usa direttamente il cal_booking_uid passato dal frontend\n// (il lookup Supabase è rimosso: la riga viene eliminata prima che n8n possa leggerla)\nconst b = $input.item.json;\nconst cal_booking_uid  = b.cal_booking_uid  || null;\nconst client_email     = b.client_email;\nconst client_name      = b.client_name;\nconst scheduled_at     = b.scheduled_at;\nconst appointment_id   = b.appointment_id;\nconst appointment_type = b.appointment_type || 'consulenza';\n\nreturn [{ json: { cal_booking_uid, has_uid: !!cal_booking_uid, client_email, client_name, scheduled_at, appointment_id, appointment_type } }];"
       },
-      "id": "8627e6d0-b891-44e7-9d36-16fe7498865f",
+      "id": "f404e239-8969-44e1-b1c2-bd2c54b1bf74",
       "name": "Estrai Cal UID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        928
+        4704,
+        2160
       ]
     },
     {
@@ -92,13 +152,13 @@
         },
         "options": {}
       },
-      "id": "7575798e-8c48-49c6-aa33-ddafafc3963b",
+      "id": "a84ea2e3-55a3-400c-9feb-38b441e28f11",
       "name": "Ha Cal UID?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        2160,
-        928
+        4928,
+        2160
       ]
     },
     {
@@ -127,13 +187,13 @@
         "jsonBody": "={ \"cancellationReason\": \"Appuntamento cancellato da Irene\" }",
         "options": {}
       },
-      "id": "f434fdc6-1225-4032-b83f-14f7d43faff8",
+      "id": "8a706cb4-f878-4f3e-b566-c5e806d4db0e",
       "name": "Cancella su Cal.com",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2368,
-        784
+        5136,
+        2016
       ],
       "onError": "continueRegularOutput"
     },
@@ -155,13 +215,13 @@
         },
         "options": {}
       },
-      "id": "c914372e-4481-4bf7-a49f-a1d562d13ced",
+      "id": "7031e9f5-3474-48a0-bbbd-cf0b9f4fed78",
       "name": "Cerca su Cal.com per Email",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2368,
-        1088
+        5136,
+        2320
       ],
       "onError": "continueRegularOutput"
     },
@@ -169,13 +229,13 @@
       "parameters": {
         "jsCode": "const res = $input.item.json;\nlet uid = null;\nif (res?.data && Array.isArray(res.data) && res.data.length > 0) {\n  uid = res.data[0]?.uid || null;\n}\nconst client_email     = $('Estrai Cal UID').item.json.client_email;\nconst client_name      = $('Estrai Cal UID').item.json.client_name;\nconst scheduled_at     = $('Estrai Cal UID').item.json.scheduled_at;\nconst appointment_id   = $('Estrai Cal UID').item.json.appointment_id;\nconst appointment_type = $('Estrai Cal UID').item.json.appointment_type || 'consulenza';\nreturn [{ json: { cal_booking_uid: uid, has_uid_calcom: !!uid, client_email, client_name, scheduled_at, appointment_id, appointment_type } }];"
       },
-      "id": "b1296883-37c4-42d5-82e3-4f3e53a40e30",
+      "id": "1d5c9f3d-58f5-4277-9716-9243cbedfafe",
       "name": "Estrai UID da Cal.com",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2592,
-        1088
+        5360,
+        2320
       ]
     },
     {
@@ -201,13 +261,13 @@
         },
         "options": {}
       },
-      "id": "3a050441-c098-4078-a579-e8b01fe6614f",
+      "id": "a63f1e98-fa1a-4d1c-86e0-2a946c73cf9f",
       "name": "Ha UID da Cal.com?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        2816,
-        1088
+        5584,
+        2320
       ]
     },
     {
@@ -236,13 +296,13 @@
         "jsonBody": "={ \"cancellationReason\": \"Appuntamento cancellato da Irene\" }",
         "options": {}
       },
-      "id": "46cf0ee8-e5dc-463c-ade0-44baa066a601",
+      "id": "4ea34945-df37-4662-beb8-17fbff1f10fc",
       "name": "Cancella su Cal.com (fallback)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2944,
-        912
+        5712,
+        2144
       ],
       "onError": "continueRegularOutput"
     },
@@ -252,13 +312,13 @@
         "responseBody": "={ \"ok\": true }",
         "options": {}
       },
-      "id": "d5e1c64d-de40-4f4f-9ef1-990b822f2b3c",
+      "id": "15671e53-52ec-4b3b-ab27-e6ceed3bd384",
       "name": "Risposta OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        3552,
-        896
+        6528,
+        2096
       ]
     }
   ],
@@ -330,7 +390,7 @@
       "main": [
         [
           {
-            "node": "Invia Email Cancellazione",
+            "node": "Lookup Phone",
             "type": "main",
             "index": 0
           }
@@ -370,7 +430,7 @@
         ],
         [
           {
-            "node": "Invia Email Cancellazione",
+            "node": "Lookup Phone",
             "type": "main",
             "index": 0
           }
@@ -381,7 +441,34 @@
       "main": [
         [
           {
+            "node": "Lookup Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Phone": {
+      "main": [
+        [
+          {
             "node": "Invia Email Cancellazione",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WhatsApp (ChakraHQ)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp (ChakraHQ)": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
             "type": "main",
             "index": 0
           }
@@ -391,9 +478,10 @@
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
-  "versionId": "34e2bb31-ec63-4ce2-9546-04a92d1c17af",
+  "versionId": "edd7cee5-64f3-4589-9af8-f5ab43b4537e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"

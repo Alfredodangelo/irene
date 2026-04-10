@@ -1,0 +1,365 @@
+{
+  "name": "Messaggistica — Invio Diretto",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-message",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "a1b2c3d4-0001-4000-a000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "send-message"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.item.json.body || $input.item.json;\n\nconst channel      = (b.channel || '').toLowerCase();\nconst to_email     = b.to_email || '';\nconst to_phone     = b.to_phone || '';\nconst subject      = b.subject || 'Messaggio da Irene Gipsy Tattoo';\nconst message      = b.message || '';\nconst client_name  = b.client_name || 'Cliente';\n\nif (!channel) throw new Error('channel mancante (email/whatsapp/sms)');\nif (channel === 'email' && !to_email) throw new Error('to_email mancante');\nif ((channel === 'whatsapp' || channel === 'sms') && !to_phone) throw new Error('to_phone mancante');\nif (!message) throw new Error('message mancante');\n\n// Convert newlines to <br> for HTML email\nconst message_html = message.replace(/\\n/g, '<br>');\n\n// Format phone: ensure +39 prefix\nlet phone_formatted = to_phone.replace(/[^\\d+]/g, '');\nif (phone_formatted && !phone_formatted.startsWith('+')) {\n  phone_formatted = phone_formatted.startsWith('39') ? '+' + phone_formatted : '+39' + phone_formatted;\n}\n\nreturn [{ json: { channel, to_email, to_phone: phone_formatted, subject, message, message_html, client_name } }];"
+      },
+      "id": "a1b2c3d4-0002-4000-a000-000000000002",
+      "name": "Prepara Dati",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "version": 2, "combinator": "and" },
+                "conditions": [
+                  {
+                    "id": "cond-email",
+                    "leftValue": "={{ $json.channel }}",
+                    "rightValue": "email",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Email"
+            },
+            {
+              "conditions": {
+                "options": { "version": 2, "combinator": "and" },
+                "conditions": [
+                  {
+                    "id": "cond-whatsapp",
+                    "leftValue": "={{ $json.channel }}",
+                    "rightValue": "whatsapp",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "WhatsApp"
+            },
+            {
+              "conditions": {
+                "options": { "version": 2, "combinator": "and" },
+                "conditions": [
+                  {
+                    "id": "cond-sms",
+                    "leftValue": "={{ $json.channel }}",
+                    "rightValue": "sms",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "SMS"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0003-4000-a000-000000000003",
+      "name": "Canale",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to_email }}",
+        "subject": "={{ $json.subject }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n  <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n  <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap\" rel=\"stylesheet\">\n  <style>\n    body { margin:0; padding:0; background-color:#0a0a0a; font-family:'Montserrat',sans-serif; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }\n    .email-wrapper { background-color:#0a0a0a; padding:30px 10px; }\n    .container { max-width:600px; width:100%; margin:0 auto; background-color:#121212; overflow:hidden; }\n    .header { background-color:#000000; padding:40px 30px 32px; text-align:center; border-bottom:1px solid #222; }\n    .header-divider { width:60px; height:2px; background-color:#D4AF37; margin:0 auto 20px; }\n    .content { background-color:#121212; padding:36px 30px; }\n    .footer { background-color:#000000; text-align:center; padding:30px 20px; border-top:1px solid #222; }\n    @media only screen and (max-width:600px) {\n      .email-wrapper { padding:10px 5px !important; }\n      .header { padding:28px 16px 24px !important; }\n      .content { padding:24px 16px !important; }\n      .footer { padding:24px 16px !important; }\n    }\n  </style>\n</head>\n<body style=\"margin:0;padding:0;background-color:#0a0a0a;\">\n  <div class=\"email-wrapper\" style=\"background-color:#0a0a0a;padding:30px 10px;\">\n    <div class=\"container\" style=\"max-width:600px;width:100%;margin:0 auto;background-color:#121212;overflow:hidden;\">\n\n      <!-- HEADER -->\n      <div class=\"header\" style=\"background-color:#000000;padding:40px 30px 32px;text-align:center;border-bottom:1px solid #222;\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.6rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:6px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#F5F5DC;letter-spacing:3px;text-transform:uppercase;display:block;margin-bottom:20px;\">Realistic Tattoo Artist</span>\n        <div class=\"header-divider\" style=\"width:60px;height:2px;background-color:#D4AF37;margin:0 auto 20px;\"></div>\n        <h1 style=\"font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:400;color:#D4AF37;margin:0;letter-spacing:0.5px;\">✉️ {{ $json.subject }}</h1>\n      </div>\n\n      <!-- CONTENT -->\n      <div class=\"content\" style=\"background-color:#121212;padding:36px 30px;\">\n        <p style=\"font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;color:#D4AF37;margin-bottom:14px;font-style:italic;\">Ciao {{ $json.client_name }},</p>\n        <p style=\"font-size:0.95rem;margin-bottom:28px;color:#F5F5DC;font-weight:300;line-height:1.7;font-family:'Montserrat',sans-serif;text-align:justify;\">{{ $json.message_html }}</p>\n      </div>\n\n      <!-- FOOTER -->\n      <div class=\"footer\" style=\"background-color:#000000;text-align:center;padding:30px 20px;border-top:1px solid #222222;\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.1rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:4px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.7rem;text-transform:uppercase;letter-spacing:3px;color:#F5F5DC;display:block;margin-bottom:16px;\">Realistic Tattoo Artist</span>\n        <p style=\"margin:0 0 10px;\">\n          <a href=\"mailto:irenegipsytattoo@gmail.com\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Email</a> |\n          <a href=\"https://www.instagram.com/irenegipsytattoo/\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Instagram</a> |\n          <a href=\"https://wa.me/393471648654\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Whatsapp</a>\n        </p>\n        <p style=\"margin:0 0 16px;\">\n          <a href=\"https://www.irenegipsytattoo.com\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">www.irenegipsytattoo.com</a>\n        </p>\n        <p style=\"margin:0;font-size:0.7rem;color:#333333;letter-spacing:0.5px;font-family:'Montserrat',sans-serif;\">© 2026 Tutti i diritti riservati</p>\n      </div>\n\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a1b2c3d4-0004-4000-a000-000000000004",
+      "name": "Invia Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        760,
+        100
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZmFlwpy10UFOwY00",
+          "name": "Gmail - Irene"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.chakrahq.com/v1/messages/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_CHAKRAHQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": \"{{ $json.to_phone }}\",\n  \"type\": \"text\",\n  \"text\": {\n    \"body\": \"Ciao {{ $json.client_name }},\\n\\n{{ $json.message }}\\n\\n— Irene Gipsy Tattoo\"\n  }\n}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0005-4000-a000-000000000005",
+      "name": "WhatsApp (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        300
+      ],
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ. L'URL e il body potrebbero variare in base alla documentazione ChakraHQ.",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/YOUR_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "=To={{ $json.to_phone }}&From=+39XXXXXXXXXX&Body=Ciao {{ $json.client_name }},\n\n{{ $json.message }}\n\n— Irene Gipsy Tattoo",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0006-4000-a000-000000000006",
+      "name": "SMS (Twilio)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        500
+      ],
+      "notes": "⚠️ DA CONFIGURARE: Serve account Twilio. Sostituisci YOUR_ACCOUNT_SID e il numero From. Aggiungi credenziali Basic Auth (Account SID + Auth Token).",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Dopo invio email\nreturn [{ json: { ok: true, channel: 'email', sent_to: $json.to_email } }];"
+      },
+      "id": "a1b2c3d4-0007-4000-a000-000000000007",
+      "name": "Risultato Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Dopo invio WhatsApp\nreturn [{ json: { ok: true, channel: 'whatsapp', sent_to: $json.to_phone } }];"
+      },
+      "id": "a1b2c3d4-0008-4000-a000-000000000008",
+      "name": "Risultato WhatsApp",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Dopo invio SMS\nreturn [{ json: { ok: true, channel: 'sms', sent_to: $json.to_phone } }];"
+      },
+      "id": "a1b2c3d4-0009-4000-a000-000000000009",
+      "name": "Risultato SMS",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "a1b2c3d4-0010-4000-a000-000000000010",
+      "name": "Risposta OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1240,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepara Dati",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara Dati": {
+      "main": [
+        [
+          {
+            "node": "Canale",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Canale": {
+      "main": [
+        [
+          {
+            "node": "Invia Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WhatsApp (ChakraHQ)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SMS (Twilio)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invia Email": {
+      "main": [
+        [
+          {
+            "node": "Risultato Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp (ChakraHQ)": {
+      "main": [
+        [
+          {
+            "node": "Risultato WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SMS (Twilio)": {
+      "main": [
+        [
+          {
+            "node": "Risultato SMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risultato Email": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risultato WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risultato SMS": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "tags": []
+}

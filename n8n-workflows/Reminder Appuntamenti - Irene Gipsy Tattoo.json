@@ -84,7 +84,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Estrae e formatta i dati di ogni appuntamento di OGGI\n// L'HTML dell'email si modifica direttamente nel nodo Gmail\nconst responseData = $input.first().json;\nconst appointments = Array.isArray(responseData) ? responseData : [];\nif (appointments.length === 0) return [];\n\nconst TYPES = {\n  consulenza: 'Consulenza gratuita',\n  'pre-seduta': 'Pre-Seduta',\n  seduta: 'Seduta Tatuaggio'\n};\n\nreturn appointments.map(function(appt) {\n  var client = appt.clients || {};\n  if (!client.email) return null;\n  var date = new Date(appt.scheduled_at);\n  return { json: {\n    emailTo:  client.email,\n    nameTo:   ((client.first_name||'') + ' ' + (client.last_name||'')).trim(),\n    nome:     client.first_name || 'cliente',\n    data:     date.toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long'}),\n    ora:      date.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}),\n    tipo:     TYPES[appt.type] || appt.type || 'Appuntamento'\n  }};\n}).filter(Boolean);"
+        "jsCode": "// Estrae e formatta i dati di ogni appuntamento di OGGI\n// L'HTML dell'email si modifica direttamente nel nodo Gmail\nconst responseData = $input.first().json;\nconst appointments = Array.isArray(responseData) ? responseData : [];\nif (appointments.length === 0) return [];\n\nconst TYPES = {\n  consulenza: 'Consulenza gratuita',\n  'pre-seduta': 'Pre-Seduta',\n  seduta: 'Seduta Tatuaggio'\n};\n\nreturn appointments.map(function(appt) {\n  var client = appt.clients || {};\n  if (!client.email) return null;\n  var date = new Date(appt.scheduled_at);\n  return { json: {\n    emailTo:  client.email,\n    nameTo:   ((client.first_name||'') + ' ' + (client.last_name||'')).trim(),\n    nome:     client.first_name || 'cliente',\n    data:     date.toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long'}),\n    ora:      date.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}),\n    tipo:     TYPES[appt.type] || appt.type || 'Appuntamento',\n    phoneTo:  client.phone || ''\n  }};\n}).filter(Boolean);"
       },
       "id": "5e0a14af-d504-465a-848b-e7076a127e9c",
       "name": "Dati Appuntamento Oggi",
@@ -170,7 +170,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Estrae e formatta i dati di ogni appuntamento tra 3 GIORNI\n// L'HTML dell'email si modifica direttamente nel nodo Gmail\nconst responseData = $input.first().json;\nconst appointments = Array.isArray(responseData) ? responseData : [];\nif (appointments.length === 0) return [];\n\nconst TYPES = {\n  consulenza: 'Consulenza gratuita',\n  'pre-seduta': 'Pre-Seduta',\n  seduta: 'Seduta Tatuaggio'\n};\n\nreturn appointments.map(function(appt) {\n  var client = appt.clients || {};\n  if (!client.email) return null;\n  var date = new Date(appt.scheduled_at);\n  return { json: {\n    emailTo:  client.email,\n    nameTo:   ((client.first_name||'') + ' ' + (client.last_name||'')).trim(),\n    nome:     client.first_name || 'cliente',\n    data:     date.toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long', year:'numeric'}),\n    ora:      date.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}),\n    tipo:     TYPES[appt.type] || appt.type || 'Appuntamento'\n  }};\n}).filter(Boolean);"
+        "jsCode": "// Estrae e formatta i dati di ogni appuntamento tra 3 GIORNI\n// L'HTML dell'email si modifica direttamente nel nodo Gmail\nconst responseData = $input.first().json;\nconst appointments = Array.isArray(responseData) ? responseData : [];\nif (appointments.length === 0) return [];\n\nconst TYPES = {\n  consulenza: 'Consulenza gratuita',\n  'pre-seduta': 'Pre-Seduta',\n  seduta: 'Seduta Tatuaggio'\n};\n\nreturn appointments.map(function(appt) {\n  var client = appt.clients || {};\n  if (!client.email) return null;\n  var date = new Date(appt.scheduled_at);\n  return { json: {\n    emailTo:  client.email,\n    nameTo:   ((client.first_name||'') + ' ' + (client.last_name||'')).trim(),\n    nome:     client.first_name || 'cliente',\n    data:     date.toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long', year:'numeric'}),\n    ora:      date.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}),\n    tipo:     TYPES[appt.type] || appt.type || 'Appuntamento',\n    phoneTo:  client.phone || ''\n  }};\n}).filter(Boolean);"
       },
       "id": "64e3a2f6-dbc9-4887-8562-11feb495865e",
       "name": "Dati Appuntamento 3 Giorni",
@@ -205,6 +205,60 @@
           "name": "Gmail - Irene"
         }
       }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_CHAKRAHQ_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: $json.phoneTo, type: 'text', text: { body: 'Ciao ' + $json.nome + '! \\ud83d\\udda4 Ci vediamo oggi per il tuo appuntamento (' + $json.tipo + ') alle ' + $json.ora + '. Se hai domande, scrivimi!\\n\\nDettagli: https://www.irenegipsytattoo.com/dashboard.html\\n\\n\\u2014 Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "name": "WhatsApp Oggi (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "a1b2c3d4-4444-4aaa-bbbb-000000000001",
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ. Abilita il nodo quando pronto."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_CHAKRAHQ_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: $json.phoneTo, type: 'text', text: { body: 'Ciao ' + $json.nome + '! \\ud83d\\udcc5 Ti ricordo che il tuo appuntamento (' + $json.tipo + ') \\u00e8 tra 3 giorni, il ' + $json.data + ' alle ' + $json.ora + '.\\n\\nDettagli: https://www.irenegipsytattoo.com/dashboard.html\\n\\n\\u2014 Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "name": "WhatsApp 3 Giorni (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        672,
+        240
+      ],
+      "id": "a1b2c3d4-4444-4aaa-bbbb-000000000002",
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ. Abilita il nodo quando pronto."
     }
   ],
   "pinData": {},
@@ -254,6 +308,11 @@
             "node": "Gmail Oggi",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "WhatsApp Oggi (ChakraHQ)",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -276,6 +335,11 @@
             "node": "Gmail 3 Giorni",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "WhatsApp 3 Giorni (ChakraHQ)",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -284,6 +348,7 @@
   "active": true,
   "settings": {
     "executionOrder": "v1",
+    "binaryMode": "separate",
     "timeSavedMode": "fixed",
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false,

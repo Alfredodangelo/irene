@@ -1,24 +1,23 @@
 {
-  "name": "Advance Offer \u2014 Timeout",
+  "name": "Advance Offer — Timeout",
   "nodes": [
     {
       "parameters": {
         "rule": {
           "interval": [
             {
-              "field": "hours",
-              "minutesInterval": 1
+              "field": "hours"
             }
           ]
         }
       },
-      "id": "ao-to-001",
+      "id": "a720cf6b-f46c-48da-9d97-9453156e10ce",
       "name": "Ogni Ora",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        0,
-        0
+        1696,
+        368
       ]
     },
     {
@@ -39,13 +38,13 @@
         },
         "options": {}
       },
-      "id": "ao-to-002",
+      "id": "a34d909f-a0ef-4ac8-ba52-4c6db2dfb15c",
       "name": "Fetch Offerte Scadute",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        224,
-        0
+        1920,
+        368
       ],
       "onError": "continueRegularOutput"
     },
@@ -53,13 +52,13 @@
       "parameters": {
         "jsCode": "const rows = Array.isArray($input.item.json) ? $input.item.json : [];\nif (rows.length === 0) return [];\nreturn rows.map(offer => {\n  const client = offer.clients || {};\n  const clientName  = [client.first_name, client.last_name].filter(Boolean).join(' ') || 'Cliente';\n  const clientEmail = client.email || '';\n  const dt = new Date(offer.freed_slot_at);\n  const dateFormatted = dt.toLocaleDateString('it-IT', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });\n  return { json: { offer_id: offer.id, client_id: offer.client_id, clientName, clientEmail, dateFormatted, freed_slot_at: offer.freed_slot_at } };\n});"
       },
-      "id": "ao-to-003",
+      "id": "9b270311-e395-4f1d-95ba-aa432c569a0c",
       "name": "Prepara Items",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
-        0
+        2144,
+        368
       ]
     },
     {
@@ -92,13 +91,13 @@
         "jsonBody": "={ \"status\": \"expired\" }",
         "options": {}
       },
-      "id": "ao-to-004",
+      "id": "7d5f4377-627d-469a-aa88-9306d26a06b8",
       "name": "Segna Expired",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        672,
-        0
+        2368,
+        368
       ],
       "onError": "continueRegularOutput"
     },
@@ -120,13 +119,13 @@
         },
         "options": {}
       },
-      "id": "ao-to-005",
+      "id": "55458b81-6e7b-45b5-ab82-62390671e45f",
       "name": "Max Position Waitlist",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        896,
-        0
+        2592,
+        368
       ],
       "onError": "continueRegularOutput"
     },
@@ -160,13 +159,13 @@
         "jsonBody": "={{ JSON.stringify({ position: ((Array.isArray($input.item.json) ? ($input.item.json[0]?.position || 0) : ($input.item.json?.position || 0)) + 1) }) }}",
         "options": {}
       },
-      "id": "ao-to-006",
+      "id": "02a32640-e659-4f98-b8c5-7a4c10e2b8ab",
       "name": "Sposta In Ultima",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1120,
-        0
+        2816,
+        368
       ],
       "onError": "continueRegularOutput"
     },
@@ -179,14 +178,15 @@
           "appendAttribution": false
         }
       },
-      "id": "ao-to-007",
+      "id": "27e7fc7d-e323-45be-bd58-4b30b2a7bfe2",
       "name": "Email Scaduta",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1344,
-        0
+        3040,
+        368
       ],
+      "webhookId": "ba91ca99-3294-4187-8d6c-05e6428c1eaf",
       "credentials": {
         "gmailOAuth2": {
           "id": "ZmFlwpy10UFOwY00",
@@ -225,15 +225,75 @@
         "jsonBody": "={{ JSON.stringify({ type: 'seduta_free_reschedule', title: 'Offerta scaduta — posto liberato', body: $('Prepara Items').item.json.clientName + ' non ha risposto all\\'offerta. Posto liberato: ' + $('Prepara Items').item.json.dateFormatted + '.', client_id: $('Prepara Items').item.json.client_id, read: false, meta: { freed_slot_at: $('Prepara Items').item.json.freed_slot_at, client_name: $('Prepara Items').item.json.clientName } }) }}",
         "options": {}
       },
-      "id": "ao-to-008",
+      "id": "989a84bf-1a37-4b71-a277-bf894a642dc8",
       "name": "Notifica Irene",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1568,
-        0
+        3264,
+        368
       ],
       "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients?email=eq.{{ $('Prepara Items').item.json.clientEmail }}&select=phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-1111-4aaa-bbbb-100000000013",
+      "name": "Lookup Phone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3040,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_CHAKRAHQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: ($json[0] ? $json[0].phone : ''), type: 'text', text: { body: 'Ciao ' + $('Prepara Items').item.json.clientName + ', l\\'offerta per il posto anticipato è scaduta. Resti in lista d\\'attesa.\\n\\nDettagli: https://www.irenegipsytattoo.com/dashboard.html\\n\\n— Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-1111-4aaa-bbbb-200000000013",
+      "name": "WhatsApp (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ.",
+      "position": [
+        3264,
+        608
+      ]
     }
   ],
   "pinData": {},
@@ -300,6 +360,11 @@
             "node": "Email Scaduta",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Lookup Phone",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -314,17 +379,28 @@
           }
         ]
       ]
+    },
+    "Lookup Phone": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp (ChakraHQ)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
-  "versionId": "ao-timeout-v1",
+  "versionId": "1f225d46-59de-43cb-893e-bd619a2ddee8",
   "meta": {
-    "templateCredsSetupCompleted": true,
     "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
   },
-  "id": "AdvanceOfferTimeout",
+  "id": "373WXd7aWbkuZGsB",
   "tags": []
 }

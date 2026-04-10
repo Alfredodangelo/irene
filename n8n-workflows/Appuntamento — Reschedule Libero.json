@@ -1,0 +1,634 @@
+{
+  "name": "Appuntamento — Reschedule Libero",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "seduta-free-reschedule",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "cafad6b7-7017-48b1-b127-1d2f6c6d21e4",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        13040,
+        3168
+      ],
+      "webhookId": "seduta-free-reschedule"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst appointment_id        = b.appointment_id        || '';\nconst new_start_iso         = b.new_start_iso         || '';\nconst client_id             = b.client_id             || '';\nconst client_email          = b.client_email          || '';\nconst client_name           = b.client_name           || 'Cliente';\nconst old_cal_booking_uid   = b.old_cal_booking_uid   || null;\nconst freed_slot_at         = b.freed_slot_at         || null;\nif (!appointment_id) throw new Error('appointment_id mancante');\nif (!new_start_iso)  throw new Error('new_start_iso mancante');\nreturn [{ json: { appointment_id, new_start_iso, client_id, client_email, client_name, old_cal_booking_uid, freed_slot_at } }];"
+      },
+      "id": "43d12216-a40c-4946-aff4-25dfc2bd8d2a",
+      "name": "Estrai Dati",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13264,
+        3168
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/appointments?id=eq.{{ $json.appointment_id }}&select=id,type,notes,cal_booking_uid,clients(id,email,first_name,last_name,phone)",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "aa1aa342-6ac8-494b-939c-5ac437b106ff",
+      "name": "Leggi Appuntamento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        13488,
+        3168
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $('Estrai Dati').item.json;\nconst rows = Array.isArray($input.item.json) ? $input.item.json : [$input.item.json];\nconst appt   = rows[0] || {};\nconst client = (appt.clients && typeof appt.clients === 'object') ? appt.clients : {};\nconst uid_for_cancel = d.old_cal_booking_uid || appt.cal_booking_uid || null;\n// Event type admin per tipo appuntamento\nconst typeEventIds = { seduta: 5147823, 'pre-seduta': 5147653, consulenza: 5147645 };\nconst appt_type = appt.type || 'seduta';\nconst eventTypeId = typeEventIds[appt_type] || 5147823;\nconst clientName  = d.client_name  || [client.first_name, client.last_name].filter(Boolean).join(' ') || 'Cliente';\nconst clientEmail = d.client_email || client.email || '';\nconst clientPhone = client.phone   || '';\nreturn [{ json: {\n  uid_for_cancel,\n  eventTypeId,\n  appt_type,\n  appt_notes: appt.notes || null,\n  appointment_id: d.appointment_id,\n  new_start_iso:  d.new_start_iso,\n  client_email:   clientEmail,\n  client_name:    clientName,\n  client_phone:   clientPhone,\n  client_id:      d.client_id,\n  freed_slot_at:  d.freed_slot_at\n} }];"
+      },
+      "id": "883755f5-5211-4685-80b0-a956a86f8988",
+      "name": "Prepara Dati Cal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13712,
+        3168
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.uid_for_cancel ? 'https://api.cal.com/v2/bookings/' + $json.uid_for_cancel : 'https://api.cal.com/v2/bookings/noop-skip' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer cal_live_c63016ee51343f3492c2759c4a0d5c93"
+            },
+            {
+              "name": "cal-api-version",
+              "value": "2024-08-13"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dd0c03c4-6885-485c-889e-b523c824209e",
+      "name": "Leggi Booking Cal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        13936,
+        3168
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const calResp = $input.item.json;\nconst d = $('Prepara Dati Cal').item.json;\n// Leggi bookingFieldsResponses dal booking originale\nconst originalFields = calResp.data?.bookingFieldsResponses || calResp.bookingFieldsResponses || {};\n// Costruisci attendee\nconst attendee = { name: d.client_name, email: d.client_email, timeZone: 'Europe/Rome', language: 'it' };\nif (d.client_phone) attendee.phoneNumber = d.client_phone;\n// Costruisci payload finale mantenendo i campi originali (incluso numeroseduta, ecc.)\nconst calBody = {\n  eventTypeId: d.eventTypeId,\n  start: d.new_start_iso,\n  attendee,\n  bookingFieldsResponses: { ...originalFields }\n};\n// Aggiorna note interne se presenti in Supabase\nif (d.appt_notes) calBody.bookingFieldsResponses.notes = d.appt_notes;\nreturn [{ json: {\n  calBody,\n  uid_for_cancel:  d.uid_for_cancel,\n  appointment_id:  d.appointment_id,\n  new_start_iso:   d.new_start_iso,\n  client_email:    d.client_email,\n  client_name:     d.client_name,\n  client_id:       d.client_id,\n  freed_slot_at:   d.freed_slot_at,\n  appt_type:       d.appt_type\n} }];"
+      },
+      "id": "4dfb155b-ccbd-4276-b6ec-8019b9fbbb5f",
+      "name": "Prepara Body Finale",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14160,
+        3168
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.uid_for_cancel ? 'https://api.cal.com/v2/bookings/' + $json.uid_for_cancel + '/cancel' : 'https://api.cal.com/v2/bookings/noop/cancel' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer cal_live_c63016ee51343f3492c2759c4a0d5c93"
+            },
+            {
+              "name": "cal-api-version",
+              "value": "2024-08-13"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"cancellationReason\": \"Cambio data libero richiesto dal cliente\" }",
+        "options": {}
+      },
+      "id": "b523dd24-51f1-4e63-aeb1-9214513e9a86",
+      "name": "Cancella Vecchio Booking",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        14384,
+        3168
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cal.com/v2/bookings",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer cal_live_c63016ee51343f3492c2759c4a0d5c93"
+            },
+            {
+              "name": "cal-api-version",
+              "value": "2024-08-13"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $('Prepara Body Finale').item.json.calBody }}",
+        "options": {}
+      },
+      "id": "878b835f-4060-4048-b3aa-8313f87294f2",
+      "name": "Crea Nuovo Booking",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        14608,
+        3168
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp = $input.item.json;\nconst new_uid = resp.data?.uid || resp.uid || null;\nconst booking_ok = !!(new_uid);\nconst d = $('Prepara Body Finale').item.json;\nreturn [{ json: {\n  new_uid,\n  booking_ok,\n  appointment_id: d.appointment_id,\n  new_start_iso:  d.new_start_iso,\n  client_email:   d.client_email,\n  client_name:    d.client_name,\n  client_id:      d.client_id,\n  freed_slot_at:  d.freed_slot_at,\n  appt_type:      d.appt_type\n} }];"
+      },
+      "id": "46a3cc73-6c11-453d-8f62-fdb08612bd5c",
+      "name": "Salva Nuovo UID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14832,
+        3168
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "booking-ok-check",
+              "leftValue": "={{ $json.booking_ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1b4a8908-3e75-4235-850e-3cbb4f6f5571",
+      "name": "Booking Riuscito?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        15056,
+        3168
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/appointments?id=eq.{{ $json.appointment_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ scheduled_at: $json.new_start_iso, ...(($json.new_uid) ? { cal_booking_uid: $json.new_uid } : {}) }) }}",
+        "options": {}
+      },
+      "id": "5afa5e21-e549-4919-a6f4-64040fdc41e4",
+      "name": "Aggiorna Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        15280,
+        3168
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/notifications",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ (() => { const d = $('Salva Nuovo UID').item.json; const isSeduta = d.appt_type === 'seduta'; const labels = { seduta: 'seduta', 'pre-seduta': 'pre-seduta', consulenza: 'consulenza' }; const label = labels[d.appt_type] || 'seduta'; const titleLabel = { seduta: 'Seduta', 'pre-seduta': 'Pre-seduta', consulenza: 'Consulenza' }[d.appt_type] || 'Appuntamento'; const notifType = isSeduta ? 'seduta_free_reschedule' : 'appointment_rescheduled'; const title = titleLabel + ' spostata dal cliente'; const body = d.client_name + ' ha spostato la ' + label + ' al ' + new Date(d.new_start_iso).toLocaleString('it-IT', { weekday:'long', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Rome' }) + (isSeduta && d.freed_slot_at ? '. Posto liberato: ' + new Date(d.freed_slot_at).toLocaleString('it-IT', { weekday:'long', day:'2-digit', month:'long', timeZone:'Europe/Rome' }) : ''); const meta = (isSeduta && d.freed_slot_at) ? { freed_slot_at: d.freed_slot_at, client_name: d.client_name } : null; return JSON.stringify({ type: notifType, title, body, client_id: d.client_id, read: false, meta }); })() }}",
+        "options": {}
+      },
+      "id": "571d1b00-c0c0-40d0-896d-4175dfa83266",
+      "name": "Notifica Irene",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        15504,
+        3168
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/notifications",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: 'reschedule_error', title: '❌ Errore cambio data', body: $('Salva Nuovo UID').item.json.client_name + ' ha provato a cambiare data ma Cal.com non ha creato il nuovo booking. Il vecchio booking è stato cancellato. Intervieni manualmente.', client_id: $('Salva Nuovo UID').item.json.client_id, read: false, meta: { appointment_id: $('Salva Nuovo UID').item.json.appointment_id, new_start_iso: $('Salva Nuovo UID').item.json.new_start_iso } }) }}",
+        "options": {}
+      },
+      "id": "a8c10efe-264d-4053-a4a5-11ef4f522feb",
+      "name": "Notifica Irene Errore",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        15280,
+        3408
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Salva Nuovo UID').item.json.client_email }}",
+        "subject": "={{ $('Salva Nuovo UID').item.json.appt_type === 'pre-seduta' ? 'Pre-seduta riprogrammata - Irene Gipsy Tattoo' : ($('Salva Nuovo UID').item.json.appt_type === 'consulenza' ? 'Consulenza riprogrammata - Irene Gipsy Tattoo' : 'Seduta tatuaggio riprogrammata - Irene Gipsy Tattoo') }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n  <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n  <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap\" rel=\"stylesheet\">\n  <style>\n    body { margin:0; padding:0; background-color:#0a0a0a; font-family:'Montserrat',sans-serif; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }\n    .email-wrapper { background-color:#0a0a0a; padding:30px 10px; }\n    .container { max-width:600px; width:100%; margin:0 auto; background-color:#121212; overflow:hidden; }\n    .header { background-color:#000000; padding:40px 30px 32px; text-align:center; border-bottom:1px solid #222; }\n    .header-divider { width:60px; height:2px; background-color:#D4AF37; margin:0 auto 20px; }\n    .content { background-color:#121212; padding:36px 30px; }\n    .footer { background-color:#000000; text-align:center; padding:30px 20px; border-top:1px solid #222; }\n    @media only screen and (max-width:600px) {\n      .email-wrapper { padding:10px 5px !important; }\n      .header { padding:28px 16px 24px !important; }\n      .content { padding:24px 16px !important; }\n      .footer { padding:24px 16px !important; }\n      .header-script { font-size:1.3rem !important; }\n      .header-h1 { font-size:1.4rem !important; }\n      .data-box { padding:16px !important; }\n      .note { padding:16px !important; }\n      .btn-mobile { display:block !important; width:85% !important; max-width:300px !important; margin:0 auto !important; box-sizing:border-box !important; padding:14px 20px !important; }\n    }\n    @media only screen and (max-width:400px) {\n      .header-h1 { font-size:1.2rem !important; }\n      .btn-mobile { width:92% !important; font-size:0.85rem !important; }\n    }\n  </style>\n</head>\n<body style=\"margin:0;padding:0;background-color:#0a0a0a;\">\n  <div class=\"email-wrapper\" style=\"background-color:#0a0a0a;padding:30px 10px;\">\n    <div class=\"container\" style=\"max-width:600px;width:100%;margin:0 auto;background-color:#121212;overflow:hidden;\">\n\n      <!-- HEADER -->\n      <div class=\"header\" style=\"background-color:#000000;padding:40px 30px 32px;text-align:center;border-bottom:1px solid #222;\">\n        <span class=\"header-script\" style=\"font-family:'Playfair Display',serif;font-size:1.6rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:6px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#F5F5DC;letter-spacing:3px;text-transform:uppercase;display:block;margin-bottom:20px;\">Realistic Tattoo Artist</span>\n        <div class=\"header-divider\" style=\"width:60px;height:2px;background-color:#D4AF37;margin:0 auto 20px;\"></div>\n        <h1 class=\"header-h1\" style=\"font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:400;color:#D4AF37;margin:0;letter-spacing:0.5px;\">{{ $('Salva Nuovo UID').item.json.appt_type === 'pre-seduta' ? 'Pre-seduta Riprogrammata' : ($('Salva Nuovo UID').item.json.appt_type === 'consulenza' ? 'Consulenza Riprogrammata' : 'Seduta Riprogrammata') }}</h1>\n      </div>\n\n      <!-- CONTENT -->\n      <div class=\"content\" style=\"background-color:#121212;padding:36px 30px;\">\n\n        <p style=\"font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;color:#D4AF37;margin-bottom:14px;font-style:italic;\">Ciao {{ $('Salva Nuovo UID').item.json.client_name }},</p>\n\n        <p style=\"font-size:0.95rem;margin-bottom:28px;color:#F5F5DC;font-weight:300;line-height:1.7;font-family:'Montserrat',sans-serif;text-align:justify;\">\n          Il tuo appuntamento e' stato <strong style=\"color:#D4AF37;font-weight:600;\">riprogrammato con successo</strong>. Ecco la nuova data confermata.\n        </p>\n\n        <!-- DATA BOX -->\n        <div class=\"data-box\" style=\"background-color:#1a160a;border:1px solid #D4AF37;padding:28px 24px;margin:0 0 28px;\">\n          <p style=\"font-family:'Playfair Display',serif;font-size:1rem;font-weight:400;color:#D4AF37;margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid #3a2e10;\">&#128197; Nuova Data {{ $('Salva Nuovo UID').item.json.appt_type === 'pre-seduta' ? 'Pre-seduta' : ($('Salva Nuovo UID').item.json.appt_type === 'consulenza' ? 'Consulenza' : 'Seduta') }}</p>\n\n          <div style=\"display:flex;align-items:flex-start;margin:10px 0;line-height:1.5;\">\n            <span style=\"font-size:16px;margin-right:12px;min-width:24px;flex-shrink:0;margin-top:1px;\">&#128197;</span>\n            <div>\n              <span style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;margin-right:8px;\">Data e Ora:</span>\n              <span style=\"color:#F5F5DC;font-weight:400;font-size:0.9rem;\">{{ new Date($('Salva Nuovo UID').item.json.new_start_iso).toLocaleString('it-IT', { weekday:'long', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Rome' }) }}</span>\n            </div>\n          </div>\n        </div>\n\n        <!-- CTA -->\n        <div style=\"text-align:center;margin:0 0 28px;\">\n          <p style=\"font-size:0.8rem;color:#888888;text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;font-family:'Montserrat',sans-serif;\">Gestisci il tuo appuntamento</p>\n          <a href=\"https://irenegipsytattoo.com/dashboard.html\" class=\"btn-mobile\" style=\"display:inline-block;padding:12px 30px;border:1px solid #D4AF37;text-transform:uppercase;font-family:'Montserrat',sans-serif;font-size:0.9rem;letter-spacing:1px;background-color:#D4AF37;color:#000000;font-weight:600;text-decoration:none;border-radius:0;\">\n            Vai alla Tua Area Personale\n          </a>\n        </div>\n\n        <!-- NOTE -->\n        <div class=\"note\" style=\"background-color:#1a1a1a;padding:20px;border:1px solid #333333;\">\n          <p style=\"font-size:0.85rem;color:#888888;font-style:italic;margin:0;line-height:1.7;font-family:'Montserrat',sans-serif;text-align:justify;\">\n            Per qualsiasi necessita' non esitare a contattarci. A presto!\n          </p>\n        </div>\n\n      </div>\n\n      <!-- FOOTER -->\n      <div class=\"footer\" style=\"background-color:#000000;text-align:center;padding:30px 20px;border-top:1px solid #222222;\">\n        <span style=\"font-family:'Playfair Display',serif;font-size:1.1rem;color:#D4AF37;display:block;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:4px;\">Irene Gipsy Tattoo</span>\n        <span style=\"font-family:'Montserrat',sans-serif;font-size:0.7rem;text-transform:uppercase;letter-spacing:3px;color:#F5F5DC;display:block;margin-bottom:16px;\">Realistic Tattoo Artist</span>\n        <p style=\"margin:0 0 10px;\">\n          <a href=\"mailto:irenegipsytattoo@gmail.com\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Email</a> |\n          <a href=\"https://www.instagram.com/irenegipsytattoo/\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Instagram</a> |\n          <a href=\"https://wa.me/393471648654\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;margin:0 4px;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">Whatsapp</a>\n        </p>\n        <p style=\"margin:0 0 16px;\">\n          <a href=\"https://www.irenegipsytattoo.com\" style=\"font-family:'Montserrat',sans-serif;color:#D4AF37;text-decoration:none;font-size:0.65rem;letter-spacing:0.5px;text-transform:uppercase;\">www.irenegipsytattoo.com</a>\n        </p>\n        <p style=\"margin:0;font-size:0.7rem;color:#333333;letter-spacing:0.5px;font-family:'Montserrat',sans-serif;\">&copy; 2026 Tutti i diritti riservati</p>\n      </div>\n\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "daee737a-3816-4fa4-a50e-8b17a0f0cff5",
+      "name": "Email al Cliente",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        15728,
+        3048
+      ],
+      "webhookId": "d23b7456-aa10-43c9-93d5-f8520bde4995",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZmFlwpy10UFOwY00",
+          "name": "Gmail - Irene"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true }",
+        "options": {}
+      },
+      "id": "40903cc6-1098-4bf9-88d5-414bb7370eaf",
+      "name": "Risposta OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        15952,
+        3168
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_CHAKRAHQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: ($('Prepara Dati Cal').item.json.client_phone || ''), type: 'text', text: { body: 'Ciao ' + $('Salva Nuovo UID').item.json.client_name + '! ✅ La tua seduta è stata spostata al ' + new Date($('Salva Nuovo UID').item.json.new_start_iso).toLocaleString('it-IT', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' }) + '.\\n\\nDettagli: https://www.irenegipsytattoo.com/dashboard.html\\n\\n— Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "id": "d4e5f6a7-4001-4ddd-b004-400000000001",
+      "name": "WhatsApp (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "disabled": true,
+      "position": [
+        15728,
+        3288
+      ],
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": false, \"error\": \"booking_creation_failed\" }",
+        "options": {}
+      },
+      "id": "9c39146a-922d-4929-9adb-a75255a3d099",
+      "name": "Risposta Errore",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        15504,
+        3408
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Estrai Dati",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estrai Dati": {
+      "main": [
+        [
+          {
+            "node": "Leggi Appuntamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leggi Appuntamento": {
+      "main": [
+        [
+          {
+            "node": "Prepara Dati Cal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara Dati Cal": {
+      "main": [
+        [
+          {
+            "node": "Leggi Booking Cal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leggi Booking Cal": {
+      "main": [
+        [
+          {
+            "node": "Prepara Body Finale",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara Body Finale": {
+      "main": [
+        [
+          {
+            "node": "Cancella Vecchio Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancella Vecchio Booking": {
+      "main": [
+        [
+          {
+            "node": "Crea Nuovo Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crea Nuovo Booking": {
+      "main": [
+        [
+          {
+            "node": "Salva Nuovo UID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salva Nuovo UID": {
+      "main": [
+        [
+          {
+            "node": "Booking Riuscito?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booking Riuscito?": {
+      "main": [
+        [
+          {
+            "node": "Aggiorna Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notifica Irene Errore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggiorna Supabase": {
+      "main": [
+        [
+          {
+            "node": "Notifica Irene",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notifica Irene": {
+      "main": [
+        [
+          {
+            "node": "Email al Cliente",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WhatsApp (ChakraHQ)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notifica Irene Errore": {
+      "main": [
+        [
+          {
+            "node": "Risposta Errore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email al Cliente": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp (ChakraHQ)": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8f838c1b-ec58-4d98-9e7f-bd09e5594656",
+  "meta": {
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "id": "XKGbbiojCnH7HFQf",
+  "tags": []
+}

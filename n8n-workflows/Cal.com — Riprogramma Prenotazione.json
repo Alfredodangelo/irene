@@ -8,13 +8,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "237fbf4d-ddef-43df-9b0b-c5bde51d4bce",
+      "id": "b37e9a99-1c7c-488c-82f5-99ad963c7bbf",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        0,
-        0
+        1984,
+        400
       ],
       "webhookId": "cal-reschedule"
     },
@@ -22,13 +22,13 @@
       "parameters": {
         "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst appointment_id  = b.appointment_id  || '';\nconst new_start_iso   = b.new_start_iso   || '';\nconst reason          = b.reason          || 'Richiesta cambio data approvata';\nconst cal_booking_uid = b.cal_booking_uid || null;\nconst client_email    = b.client_email    || null;\n\nif (!appointment_id) throw new Error('appointment_id mancante');\nif (!new_start_iso)  throw new Error('new_start_iso mancante');\n\nreturn [{ json: { appointment_id, new_start_iso, reason, cal_booking_uid, client_email } }];"
       },
-      "id": "b8e2dbfc-344f-44a7-8164-79e823eb9e53",
+      "id": "fc03fdc5-4486-41d9-81bb-dcf490f06dc0",
       "name": "Estrai Dati",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        208,
-        0
+        2192,
+        400
       ]
     },
     {
@@ -49,13 +49,13 @@
         },
         "options": {}
       },
-      "id": "79eccee2-5f20-46f7-960f-9bec9f4b1117",
+      "id": "065660f6-3797-417d-a163-a7421d6e6c5b",
       "name": "Leggi Appuntamento",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        400,
-        0
+        2384,
+        400
       ],
       "onError": "continueRegularOutput"
     },
@@ -63,13 +63,13 @@
       "parameters": {
         "jsCode": "// Dati dal webhook\nconst d = $('Estrai Dati').item.json;\nconst appointment_id  = d.appointment_id;\nconst new_start_iso   = d.new_start_iso;\nconst fallback_email  = d.client_email || '';\n\n// Dati da Supabase\nconst rows = Array.isArray($input.item.json) ? $input.item.json : [$input.item.json];\nconst appt   = rows[0] || {};\nconst client = (appt.clients && typeof appt.clients === 'object') ? appt.clients : {};\n\n// UID da cancellare: prima quello passato dal webhook, poi quello in Supabase\nconst uid_for_cancel = d.cal_booking_uid || appt.cal_booking_uid || 'not-found';\n\n// Mappa tipo → eventTypeId ADMIN (orari illimitati)\nconst EVENT_TYPE_IDS = { consulenza: 5147645, 'pre-seduta': 5147653, seduta: 5147823 };\nconst eventTypeId = EVENT_TYPE_IDS[appt.type] || 5147645;\n\nconst clientName  = [client.first_name, client.last_name].filter(Boolean).join(' ').trim() || client.email || fallback_email;\nconst clientEmail = client.email || fallback_email;\nconst clientPhone = client.phone || '';\n\n// v2: attendee object (non responses)\nconst attendee = {\n  name:     clientName,\n  email:    clientEmail,\n  timeZone: 'Europe/Rome',\n  language: 'it'\n};\nif (clientPhone) attendee.phoneNumber = clientPhone;\n\nconst calPayload = {\n  eventTypeId,\n  start: new_start_iso,\n  attendee,\n  metadata: {\n    pagamento:        appt.payment_method || '',\n    descrizione_idea: appt.notes || ''\n  }\n};\nif (appt.notes) calPayload.bookingFieldsResponses = { notes: appt.notes };\n\nreturn [{ json: {\n  uid_for_cancel,\n  calBodyString: JSON.stringify(calPayload),\n  appointment_id,\n  new_start_iso,\n  client_email: clientEmail\n} }];"
       },
-      "id": "ee728169-bfaa-4a0c-a992-d8fabe1c3f17",
+      "id": "7aa441f2-95bc-40b4-adfa-f30aa196c702",
       "name": "Prepara Dati",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        608,
-        0
+        2592,
+        400
       ]
     },
     {
@@ -98,13 +98,13 @@
         "jsonBody": "={ \"cancellationReason\": \"Riprogrammazione\" }",
         "options": {}
       },
-      "id": "5552d632-f0f6-4ec9-99e8-ebf90c6d53b4",
+      "id": "fa291d40-6246-4279-94bf-5da998ebb9ff",
       "name": "Cancella Vecchio Booking",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        800,
-        0
+        2784,
+        400
       ],
       "onError": "continueRegularOutput"
     },
@@ -134,26 +134,26 @@
         "jsonBody": "={{ $('Prepara Dati').item.json.calBodyString }}",
         "options": {}
       },
-      "id": "e17b83a1-4855-4e07-a258-4ed2f65d5100",
+      "id": "f34a587d-7bd7-4301-b73f-e003b4711a52",
       "name": "Crea Nuovo Booking",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1008,
-        0
+        2992,
+        400
       ]
     },
     {
       "parameters": {
         "jsCode": "// Estrai uid dal nuovo booking Cal.com v2 (wrappato in .data)\nconst resp = $input.item.json;\nconst new_uid = resp.data?.uid || resp.uid || null;\nconst appointment_id = $('Prepara Dati').item.json.appointment_id;\nconst client_email   = $('Prepara Dati').item.json.client_email;\nconst new_start_iso  = $('Prepara Dati').item.json.new_start_iso;\n\nreturn [{ json: { new_uid, appointment_id, client_email, new_start_iso } }];"
       },
-      "id": "202547a0-c59d-4ead-a64c-a5b36e6b8d60",
+      "id": "8b4a0e5e-fdc6-444e-b4f6-1184d6240382",
       "name": "Salva Nuovo UID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1200,
-        0
+        3184,
+        400
       ]
     },
     {
@@ -186,13 +186,13 @@
         "jsonBody": "={{ JSON.stringify($json.new_uid ? { cal_booking_uid: $json.new_uid } : {}) }}",
         "options": {}
       },
-      "id": "c5aae0ab-cf6d-40d0-b3ee-a0315d1cca20",
+      "id": "10e84f06-f16e-41f7-951c-a4d756b6b96e",
       "name": "Aggiorna Supabase",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1408,
-        0
+        3392,
+        400
       ],
       "onError": "continueRegularOutput"
     },
@@ -205,13 +205,13 @@
           "appendAttribution": false
         }
       },
-      "id": "34debe0a-ede5-4677-bf27-95ce1664690d",
+      "id": "b36ea49b-8027-4759-9f6f-3e5936ed30ad",
       "name": "Email Conferma",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1600,
-        0
+        3776,
+        280
       ],
       "webhookId": "2d819fe6-23a3-4b12-a944-bef8fdc5c0bc",
       "credentials": {
@@ -228,14 +228,74 @@
         "responseBody": "={ \"ok\": true, \"message\": \"Riprogrammazione completata\" }",
         "options": {}
       },
-      "id": "0c0ca27a-d202-44bd-a549-c55bf1683587",
+      "id": "40e12408-e199-446a-be3d-ea49340c030a",
       "name": "Risposta OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1808,
-        0
+        3984,
+        400
       ]
+    },
+    {
+      "parameters": {
+        "url": "=https://ptoerfxyydlcjstiqqwb.supabase.co/rest/v1/clients?email=eq.{{ $('Salva Nuovo UID').item.json.client_email }}&select=phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0b2VyZnh5eWRsY2pzdGlxcXdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQzNTQzMywiZXhwIjoyMDg4MDExNDMzfQ.hxZf-JiV-e5-EtGgwPf-J2qNWu8TW_tBRLeBWTuaGyM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-3001-4ccc-b003-300000000001",
+      "name": "Lookup Phone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3584,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_CHAKRAHQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: ($input.item.json[0]?.phone || $input.item.json.phone || ''), type: 'text', text: { body: 'Ciao! 📅 Il tuo appuntamento è stato riprogrammato al ' + new Date($('Salva Nuovo UID').item.json.new_start_iso).toLocaleString('it-IT', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' }) + '.\\n\\nDettagli: https://www.irenegipsytattoo.com/dashboard.html\\n\\n— Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "id": "c3d4e5f6-3001-4ccc-b003-300000000002",
+      "name": "WhatsApp (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "disabled": true,
+      "position": [
+        3776,
+        520
+      ],
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ."
     }
   ],
   "pinData": {},
@@ -321,7 +381,23 @@
       "main": [
         [
           {
+            "node": "Lookup Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Phone": {
+      "main": [
+        [
+          {
             "node": "Email Conferma",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WhatsApp (ChakraHQ)",
             "type": "main",
             "index": 0
           }
@@ -338,13 +414,25 @@
           }
         ]
       ]
+    },
+    "WhatsApp (ChakraHQ)": {
+      "main": [
+        [
+          {
+            "node": "Risposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
-  "versionId": "bdf823c5-abeb-4eb9-9271-3adbe11c4712",
+  "versionId": "efd82d4c-63ed-4a3d-bf58-fefc6c0b081b",
   "meta": {
     "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
   },

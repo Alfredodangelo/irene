@@ -153,108 +153,8 @@
               "removed": true
             },
             {
-              "id": "PRESEDUTA",
-              "displayName": "PRESEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "DATA 1 SEDUTA",
-              "displayName": "DATA 1 SEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "CONFERMA 1",
-              "displayName": "CONFERMA 1",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "DATA 2 SEDUTA",
-              "displayName": "DATA 2 SEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "CONFERMA 2",
-              "displayName": "CONFERMA 2",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "DATA 3 SEDUTA",
-              "displayName": "DATA 3 SEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "CONFERMA 3",
-              "displayName": "CONFERMA 3",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "DATA 4 SEDUTA",
-              "displayName": "DATA 4 SEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "CONFERMA 4",
-              "displayName": "CONFERMA 4",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "DATA 5 SEDUTA",
-              "displayName": "DATA 5 SEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "CONFERMA 5",
-              "displayName": "CONFERMA 5",
+              "id": "INDIRIZZO",
+              "displayName": "INDIRIZZO",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -281,7 +181,8 @@
           "id": "hWHUDoqB9c7bIPOk",
           "name": "Google Sheets - Irene"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -345,8 +246,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5504,
-        9216
+        4112,
+        9984
       ],
       "id": "fadebb3c-5ee5-47d5-a0ef-1f01e712167d",
       "name": "Carica Foto Supabase",
@@ -381,8 +282,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        5728,
-        9120
+        4384,
+        9632
       ],
       "id": "94f8f40d-a2ea-48ad-bed3-880b2e1f64f0",
       "name": "Upload Foto Storage",
@@ -440,8 +341,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        5728,
-        9312
+        4416,
+        10112
       ],
       "id": "9ccdba14-0cdb-4768-9ea7-8f5d2e9ae1cb",
       "name": "Upload Foto Drive",
@@ -654,7 +555,8 @@
           "id": "hWHUDoqB9c7bIPOk",
           "name": "Google Sheets - Irene"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -668,204 +570,6 @@
       ],
       "id": "9cff7a94-4596-462c-8948-62ea6767c7df",
       "name": "Normalizza Dati Webhook"
-    },
-    {
-      "parameters": {
-        "operation": "appendOrUpdate",
-        "documentId": {
-          "__rl": true,
-          "value": "19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo",
-          "mode": "list",
-          "cachedResultName": "DataBase_clienti_commercialista",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "Foglio1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo/edit#gid=0"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "NOME COGNOME": "={{ $json.nome_cliente }}",
-            "EMAIL": "={{ $json.email_cliente }}"
-          },
-          "matchingColumns": [
-            "NOME COGNOME"
-          ],
-          "schema": [
-            {
-              "id": "NOME COGNOME",
-              "displayName": "NOME COGNOME",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "EMAIL",
-              "displayName": "EMAIL",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "CELLULARE",
-              "displayName": "CELLULARE",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "C.F.",
-              "displayName": "C.F.",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "PRESEDUTA",
-              "displayName": "PRESEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "DATA 1 SEDUTA",
-              "displayName": "DATA 1 SEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "CONFERMA 1",
-              "displayName": "CONFERMA 1",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "DATA 2 SEDUTA",
-              "displayName": "DATA 2 SEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "CONFERMA 2",
-              "displayName": "CONFERMA 2",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "DATA 3 SEDUTA",
-              "displayName": "DATA 3 SEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "CONFERMA 3",
-              "displayName": "CONFERMA 3",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "DATA 4 SEDUTA",
-              "displayName": "DATA 4 SEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "CONFERMA 4",
-              "displayName": "CONFERMA 4",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "DATA 5 SEDUTA",
-              "displayName": "DATA 5 SEDUTA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "CONFERMA 5",
-              "displayName": "CONFERMA 5",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        5280,
-        9696
-      ],
-      "id": "845eb3d2-71f0-4429-9882-3ac7d89fde06",
-      "name": "Salva Commercialista Sheet2",
-      "retryOnFail": true,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "hWHUDoqB9c7bIPOk",
-          "name": "Google Sheets - Irene"
-        }
-      }
     },
     {
       "parameters": {
@@ -1049,8 +753,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        5008,
-        10528
+        5168,
+        10288
       ],
       "onError": "continueRegularOutput"
     },
@@ -1105,8 +809,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        5232,
-        10528
+        5632,
+        10336
       ]
     },
     {
@@ -1123,8 +827,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        4816,
-        10576
+        4944,
+        10208
       ],
       "webhookId": "4b0ea9d6-2815-464a-8a46-9219b1720b3b",
       "credentials": {
@@ -1165,8 +869,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3632,
-        10464
+        4048,
+        10288
       ],
       "onError": "continueRegularOutput"
     },
@@ -1233,6 +937,132 @@
         4816,
         10464
       ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo",
+          "mode": "list",
+          "cachedResultName": "DataBase_clienti_commercialista",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Foglio1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19qSkyEJcCa20QamgErvSaEEJUdB7RqWEYQmaEd4s9lo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "NOME COGNOME": "={{ $json.nome_cliente }}",
+            "EMAIL": "={{ $json.email_cliente }}"
+          },
+          "matchingColumns": [
+            "NOME COGNOME"
+          ],
+          "schema": [
+            {
+              "id": "NOME COGNOME",
+              "displayName": "NOME COGNOME",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "EMAIL",
+              "displayName": "EMAIL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CELLULARE",
+              "displayName": "CELLULARE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "C.F.",
+              "displayName": "C.F.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "INDIRIZZO",
+              "displayName": "INDIRIZZO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        5280,
+        9696
+      ],
+      "id": "845eb3d2-71f0-4429-9882-3ac7d89fde06",
+      "name": "Salva Commercialista Sheet2",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hWHUDoqB9c7bIPOk",
+          "name": "Google Sheets - Irene"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apis.chakrahq.com/v1/whatsapp/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_CHAKRAHQ_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: $('Estrai Dati Webhook').item.json.telefono, type: 'text', text: { body: 'Ciao ' + $('Estrai Dati Webhook').item.json.nome + '! \\ud83d\\udda4 Il tuo account su Irene Gipsy Tattoo \\u00e8 stato creato. Trovi tutti i dettagli nella tua area personale: https://www.irenegipsytattoo.com/dashboard.html\\n\\nA presto!\\n\\u2014 Irene Gipsy Tattoo' } }) }}",
+        "options": {}
+      },
+      "name": "WhatsApp Benvenuto (ChakraHQ)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4944,
+        10448
+      ],
+      "id": "a1b2c3d4-1111-4aaa-bbbb-000000000001",
+      "disabled": true,
+      "notes": "⚠️ DA CONFIGURARE: Sostituisci YOUR_CHAKRAHQ_API_KEY con la tua API key ChakraHQ. Abilita il nodo quando pronto."
     }
   ],
   "pinData": {},
@@ -1507,6 +1337,11 @@
             "node": "Invia Email Benvenuto",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "WhatsApp Benvenuto (ChakraHQ)",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -1514,9 +1349,11 @@
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
   },
-  "versionId": "a008b8f7-c8ec-418c-84ea-0f61cb3dccd8",
+  "versionId": "51bdcad4-daa5-43ba-a109-1385afe7ce0f",
   "meta": {
     "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
   },
