@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst client_email  = b.client_email  || '';\nconst client_name   = b.client_name   || 'Cliente';\nconst freed_slot_at = b.freed_slot_at  || '';\n\nif (!client_email)  throw new Error('client_email mancante');\nif (!freed_slot_at) throw new Error('freed_slot_at mancante');\n\nconst dt = new Date(freed_slot_at);\nconst dateFormatted = dt.toLocaleDateString('it-IT', {\n  weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',\n  hour: '2-digit', minute: '2-digit'\n});\n\nreturn [{ json: { client_email, client_name, freed_slot_at, dateFormatted } }];"
+        "jsCode": "const b = $input.item.json.body || $input.item.json;\nconst client_email  = b.client_email  || '';\nconst client_name   = b.client_name   || 'Cliente';\nconst freed_slot_at = b.freed_slot_at  || '';\n\nif (!client_email)  throw new Error('client_email mancante');\nif (!freed_slot_at) throw new Error('freed_slot_at mancante');\n\nconst dt = new Date(freed_slot_at);\nconst dateFormatted = dt.toLocaleDateString('it-IT', {\n  weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',\n  hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome'\n});\n\nreturn [{ json: { client_email, client_name, freed_slot_at, dateFormatted } }];"
       },
       "id": "c0e39219-f7ec-4520-95ea-5de79e83eb31",
       "name": "Estrai Dati",

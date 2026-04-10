@@ -1130,7 +1130,7 @@ async function openClientDetail(clientId) {
     if (deletionBanner) {
         if (client.deletion_requested_at) {
             const d = new Date(client.deletion_requested_at).toLocaleDateString('it-IT',
-                { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' });
             document.getElementById('clientDeletionBannerDate').textContent = `Richiesta il ${d}`;
             deletionBanner.style.display = 'block';
         } else {
@@ -1930,14 +1930,14 @@ function formatDate(dateStr) {
 
 function formatTime(dateStr) {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    return new Date(dateStr).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' });
 }
 
 function formatDateTime(dateStr) {
     if (!dateStr) return '—';
     return new Date(dateStr).toLocaleDateString('it-IT', {
         weekday: 'short', day: '2-digit', month: 'long', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
+        hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome'
     });
 }
 
@@ -2565,7 +2565,7 @@ function renderRescheduleRequests() {
         const safeName  = name.replace(/'/g, "\\'");
         const safeEmail = (client?.email || '').replace(/'/g, "\\'");
         const oldDate   = r.appointments?.scheduled_at
-            ? new Date(r.appointments.scheduled_at).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+            ? new Date(r.appointments.scheduled_at).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone: 'Europe/Rome' })
             : '—';
         const newDate   = new Date(r.requested_date).toLocaleDateString('it-IT');
         return `
@@ -3407,7 +3407,7 @@ let _cancelApptData = null; // { id, clientEmail, clientName, scheduledAt }
 function openCancelModal(apptId, clientEmail, clientName, scheduledAt) {
     _cancelApptData = { id: apptId, clientEmail, clientName, scheduledAt };
     const dt = scheduledAt
-        ? new Date(scheduledAt).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+        ? new Date(scheduledAt).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone: 'Europe/Rome' })
         : '—';
     document.getElementById('cancelApptInfo').textContent =
         `${clientName} — ${dt}`;
@@ -3496,7 +3496,7 @@ function openFreedSlotModal(scheduledAt, apptId, notifId, reason) {
     _freedSlotApptId      = apptId || null;
     _freedSlotNotifId     = notifId || null;
     const label = new Date(scheduledAt).toLocaleDateString('it-IT',
-        { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' });
     document.getElementById('freedSlotDateLabel').textContent = label;
     const reasonEl = document.getElementById('freedSlotReasonLabel');
     const decodedReason = reason ? decodeURIComponent(reason) : '';
@@ -5054,6 +5054,9 @@ let _aaRec = null, _aaChunks = [], _aaTimer = null, _aaSecs = 0;
 
 async function toggleAdminVoice() {
     if (_aaRec && _aaRec.state === 'recording') { stopAdminVoice(true); return; }
+    // Immediate visual feedback while mic activates
+    const micBtn = document.getElementById('aaMicBtn');
+    if (micBtn) micBtn.classList.add('recording');
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         _aaChunks = []; _aaSecs = 0;
@@ -5074,6 +5077,7 @@ async function toggleAdminVoice() {
             document.getElementById('aaMicTimer').textContent = m + ':' + String(s).padStart(2, '0');
         }, 1000);
     } catch (_) {
+        if (micBtn) micBtn.classList.remove('recording');
         showToast('Microfono non disponibile. Controlla i permessi.', 4000, true);
     }
 }

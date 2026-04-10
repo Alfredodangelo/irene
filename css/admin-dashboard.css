@@ -1693,8 +1693,8 @@ body.aa-full .admin-layout {
 .aa-input-area {
     display: flex; flex-direction: column; gap: 8px;
     padding: 12px 14px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    background: #0d0d0d; flex-shrink: 0;
+    border-top: none;
+    background: #111; flex-shrink: 0;
 }
 .aa-input-row {
     display: flex; align-items: flex-end; gap: 8px;

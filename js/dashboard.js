@@ -1192,7 +1192,7 @@ function formatDate(iso, dateOnly = false) {
     try {
         const d = new Date(iso);
         if (dateOnly) return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
-        return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' });
     } catch { return iso; }
 }
 
@@ -2509,10 +2509,10 @@ async function submitWlJoinRequest() {
 function buildAdvanceOfferBanner(offer) {
     const date = new Date(offer.freed_slot_at).toLocaleDateString('it-IT', {
         weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
+        hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome'
     });
     const expiresAt = new Date(offer.expires_at).toLocaleDateString('it-IT', {
-        day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit'
+        day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome'
     });
     return `
     <div style="margin-bottom:14px;background:rgba(109,192,124,0.08);border:1px solid rgba(109,192,124,0.35);
@@ -2542,6 +2542,73 @@ function buildAdvanceOfferBanner(offer) {
 const ADVANCE_OFFER_ACCEPTED_URL = 'https://n8n.srv1204993.hstgr.cloud/webhook/advance-offer-accepted';
 const ADVANCE_OFFER_DECLINED_URL = 'https://n8n.srv1204993.hstgr.cloud/webhook/advance-offer-declined';
 
+// PayPal — stesso Client ID usato per le prenotazioni seduta
+// ⚠️ RICORDATI: va cambiato con il Client ID LIVE prima del lancio
+const PAYPAL_CLIENT_ID = 'YOUR_PAYPAL_CLIENT_ID';
+const EXTRA_SESSION_DEPOSIT = 50; // euro
+
+function loadPayPalSDK() {
+    return new Promise((resolve, reject) => {
+        if (window.paypal) { resolve(); return; }
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=EUR`;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('PayPal SDK non caricato'));
+        document.body.appendChild(script);
+    });
+}
+
+// Mostra modal PayPal per pagamento sessione extra.
+// Restituisce orderId se pagato, null se annullato.
+function showExtraSessionPayment() {
+    return new Promise(async (resolve) => {
+        const overlay = document.getElementById('paypalExtraOverlay');
+        const container = document.getElementById('paypalExtraBtnContainer');
+        const testBtn = document.getElementById('paypalExtraTestBtn');
+        const cancelBtn = document.getElementById('paypalExtraCancelBtn');
+        if (!overlay) { resolve(null); return; }
+
+        container.innerHTML = '';
+        overlay.style.display = 'flex';
+
+        const cleanup = () => { overlay.style.display = 'none'; container.innerHTML = ''; };
+
+        cancelBtn.onclick = () => { cleanup(); resolve(null); };
+
+        // Test mode: mostra bottone test
+        if (PAYPAL_CLIENT_ID === 'YOUR_PAYPAL_CLIENT_ID') {
+            testBtn.style.display = '';
+            testBtn.onclick = () => { cleanup(); resolve('TEST_ORDER_' + Date.now()); };
+        } else {
+            testBtn.style.display = 'none';
+            try {
+                await loadPayPalSDK();
+                paypal.Buttons({
+                    style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'pay' },
+                    createOrder: (data, actions) => actions.order.create({
+                        purchase_units: [{
+                            amount: { value: EXTRA_SESSION_DEPOSIT.toFixed(2), currency_code: 'EUR' },
+                            description: 'Acconto seduta extra - Irene Gipsy Tattoo'
+                        }]
+                    }),
+                    onApprove: async (data, actions) => {
+                        const order = await actions.order.capture();
+                        cleanup();
+                        resolve(order.id);
+                    },
+                    onError: () => {
+                        showToast('Errore durante il pagamento. Riprova.', true);
+                    }
+                }).render('#paypalExtraBtnContainer');
+            } catch {
+                showToast('PayPal non disponibile. Riprova più tardi.', true);
+                cleanup();
+                resolve(null);
+            }
+        }
+    });
+}
+
 async function acceptAdvanceOffer(offerId, freedSlotAt) {
     // Recupera in parallelo: ultime sedute + dati cliente dalla tabella clients
     const [{ data: sedute }, { data: clientRec }] = await Promise.all([
@@ -2562,12 +2629,22 @@ async function acceptAdvanceOffer(offerId, freedSlotAt) {
         : (currentUser.user_metadata?.full_name || currentUser.email);
 
     let keepLast = null;
+    let extraPaypalOrderId = null;
     if (lastSeduta) {
         const lastDate = new Date(lastSeduta.scheduled_at).toLocaleDateString('it-IT',
             { day: '2-digit', month: 'long', year: 'numeric' });
         keepLast = await customConfirm(
-            `Vuoi mantenere la tua seduta del ${lastDate} come sessione extra?\nPremi Conferma per mantenerla, Annulla per cancellarla.`
+            `Vuoi mantenere la tua seduta del ${lastDate} come sessione extra?\nPremi Conferma per mantenerla (acconto €${EXTRA_SESSION_DEPOSIT}), Annulla per cancellarla.`
         );
+
+        // Se vuole tenerla → pagamento PayPal obbligatorio
+        if (keepLast === true) {
+            extraPaypalOrderId = await showExtraSessionPayment();
+            if (!extraPaypalOrderId) {
+                showToast('Pagamento annullato. L\'offerta è ancora attiva, riprova quando vuoi.');
+                return;
+            }
+        }
     }
 
     const now = new Date().toISOString();
@@ -2600,7 +2677,7 @@ async function acceptAdvanceOffer(offerId, freedSlotAt) {
 
     // Inserisci notifica di conferma nella dashboard del cliente
     const freedDateStr = new Date(freedSlotAt).toLocaleDateString('it-IT',
-        { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' });
     await db.from('notifications').insert({
         type:      'advance_offer_accepted',
         title:     'Seduta anticipata confermata!',
@@ -2609,14 +2686,14 @@ async function acceptAdvanceOffer(offerId, freedSlotAt) {
         is_read:   false,
     });
 
-    // Se ha tenuto l'ultima seduta extra: notifica Irene per richiesta pagamento
+    // Se ha tenuto l'ultima seduta extra: notifica Irene con conferma pagamento
     if (keepLast === true && lastSeduta) {
         const lastDateStr = new Date(lastSeduta.scheduled_at).toLocaleDateString('it-IT',
             { day: '2-digit', month: 'long', year: 'numeric' });
         await db.from('notifications').insert({
             type:      'extra_seduta_payment',
-            title:     `💰 ${clientName} deve pagare una seduta extra`,
-            body:      `Ha accettato il posto del ${new Date(freedSlotAt).toLocaleDateString('it-IT',{day:'2-digit',month:'long'})} e ha mantenuto anche la seduta del ${lastDateStr}. Ricordagli di pagare la sessione extra.`,
+            title:     `✅ ${clientName} ha pagato l'acconto seduta extra`,
+            body:      `Ha accettato il posto del ${new Date(freedSlotAt).toLocaleDateString('it-IT',{day:'2-digit',month:'long'})} e ha mantenuto la seduta del ${lastDateStr}. Acconto €${EXTRA_SESSION_DEPOSIT} pagato (PayPal: ${extraPaypalOrderId}).`,
             client_id: lastSeduta.client_id,
             is_read:   false,
         });
@@ -2635,6 +2712,7 @@ async function acceptAdvanceOffer(offerId, freedSlotAt) {
             cal_booking_uid_old:      keepLast === false ? (lastSeduta?.cal_booking_uid || null) : null,
             client_email:             currentUser.email,
             client_name:              clientName,
+            extra_session_paypal_id:  extraPaypalOrderId || null,
         }),
     }).catch(e => console.warn('[advance-offer-accepted]', e));
 
@@ -2648,6 +2726,18 @@ async function declineAdvanceOffer(offerId, freedSlotAt) {
         .eq('id', offerId);
     if (error) { showToast('Errore: ' + error.message, true); return; }
 
+    // Sposta il cliente in fondo alla lista d'attesa
+    const { data: allWl } = await db.from('waitlist')
+        .select('position')
+        .eq('active', true)
+        .order('position', { ascending: false })
+        .limit(1);
+    const maxPos = allWl?.[0]?.position || 0;
+    await db.from('waitlist')
+        .update({ position: maxPos + 1 })
+        .eq('client_id', currentUser.id)
+        .eq('active', true);
+
     // fire-and-forget n8n per notificare Irene
     fetch(ADVANCE_OFFER_DECLINED_URL, {
         method: 'POST',
@@ -2655,6 +2745,7 @@ async function declineAdvanceOffer(offerId, freedSlotAt) {
         body: JSON.stringify({ offer_id: offerId, freed_slot_at: freedSlotAt }),
     }).catch(e => console.warn('[advance-offer-declined]', e));
 
+    showToast('Offerta rifiutata. Sei stato/a spostato/a in fondo alla lista d\'attesa.');
     await loadAllData();
 }
 

@@ -83,7 +83,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const responseData = $input.first().json;\nconst appointments = Array.isArray(responseData) ? responseData : [];\nif (appointments.length === 0) return [];\n\nreturn appointments.map(function(appt) {\n  var client = appt.clients || {};\n  var date = new Date(appt.scheduled_at);\n  return { json: {\n    appointmentId: appt.id,\n    clientId:      client.id,\n    clientName:    ((client.first_name||'') + ' ' + (client.last_name||'')).trim() || 'Cliente sconosciuto',\n    clientEmail:   client.email || '',\n    clientPhone:   client.phone || '',\n    data:          date.toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long', year:'numeric'}),\n    ora:           date.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})\n  }};\n}).filter(Boolean);"
+        "jsCode": "const responseData = $input.first().json;\nconst appointments = Array.isArray(responseData) ? responseData : [];\nif (appointments.length === 0) return [];\n\nreturn appointments.map(function(appt) {\n  var client = appt.clients || {};\n  var date = new Date(appt.scheduled_at);\n  return { json: {\n    appointmentId: appt.id,\n    clientId:      client.id,\n    clientName:    ((client.first_name||'') + ' ' + (client.last_name||'')).trim() || 'Cliente sconosciuto',\n    clientEmail:   client.email || '',\n    clientPhone:   client.phone || '',\n    data:          date.toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long', year:'numeric'}),\n    ora:           date.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit', timeZone:'Europe/Rome'})\n  }};\n}).filter(Boolean);"
       },
       "id": "d3b30001-0001-4001-8001-000000000004",
       "name": "Dati Non Confermati",
