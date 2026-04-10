@@ -4726,3 +4726,304 @@ async function rejectClientDeletion() {
     document.getElementById('clientDeletionBanner').style.display = 'none';
     showToast('Richiesta rifiutata — account mantenuto.');
 }
+
+// ============================================
+// ADMIN AI ASSISTANT
+// ============================================
+const AA_CHAT_URL = 'https://n8n.srv1204993.hstgr.cloud/webhook/chat-admin';
+const AA_SESSION  = crypto.randomUUID();
+let aaHistory = [];
+let aaPendingAction = null;
+let aaBusy = false;
+
+// ─── Context builders ────────────────────────────────────────
+function aaBuildContext() {
+    const today = new Date().toISOString().slice(0, 10);
+    const todayAppts = (allAppointments || [])
+        .filter(a => a.scheduled_at && a.scheduled_at.startsWith(today) && a.status !== 'cancelled')
+        .map(a => ({
+            type: a.type, time: a.scheduled_at.slice(11, 16), status: a.status,
+            client: a.clients ? [a.clients.first_name, a.clients.last_name].filter(Boolean).join(' ') : '?',
+        }));
+    const clients = (allClients || []).slice(0, 300).map(c => ({
+        id: c.id,
+        n: [c.first_name, c.last_name].filter(Boolean).join(' '),
+        e: c.email || '', p: c.phone || '',
+    }));
+    const wl = (allWaitlist || []).filter(w => w.active).map(w => ({
+        n: w.clients ? [w.clients.first_name, w.clients.last_name].filter(Boolean).join(' ') : '?',
+        pos: w.position, pri: w.priority,
+    }));
+    const wlReqs = (allRescheduleRequests || []).length; // pending requests count
+    const pendingWl = (allWaitlistRequests || []).length;
+    return { date: today, today_appts: todayAppts, clients, waitlist: wl, pending_wl_requests: pendingWl, pending_rsch_requests: wlReqs };
+}
+
+// ─── Quick actions ───────────────────────────────────────────
+function aaQuick(text) {
+    const inp = document.getElementById('aaInput');
+    if (inp) { inp.value = text; sendAdminMsg(); }
+}
+
+// ─── Send text message ──────────────────────────────────────
+async function sendAdminMsg() {
+    const inp = document.getElementById('aaInput');
+    const text = (inp.value || '').trim();
+    if (!text || aaBusy) return;
+    inp.value = ''; aaAutoResize();
+
+    // Remove welcome screen
+    const wel = document.querySelector('.aa-welcome');
+    if (wel) wel.remove();
+
+    addAaMsg('user', text);
+    aaHistory.push({ role: 'user', content: text });
+
+    // Check confirmation of pending action
+    if (aaPendingAction) {
+        if (/^(s[iì]|ok|conferma|confermo|vai|procedi|esatto)/i.test(text)) {
+            await aaExecAction(aaPendingAction);
+            aaPendingAction = null;
+            return;
+        }
+        if (/^(no|annulla|cancel|lascia)/i.test(text)) {
+            aaPendingAction = null;
+            addAaMsg('bot', 'OK, operazione annullata.');
+            aaHistory.push({ role: 'assistant', content: 'Operazione annullata.' });
+            return;
+        }
+        // If user says something else, clear pending and continue chat
+        aaPendingAction = null;
+    }
+
+    await aaSendToBackend({ message: text });
+}
+
+// ─── Core fetch to n8n ──────────────────────────────────────
+async function aaSendToBackend(payload) {
+    showAaTyping(true);
+    aaBusy = true;
+    try {
+        const ctrl = new AbortController();
+        const tout = setTimeout(() => ctrl.abort(), payload.audio ? 45000 : 30000);
+        const res = await fetch(AA_CHAT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...payload,
+                history: aaHistory.slice(-20),
+                sessionId: AA_SESSION,
+                context: aaBuildContext(),
+            }),
+            signal: ctrl.signal,
+        });
+        clearTimeout(tout);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+
+        // Voice: update transcription in last user bubble
+        if (data.transcription) {
+            const msgs = document.querySelectorAll('.aa-msg-user');
+            const last = msgs[msgs.length - 1];
+            if (last) last.innerHTML = data.transcription + '<div class="aa-msg-voice-badge"><i class="fas fa-microphone"></i> Vocale</div>';
+            aaHistory.push({ role: 'user', content: data.transcription });
+        }
+
+        const reply = data.reply || data.output || data.text || 'Errore nella risposta.';
+        if (data.action) aaPendingAction = data.action;
+
+        addAaMsg('bot', reply);
+        aaHistory.push({ role: 'assistant', content: reply });
+    } catch (e) {
+        addAaMsg('bot', e.name === 'AbortError'
+            ? 'Timeout — riprova.' : 'Errore di connessione. Riprova.');
+    } finally {
+        showAaTyping(false);
+        aaBusy = false;
+    }
+}
+
+// ─── Action execution ───────────────────────────────────────
+async function aaExecAction(action) {
+    showAaTyping(true);
+    aaBusy = true;
+    try {
+        let msg = '';
+        const d = action.data || {};
+        switch (action.type) {
+            case 'create_appointment': {
+                // 1. Insert into Supabase
+                const insertData = {
+                    client_id: d.client_id,
+                    type: d.appointment_type,
+                    status: 'confirmed',
+                    scheduled_at: d.scheduled_at,
+                    ...(d.notes ? { notes: d.notes } : {}),
+                    ...(d.appointment_type === 'seduta' ? { amount: 50, amount_paid: 0 } : {}),
+                    ...(['consulenza', 'pre-seduta'].includes(d.appointment_type) && d.location ? { consultation_mode: d.location } : {}),
+                };
+                const { data: newAppt, error } = await db.from('appointments')
+                    .insert(insertData).select('*, clients(id,first_name,last_name,email,phone)').single();
+                if (error) throw new Error(error.message);
+                allAppointments.push(newAppt);
+                // 2. Fire-and-forget n8n: Cal.com + email
+                fetch(ADMIN_CREATE_APPT_URL, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        appointment_id: newAppt.id, client_id: d.client_id,
+                        client_email: d.client_email, client_name: d.client_name,
+                        client_phone: d.client_phone, appointment_type: d.appointment_type,
+                        scheduled_at: d.scheduled_at, notes: d.notes || '',
+                        is_first_session: d.is_first_session || false,
+                        location: d.location || null,
+                    }),
+                }).catch(() => {});
+                msg = '\u2705 Appuntamento creato per ' + (d.client_name || 'il cliente') + '! Email di conferma inviata.';
+                renderOverview(); renderCalendar();
+                break;
+            }
+            case 'send_message': {
+                const ctrl = new AbortController();
+                const tout = setTimeout(() => ctrl.abort(), 15000);
+                const res = await fetch('https://n8n.srv1204993.hstgr.cloud/webhook/send-message', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(d), signal: ctrl.signal,
+                });
+                clearTimeout(tout);
+                if (!res.ok) throw new Error('Errore server');
+                const chLabel = { email: 'Email', whatsapp: 'WhatsApp', sms: 'SMS' };
+                msg = '\u2705 ' + (chLabel[d.channel] || 'Messaggio') + ' inviato a ' + (d.client_name || d.to_email || 'il cliente') + '!';
+                break;
+            }
+            case 'approve_waitlist': {
+                await approveWlRequest(d.request_id);
+                msg = '\u2705 Richiesta lista d\'attesa approvata!';
+                break;
+            }
+            case 'deny_waitlist': {
+                await denyWlRequest(d.request_id);
+                msg = '\u2705 Richiesta lista d\'attesa rifiutata.';
+                break;
+            }
+            default:
+                msg = 'Azione non supportata.';
+        }
+        addAaMsg('bot', msg);
+        aaHistory.push({ role: 'assistant', content: msg });
+    } catch (e) {
+        const errMsg = '\u274c Errore: ' + (e.message || 'Riprova.');
+        addAaMsg('bot', errMsg);
+        aaHistory.push({ role: 'assistant', content: errMsg });
+    } finally {
+        showAaTyping(false);
+        aaBusy = false;
+    }
+}
+
+// ─── Render helpers ─────────────────────────────────────────
+function addAaMsg(role, text, isVoice) {
+    const box = document.getElementById('aaMessages');
+    const div = document.createElement('div');
+    div.className = 'aa-msg aa-msg-' + (role === 'user' ? 'user' : 'bot');
+    let html = '';
+    if (role !== 'user') html += '<div class="aa-msg-label">Assistente</div>';
+    html += aaFmt(text);
+    if (isVoice) html += '<div class="aa-msg-voice-badge"><i class="fas fa-microphone"></i> Vocale</div>';
+    div.innerHTML = html;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+function aaFmt(t) {
+    return t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>');
+}
+function showAaTyping(show) {
+    const box = document.getElementById('aaMessages');
+    let el = document.getElementById('aaTyping');
+    if (show && !el) {
+        el = document.createElement('div');
+        el.id = 'aaTyping'; el.className = 'aa-typing';
+        el.innerHTML = '<span></span><span></span><span></span>';
+        box.appendChild(el); box.scrollTop = box.scrollHeight;
+    } else if (!show && el) { el.remove(); }
+}
+function clearAdminChat() {
+    aaHistory = []; aaPendingAction = null;
+    document.getElementById('aaMessages').innerHTML = `
+        <div class="aa-welcome">
+            <div class="aa-welcome-icon"><i class="fas fa-robot"></i></div>
+            <p class="aa-welcome-title">Ciao Irene!</p>
+            <p class="aa-welcome-text">Sono il tuo assistente. Posso aiutarti a creare appuntamenti, cercare clienti, gestire la lista d'attesa e molto altro. Scrivi o usa il microfono.</p>
+            <div class="aa-quick-actions">
+                <button class="aa-quick-btn" onclick="aaQuick('Crea un appuntamento')"><i class="fas fa-calendar-plus"></i> Crea appuntamento</button>
+                <button class="aa-quick-btn" onclick="aaQuick('Mostra la lista d\\'attesa')"><i class="fas fa-list-ol"></i> Lista d'attesa</button>
+                <button class="aa-quick-btn" onclick="aaQuick('Cerca un cliente')"><i class="fas fa-search"></i> Cerca cliente</button>
+                <button class="aa-quick-btn" onclick="aaQuick('Appuntamenti di oggi')"><i class="fas fa-clock"></i> Oggi</button>
+            </div>
+        </div>`;
+}
+function aaAutoResize() {
+    const el = document.getElementById('aaInput');
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ─── Voice Recording (MediaRecorder → base64 → n8n Whisper) ─
+let _aaRec = null, _aaChunks = [], _aaTimer = null, _aaSecs = 0;
+
+async function toggleAdminVoice() {
+    if (_aaRec && _aaRec.state === 'recording') { stopAdminVoice(true); return; }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        _aaChunks = []; _aaSecs = 0;
+        // Try opus first, fall back to default
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : '';
+        _aaRec = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+        _aaRec.ondataavailable = e => { if (e.data.size > 0) _aaChunks.push(e.data); };
+        _aaRec.onstop = () => stream.getTracks().forEach(t => t.stop());
+        _aaRec.start(250);
+        // UI
+        document.getElementById('aaMicBtn').classList.add('recording');
+        document.getElementById('aaMicRecording').style.display = 'flex';
+        document.getElementById('aaInput').style.display = 'none';
+        document.getElementById('aaSendBtn').style.display = 'none';
+        _aaTimer = setInterval(() => {
+            _aaSecs++;
+            const m = Math.floor(_aaSecs / 60), s = _aaSecs % 60;
+            document.getElementById('aaMicTimer').textContent = m + ':' + String(s).padStart(2, '0');
+        }, 1000);
+    } catch (_) {
+        showToast('Microfono non disponibile. Controlla i permessi.', 4000, true);
+    }
+}
+
+async function stopAdminVoice(send) {
+    if (!_aaRec) return;
+    const rec = _aaRec; _aaRec = null;
+    clearInterval(_aaTimer);
+    // Reset UI
+    document.getElementById('aaMicBtn').classList.remove('recording');
+    document.getElementById('aaMicRecording').style.display = 'none';
+    document.getElementById('aaInput').style.display = '';
+    document.getElementById('aaSendBtn').style.display = '';
+    if (!send) { rec.stop(); return; }
+    // Wait for stop
+    await new Promise(r => { const orig = rec.onstop; rec.onstop = () => { if (orig) orig(); r(); }; rec.stop(); });
+    if (!_aaChunks.length) return;
+    const blob = new Blob(_aaChunks, { type: rec.mimeType || 'audio/webm' });
+    // base64
+    const b64 = await new Promise(r => { const fr = new FileReader(); fr.onloadend = () => r(fr.result.split(',')[1]); fr.readAsDataURL(blob); });
+    // Remove welcome
+    const wel = document.querySelector('.aa-welcome');
+    if (wel) wel.remove();
+    addAaMsg('user', '\uD83C\uDFA4 Nota vocale...', true);
+    await aaSendToBackend({ audio: b64, audio_format: rec.mimeType || 'audio/webm' });
+}
+
+// Auto-resize on input
+document.addEventListener('DOMContentLoaded', () => {
+    const inp = document.getElementById('aaInput');
+    if (inp) inp.addEventListener('input', aaAutoResize);
+});

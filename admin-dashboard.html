@@ -59,6 +59,10 @@
                     </span>
                     <span>Notifiche</span>
                 </button>
+                <button class="admin-nav-item" data-section="assistente">
+                    <i class="fas fa-robot"></i>
+                    <span>Assistente</span>
+                </button>
                 <button class="admin-nav-item active" data-section="overview">
                     <i class="fas fa-chart-line"></i>
                     <span>Panoramica</span>
@@ -99,6 +103,52 @@
 
             <!-- Main -->
             <main class="admin-main">
+
+                <!-- ======= ASSISTENTE AI ======= -->
+                <section id="section-assistente" class="admin-section">
+                    <div class="aa-container">
+                        <div class="aa-header">
+                            <div class="aa-header-left">
+                                <div class="aa-avatar"><i class="fas fa-robot"></i></div>
+                                <div>
+                                    <h1 class="aa-title">Assistente Irene</h1>
+                                    <span class="aa-subtitle">AI — Gestione studio</span>
+                                </div>
+                            </div>
+                            <button class="aa-clear-btn" onclick="clearAdminChat()" title="Nuova conversazione">
+                                <i class="fas fa-broom"></i>
+                            </button>
+                        </div>
+                        <div class="aa-messages" id="aaMessages">
+                            <div class="aa-welcome">
+                                <div class="aa-welcome-icon"><i class="fas fa-robot"></i></div>
+                                <p class="aa-welcome-title">Ciao Irene!</p>
+                                <p class="aa-welcome-text">Sono il tuo assistente. Posso aiutarti a creare appuntamenti, cercare clienti, gestire la lista d'attesa e molto altro. Scrivi o usa il microfono.</p>
+                                <div class="aa-quick-actions">
+                                    <button class="aa-quick-btn" onclick="aaQuick('Crea un appuntamento')"><i class="fas fa-calendar-plus"></i> Crea appuntamento</button>
+                                    <button class="aa-quick-btn" onclick="aaQuick('Mostra la lista d\'attesa')"><i class="fas fa-list-ol"></i> Lista d'attesa</button>
+                                    <button class="aa-quick-btn" onclick="aaQuick('Cerca un cliente')"><i class="fas fa-search"></i> Cerca cliente</button>
+                                    <button class="aa-quick-btn" onclick="aaQuick('Appuntamenti di oggi')"><i class="fas fa-clock"></i> Oggi</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="aa-input-area">
+                            <div class="aa-input-row">
+                                <button class="aa-mic-btn" id="aaMicBtn" onclick="toggleAdminVoice()" title="Nota vocale">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                                <div class="aa-mic-recording" id="aaMicRecording" style="display:none;">
+                                    <div class="aa-mic-pulse"></div>
+                                    <span class="aa-mic-timer" id="aaMicTimer">0:00</span>
+                                    <button class="aa-mic-stop" onclick="stopAdminVoice(false)" title="Annulla"><i class="fas fa-times"></i></button>
+                                    <button class="aa-mic-send" onclick="stopAdminVoice(true)" title="Invia"><i class="fas fa-paper-plane"></i></button>
+                                </div>
+                                <textarea class="aa-input" id="aaInput" placeholder="Scrivi un messaggio..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAdminMsg();}"></textarea>
+                                <button class="aa-send-btn" id="aaSendBtn" onclick="sendAdminMsg()"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 <!-- ======= NOTIFICHE ======= -->
                 <section id="section-notifiche" class="admin-section">

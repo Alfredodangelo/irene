@@ -1,0 +1,212 @@
+{
+  "name": "Assistente Admin — Irene",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat-admin",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "aa-001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "chat-admin"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.item.json.body || $input.item.json;\nreturn [{ json: {\n  message: b.message || '',\n  audio: b.audio || '',\n  audio_format: b.audio_format || '',\n  history: b.history || [],\n  sessionId: b.sessionId || 'default',\n  context: b.context || {},\n  hasAudio: !!b.audio\n}}];"
+      },
+      "id": "aa-002",
+      "name": "Estrai Dati",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "has-audio",
+              "leftValue": "={{ $json.hasAudio }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "aa-003",
+      "name": "Audio?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/transcriptions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.OPENAI_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "model", "value": "whisper-1" },
+            { "name": "language", "value": "it" },
+            {
+              "name": "file",
+              "parameterType": "formBinaryData",
+              "inputDataFieldName": "audioFile"
+            }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "aa-004",
+      "name": "Whisper STT",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, -140],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Estrai Dati').item.json;\nconst audioB64 = prev.audio;\n\n// Decode base64 to binary buffer\nconst binaryData = Buffer.from(audioB64, 'base64');\n\n// Determine extension from format\nconst fmt = prev.audio_format || 'audio/webm';\nlet ext = 'webm';\nif (fmt.includes('mp4')) ext = 'mp4';\nif (fmt.includes('ogg')) ext = 'ogg';\nif (fmt.includes('wav')) ext = 'wav';\n\n// Set binary property for Whisper\nreturn [{\n  json: prev,\n  binary: {\n    audioFile: {\n      data: audioB64,\n      mimeType: fmt.split(';')[0] || 'audio/webm',\n      fileName: 'voice.' + ext\n    }\n  }\n}];"
+      },
+      "id": "aa-008",
+      "name": "Prepara Audio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, -300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Estrai Dati').item.json;\nconst whisperResult = $input.item.json;\nconst transcription = whisperResult.text || '';\nif (!transcription) throw new Error('Trascrizione vuota');\nreturn [{ json: {\n  message: transcription,\n  transcription: transcription,\n  history: prev.history,\n  sessionId: prev.sessionId,\n  context: prev.context\n}}];"
+      },
+      "id": "aa-005",
+      "name": "Prepara Testo Trascritto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, -140]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.item.json;\nreturn [{ json: {\n  message: input.message,\n  transcription: '',\n  history: input.history,\n  sessionId: input.sessionId,\n  context: input.context\n}}];"
+      },
+      "id": "aa-006",
+      "name": "Prepara Testo Diretto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 140]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.item.json;\nconst ctx = input.context || {};\nconst hist = input.history || [];\n\n// Build conversation messages\nconst historyText = hist.slice(-20).map(h => h.role + ': ' + h.content).join('\\n');\n\n// Build context summary\nconst clientsStr = (ctx.clients || []).map(c => c.n + ' (' + c.e + ') [id:' + c.id + ']' + (c.p ? ' tel:' + c.p : '')).join('\\n');\nconst todayStr = (ctx.today_appts || []).map(a => a.time + ' - ' + a.type + ' - ' + a.client + ' (' + a.status + ')').join('\\n') || 'Nessun appuntamento oggi.';\nconst wlStr = (ctx.waitlist || []).map(w => '#' + (w.pos||'?') + ' ' + w.n + ' (priorità: ' + (w.pri == 1 ? 'urgente' : 'normale') + ')').join('\\n') || 'Lista vuota.';\n\nconst systemPrompt = `Sei l'assistente personale di Irene, tatuatrice professionista (Irene Gipsy Tattoo, Roma).\nIl tuo nome è \"Assistente Irene\". Rispondi SEMPRE in italiano.\n\nPERSONALITA':\n- Professionale, concisa, efficiente\n- Usa qualche emoji ma senza esagerare (max 1-2 per messaggio)\n- Risposte brevi e dirette, max 3-4 frasi per messaggi informativi\n\nDATA ODIERNA: ${ctx.date || new Date().toISOString().slice(0,10)}\n\nCLIENTI REGISTRATI (${(ctx.clients||[]).length}):\n${clientsStr || 'Nessun cliente.'}\n\nAPPUNTAMENTI DI OGGI:\n${todayStr}\n\nLISTA D'ATTESA:\n${wlStr}\n\nRICHIESTE IN SOSPESO: ${ctx.pending_wl_requests || 0} lista attesa, ${ctx.pending_rsch_requests || 0} cambio data\n\nCOSA PUOI FARE:\n1. CERCARE CLIENTI: cerca nella lista clienti per nome/email e mostra le info\n2. CREARE APPUNTAMENTI: raccogli dati (cliente, tipo, data, ora) e proponi l'azione\n3. INVIARE MESSAGGI: email, WhatsApp, SMS tramite il sistema di messaggistica\n4. GESTIRE LISTA D'ATTESA: mostra stato, approva/rifiuta richieste\n5. MOSTRARE STATISTICHE: appuntamenti del giorno, clienti totali, ecc.\n\nCREAZIONE APPUNTAMENTI — PROCEDURA OBBLIGATORIA:\n- Chiedi: chi (nome cliente), tipo (consulenza/pre-seduta/seduta), data e ora\n- Se il cliente non è in lista, dì a Irene di crearlo prima dalla sezione Clienti\n- Se ci sono più clienti con lo stesso nome, mostra la lista e chiedi quale\n- Quando hai TUTTI i dati, mostra il riepilogo e chiedi conferma\n- IMPORTANTE: nella risposta con il riepilogo, aggiungi alla fine un blocco JSON nascosto con questo formato esatto:\n  <!--ACTION:{\"type\":\"create_appointment\",\"data\":{\"client_id\":\"...\",\"client_name\":\"...\",\"client_email\":\"...\",\"client_phone\":\"...\",\"appointment_type\":\"consulenza|pre-seduta|seduta\",\"scheduled_at\":\"ISO8601\",\"notes\":\"...\",\"location\":\"in_studio|videochiamata\",\"is_first_session\":false}}-->\n- Per consulenza/pre-seduta chiedi anche la modalità: in studio o videochiamata\n- La data deve essere nel formato ISO 8601 (es: 2026-04-25T14:00:00)\n\nINVIO MESSAGGI — PROCEDURA:\n- Chiedi: destinatario (nome cliente), canale (email/whatsapp/sms), contenuto del messaggio\n- Per email chiedi anche l'oggetto\n- Mostra anteprima e chiedi conferma\n- Nel riepilogo aggiungi:\n  <!--ACTION:{\"type\":\"send_message\",\"data\":{\"channel\":\"email|whatsapp|sms\",\"to_email\":\"...\",\"to_phone\":\"...\",\"subject\":\"...\",\"message\":\"...\",\"client_name\":\"...\"}}-->\n\nREGOLE ACTION:\n- Il blocco <!--ACTION:...--> va SEMPRE alla fine del messaggio, dopo il testo visibile\n- Inseriscilo SOLO quando hai tutti i dati e stai chiedendo conferma\n- NON inserirlo quando stai ancora raccogliendo informazioni\n- Il JSON deve essere valido e su una riga sola\n\nREGOLE IMPORTANTI:\n- Se non trovi un cliente, suggerisci nomi simili dalla lista\n- Non inventare dati — usa solo quelli forniti nel contesto\n- Se Irene chiede qualcosa che non puoi fare, dillo chiaramente\n- Per orari appuntamenti suggerisci orari lavorativi (10:00-19:00, lun-ven)\n`;\n\nconst messages = [\n  { role: 'system', content: systemPrompt },\n];\n\n// Add history\nhist.slice(-16).forEach(h => {\n  messages.push({ role: h.role === 'assistant' ? 'assistant' : 'user', content: h.content });\n});\n\n// Add current message\nmessages.push({ role: 'user', content: input.message });\n\nreturn [{ json: { messages, transcription: input.transcription || '' } }];"
+      },
+      "id": "aa-007",
+      "name": "Costruisci Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.OPENAI_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-4o', messages: $json.messages, max_tokens: 800, temperature: 0.6 }) }}",
+        "options": { "timeout": 30000 }
+      },
+      "id": "aa-009",
+      "name": "OpenAI Chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, 0],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Costruisci Prompt').item.json;\nconst oai = $input.item.json;\n\nlet reply = 'Mi dispiace, c\\'è stato un errore. Riprova.';\nlet action = null;\n\nif (oai.choices && oai.choices[0] && oai.choices[0].message) {\n  reply = oai.choices[0].message.content || reply;\n}\n\n// Extract ACTION block if present\nconst actionMatch = reply.match(/<!--ACTION:(\\{.*?\\})-->/);\nif (actionMatch) {\n  try {\n    action = JSON.parse(actionMatch[1]);\n  } catch (e) {\n    // Invalid JSON in action block, ignore\n  }\n  // Remove the action block from visible reply\n  reply = reply.replace(/<!--ACTION:\\{.*?\\}-->/, '').trim();\n}\n\nconst result = { reply };\nif (prev.transcription) result.transcription = prev.transcription;\nif (action) result.action = action;\n\nreturn [{ json: result }];"
+      },
+      "id": "aa-010",
+      "name": "Formatta Risposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1540, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "aa-011",
+      "name": "Risposta",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1760, 0]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Estrai Dati", "type": "main", "index": 0 }]]
+    },
+    "Estrai Dati": {
+      "main": [[{ "node": "Audio?", "type": "main", "index": 0 }]]
+    },
+    "Audio?": {
+      "main": [
+        [{ "node": "Prepara Audio", "type": "main", "index": 0 }],
+        [{ "node": "Prepara Testo Diretto", "type": "main", "index": 0 }]
+      ]
+    },
+    "Prepara Audio": {
+      "main": [[{ "node": "Whisper STT", "type": "main", "index": 0 }]]
+    },
+    "Whisper STT": {
+      "main": [[{ "node": "Prepara Testo Trascritto", "type": "main", "index": 0 }]]
+    },
+    "Prepara Testo Trascritto": {
+      "main": [[{ "node": "Costruisci Prompt", "type": "main", "index": 0 }]]
+    },
+    "Prepara Testo Diretto": {
+      "main": [[{ "node": "Costruisci Prompt", "type": "main", "index": 0 }]]
+    },
+    "Costruisci Prompt": {
+      "main": [[{ "node": "OpenAI Chat", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Chat": {
+      "main": [[{ "node": "Formatta Risposta", "type": "main", "index": 0 }]]
+    },
+    "Formatta Risposta": {
+      "main": [[{ "node": "Risposta", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "aa-v1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "548b305da89e498b3d11055fd7feb2c3d42eb2d72a9308cee1070564155fb025"
+  },
+  "id": "AssistenteAdminIrene",
+  "tags": []
+}
