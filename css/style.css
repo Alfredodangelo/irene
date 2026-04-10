@@ -4284,8 +4284,7 @@ img {
     color: #f87171;
 }
 
-/* ===== PWA Install & Update Banners ===== */
-#pwa-install-banner,
+/* ===== PWA Update Banner ===== */
 #pwa-update-banner {
     position: fixed;
     bottom: 0;
@@ -4299,7 +4298,6 @@ img {
     border-top: 1px solid rgba(212,175,55,0.3);
     box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
 }
-#pwa-install-banner.pwa-banner-show,
 #pwa-update-banner.pwa-banner-show {
     transform: translateY(0);
 }
