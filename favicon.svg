@@ -3,6 +3,7 @@
  width="837.000000pt" height="837.000000pt" viewBox="0 0 837 837"
  preserveAspectRatio="xMidYMid meet">
 <rect width="837" height="837" rx="42" fill="#0a0a0a"/>
+<g transform="translate(418.5,418.5) scale(0.65) translate(-418.5,-418.5)">
 <g transform="translate(83.5,0)">
 <g transform="translate(0.000000,837.000000) scale(0.100000,-0.100000)"
 fill="#D4AF37" stroke="none">
@@ -48,6 +49,7 @@ l59 1 -7 -267z m209 241 c236 -44 385 -117 529 -260 139 -139 221 -289 261
 202 93 350 168 149 76 312 154 364 175 129 51 255 74 330 59z m176 -48 c63
 -29 134 -97 164 -158 22 -47 40 -139 41 -210 l0 -36 -152 5 c-84 3 -153 6
 -153 7 -1 0 1 97 3 214 5 242 -6 224 97 178z"/>
+</g>
 </g>
 </g>
 </svg>
