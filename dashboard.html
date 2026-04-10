@@ -38,6 +38,10 @@
             --font-body: 'Montserrat', sans-serif;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        button, a, input, select, textarea, [role="button"], .tab-btn {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
         body {
             background: var(--bg);
             color: var(--text);
@@ -132,7 +136,10 @@
             justify-content: space-evenly;
             border-bottom: 1px solid var(--border);
             margin-bottom: 28px;
-            overflow-x: auto;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
             scrollbar-width: none;
         }
         .tabs::-webkit-scrollbar { display: none; }

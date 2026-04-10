@@ -22,6 +22,12 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Touch: rimuovi ritardo 300ms su tap e flash blu */
+button, a, input, select, textarea, [role="button"], .admin-nav-item, .admin-card, .stat-card {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
 body {
     font-family: var(--font);
     background: var(--bg);
@@ -1099,26 +1105,31 @@ body {
         height: 81px;
         min-height: unset;
         flex-direction: row;
+        flex-wrap: nowrap;
         padding: 0;
         border-right: none;
         border-top: 1px solid rgba(255,255,255,0.1);
         z-index: 200;
-        overflow-x: auto;
+        overflow-x: scroll;
+        overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
         touch-action: pan-x;
         scrollbar-width: none;
         top: unset;
     }
     .admin-sidebar::-webkit-scrollbar { display: none; }
     .admin-nav-item {
-        flex: 0 0 20vw;
-        flex-direction: column;
-        padding: 10px 6px;
+        flex: 0 0 auto;
+        width: 20vw;
         min-width: 72px;
         max-width: 90px;
+        flex-direction: column;
+        padding: 10px 6px;
         border-radius: 0;
         font-size: 0.7rem;
         gap: 5px;
+        -webkit-tap-highlight-color: transparent;
     }
     .admin-nav-item span { display: block; font-size: 0.7rem; letter-spacing: 0; }
     .admin-nav-item i { font-size: 1.4rem; width: auto; }
@@ -2164,6 +2175,8 @@ body {
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
     scrollbar-width: none;
     position: relative;
 }
