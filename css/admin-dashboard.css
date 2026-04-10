@@ -1508,7 +1508,7 @@ body.aa-full .admin-layout {
     display: flex; flex-direction: column;
     flex: 1; min-height: 0;
     background: #111;
-    border: 1px solid rgba(212,175,55,0.2);
+    border: none;
     border-radius: 16px; overflow: hidden;
     box-shadow: 0 8px 40px rgba(0,0,0,0.5);
 }
