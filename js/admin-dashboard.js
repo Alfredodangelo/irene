@@ -336,15 +336,17 @@ async function approveWlRequest(requestId) {
     if (!req) return;
     const clientId = req.client_id;
     if (req.request_type === 'join') {
-        const maxPos = allWaitlist.reduce((m, w) => Math.max(m, w.position ?? 0), 0);
-        await db.from('waitlist').upsert(
-            { client_id: clientId, active: true, position: maxPos + 1 },
+        const { error: e1 } = await db.from('waitlist').upsert(
+            { client_id: clientId, active: true, position: 0 },
             { onConflict: 'client_id' }
         );
+        if (e1) { showToast('Errore nell\'approvazione: ' + e1.message, 4000, true); return; }
     } else {
-        await db.from('waitlist').update({ active: false }).eq('client_id', clientId);
+        const { error: e1 } = await db.from('waitlist').update({ active: false }).eq('client_id', clientId);
+        if (e1) { showToast('Errore nell\'approvazione: ' + e1.message, 4000, true); return; }
     }
-    await db.from('waitlist_requests').update({ status: 'approved', resolved_at: new Date().toISOString() }).eq('id', requestId);
+    const { error: e2 } = await db.from('waitlist_requests').update({ status: 'approved', resolved_at: new Date().toISOString() }).eq('id', requestId);
+    if (e2) { showToast('Errore aggiornamento richiesta: ' + e2.message, 4000, true); return; }
     // notifica cliente via n8n
     fetch(WL_NOTIFY_URL, {
         method: 'POST',
@@ -362,7 +364,8 @@ async function approveWlRequest(requestId) {
 async function denyWlRequest(requestId) {
     const req = allWaitlistRequests.find(r => r.id === requestId);
     if (!req) return;
-    await db.from('waitlist_requests').update({ status: 'denied', resolved_at: new Date().toISOString() }).eq('id', requestId);
+    const { error } = await db.from('waitlist_requests').update({ status: 'denied', resolved_at: new Date().toISOString() }).eq('id', requestId);
+    if (error) { showToast('Errore: ' + error.message, 4000, true); return; }
     fetch(WL_NOTIFY_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

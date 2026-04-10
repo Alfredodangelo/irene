@@ -440,6 +440,7 @@
         signal: controller.signal,
       });
       clearTimeout(timeout);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       var data = await res.json();
       removeTyping();
       var reply = data.reply || data.output || data.text || S.error;

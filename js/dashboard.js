@@ -129,6 +129,7 @@ function checkFirstLogin(user) {
     if (!user.user_metadata?.must_change_password) return;
 
     const overlay = document.getElementById('chpwdOverlay');
+    if (!overlay) return;
     overlay.style.display = 'flex';
 
     document.getElementById('chpwdBtn').addEventListener('click', async () => {
@@ -490,9 +491,13 @@ function updateTopbarName(name, avatar) {
 
 // Logout
 document.getElementById('logoutBtn').addEventListener('click', async () => {
-    localStorage.removeItem('pendingNewsletterConsent');
-    await db.auth.signOut();
-    window.location.href = 'index.html';
+    try {
+        localStorage.removeItem('pendingNewsletterConsent');
+        await db.auth.signOut();
+        window.location.href = 'index.html';
+    } catch (e) {
+        showToast('Errore nel logout. Riprova.', 3000, true);
+    }
 });
 
 // ─────────────────────────────────────────────

@@ -719,10 +719,13 @@ async function createCalBooking(formData, startISO, sessionLabel) {
         language: 'en'
     };
 
+    const bookingCtrl = new AbortController();
+    const bookingTimeout = setTimeout(() => bookingCtrl.abort(), 20000);
     const response = await fetch(
         CONFIG.N8N_CAL_BOOKINGS_URL,
-        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: bookingCtrl.signal }
     );
+    clearTimeout(bookingTimeout);
 
     const result = await response.json().catch(() => null);
 
