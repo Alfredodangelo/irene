@@ -1123,11 +1123,10 @@ body {
         border-right: none;
         border-top: 1px solid rgba(255,255,255,0.1);
         z-index: 200;
-        overflow-x: scroll;
+        overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior-x: contain;
-        touch-action: pan-x;
         scrollbar-width: none;
         top: unset;
     }
@@ -1143,6 +1142,7 @@ body {
         font-size: 0.7rem;
         gap: 5px;
         -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
     }
     .admin-nav-item span { display: block; font-size: 0.7rem; letter-spacing: 0; }
     .admin-nav-item i { font-size: 1.4rem; width: auto; }
