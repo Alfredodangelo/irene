@@ -83,6 +83,8 @@ async function setupDashboard(user) {
             filter: `client_id=eq.${uid}` }, () => loadAllData())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'waitlist',
             filter: `client_id=eq.${uid}` }, () => loadAllData())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'waitlist_requests',
+            filter: `client_id=eq.${uid}` }, () => loadAllData())
         .subscribe();
 
     // Ascolta logout da altre schede
@@ -488,6 +490,7 @@ function updateTopbarName(name, avatar) {
 
 // Logout
 document.getElementById('logoutBtn').addEventListener('click', async () => {
+    localStorage.removeItem('pendingNewsletterConsent');
     await db.auth.signOut();
     window.location.href = 'index.html';
 });
@@ -2400,7 +2403,7 @@ function buildWaitlistBlock(waitlist) {
         <div style="margin-top:16px;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;">
             <div>
                 <div style="font-size:0.8rem;font-weight:600;color:#D4AF37;margin-bottom:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <span><i class="fas fa-star" style="margin-right:5px;"></i>Lista Prioritaria</span>
+                    <span><i class="fas fa-star" style="margin-right:5px;"></i>Lista d'attesa</span>
                     <span style="background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.3);border-radius:20px;padding:2px 9px;font-size:0.66rem;font-weight:500;letter-spacing:0.3px;">Attiva</span>
                 </div>
                 <div style="font-size:0.74rem;color:#888;line-height:1.5;">
@@ -2447,17 +2450,18 @@ function closeWlLeaveModal() {
     document.getElementById('wlLeaveModal').style.display = 'none';
 }
 async function confirmWlLeave() {
+    if (!currentWaitlist?.active) { showToast('Non sei in lista.', 3000, true); closeWlLeaveModal(); return; }
     closeWlLeaveModal();
-    const { error } = await db.from('waitlist_requests').insert({
+    const { data, error } = await db.from('waitlist_requests').insert({
         client_id: currentUser.id,
         request_type: 'leave',
-    });
-    if (error) { showToast('Errore: ' + error.message); return; }
+    }).select().single();
+    if (error) { showToast('Errore: ' + error.message, 3500, true); return; }
     fetch(WL_REQUEST_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ client_id: currentUser.id, request_type: 'leave' }),
-    }).catch(() => {});
+        body: JSON.stringify({ request_id: data.id, client_id: currentUser.id, request_type: 'leave' }),
+    }).catch(() => showToast('Richiesta salvata ma notifica non inviata.', 4000, true));
     showToast('Richiesta inviata. Irene risponderà a breve.');
 }
 
@@ -2472,16 +2476,20 @@ function closeWlJoinModal() {
 
 async function submitWlJoinRequest() {
     const msg = document.getElementById('wlJoinMsg');
-    const { error } = await db.from('waitlist_requests').insert({
+    // Prevenzione doppia richiesta
+    const { data: existing } = await db.from('waitlist_requests')
+        .select('id').eq('client_id', currentUser.id).eq('request_type', 'join').eq('status', 'pending').maybeSingle();
+    if (existing) { msg.textContent = 'Hai già una richiesta in attesa.'; return; }
+    const { data, error } = await db.from('waitlist_requests').insert({
         client_id: currentUser.id,
         request_type: 'join',
-    });
+    }).select().single();
     if (error) { msg.textContent = 'Errore: ' + error.message; return; }
     fetch(WL_REQUEST_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ client_id: currentUser.id, request_type: 'join' }),
-    }).catch(() => {});
+        body: JSON.stringify({ request_id: data.id, client_id: currentUser.id, request_type: 'join' }),
+    }).catch(() => showToast('Richiesta salvata ma notifica non inviata.', 4000, true));
     closeWlJoinModal();
     showToast('Richiesta inviata. Irene risponderà a breve.');
 }

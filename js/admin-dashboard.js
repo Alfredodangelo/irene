@@ -350,7 +350,7 @@ async function approveWlRequest(requestId) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ request_id: requestId, action: 'approved', client_id: clientId, request_type: req.request_type }),
-    }).catch(() => {});
+    }).catch(() => showToast('Approvata, ma notifica email non inviata.', 4000, true));
     allWaitlistRequests = allWaitlistRequests.filter(r => r.id !== requestId);
     updateNotifBadge();
     await loadWaitlist();
@@ -367,7 +367,7 @@ async function denyWlRequest(requestId) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ request_id: requestId, action: 'denied', client_id: req.client_id, request_type: req.request_type }),
-    }).catch(() => {});
+    }).catch(() => showToast('Negata, ma notifica email non inviata.', 4000, true));
     allWaitlistRequests = allWaitlistRequests.filter(r => r.id !== requestId);
     updateNotifBadge();
     renderWlRequests();
@@ -2223,10 +2223,33 @@ function sendIndividual() {
         window.open('https://wa.me/' + num + '?text=' + encodeURIComponent(message), '_blank');
 
     } else if (currentChannel === 'email') {
-        const subject = document.getElementById('commSubject').value;
-        window.location.href = 'mailto:' + (client.email || '') +
-            '?subject=' + encodeURIComponent(subject) +
-            '&body='    + encodeURIComponent(message);
+        if (!client.email) { showToast('Questo cliente non ha un indirizzo email.', 3500, true); return; }
+        const subject = document.getElementById('commSubject').value || 'Messaggio da Irene Gipsy Tattoo';
+        const clientName = (client.first_name || 'Cliente');
+        const btn = document.getElementById('commSendBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Invio in corso...';
+        const ctrl = new AbortController();
+        const tout = setTimeout(() => ctrl.abort(), 15000);
+        fetch('https://n8n.srv1204993.hstgr.cloud/webhook/send-message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ channel: 'email', to_email: client.email, subject: subject, message: message, client_name: clientName }),
+            signal: ctrl.signal
+        })
+        .then(r => { if (!r.ok) throw new Error('Errore server'); return r.json(); })
+        .then(() => {
+            showToast('Email inviata a ' + client.email + '!');
+            document.getElementById('commMessage').value = '';
+            updateCharCount();
+        })
+        .catch(() => showToast('Errore nell\'invio dell\'email. Riprova.', 4000, true))
+        .finally(() => {
+            clearTimeout(tout);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Invia';
+        });
+        return;
 
     } else if (currentChannel === 'sms') {
         const phone = (client.phone || '').replace(/\D/g, '');
