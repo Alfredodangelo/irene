@@ -243,6 +243,19 @@ body {
 
 .admin-section { display: none; }
 .admin-section.active { display: block; }
+#section-assistente.active {
+    display: flex; flex-direction: column;
+    height: calc(100vh - 140px); overflow: hidden;
+}
+@media (max-width: 480px) {
+    #section-assistente.active { height: calc(100vh - 170px); }
+}
+@supports (height: 100dvh) {
+    #section-assistente.active { height: calc(100dvh - 140px); }
+    @media (max-width: 480px) {
+        #section-assistente.active { height: calc(100dvh - 170px); }
+    }
+}
 
 .admin-section-title {
     font-size: 1.3rem;
@@ -1487,7 +1500,7 @@ body {
    ============================================ */
 .aa-container {
     display: flex; flex-direction: column;
-    height: calc(100vh - 140px); max-height: 800px;
+    flex: 1; min-height: 0;
     background: #111;
     border: 1px solid rgba(212,175,55,0.2);
     border-radius: 16px; overflow: hidden;
@@ -1739,18 +1752,13 @@ body {
 
 /* Mobile adjustments */
 @media (max-width: 480px) {
-    .aa-container { height: calc(100vh - 170px); max-height: unset; border-radius: 0; border: none; }
+    .aa-container { border-radius: 0; border: none; box-shadow: none; }
     .aa-header { padding: 10px 14px; }
     .aa-messages { padding: 12px 10px; }
     .aa-msg { max-width: 90%; }
     .aa-input-area { padding: 10px; }
     .aa-quick-actions { gap: 6px; }
     .aa-quick-btn { font-size: 0.7rem; padding: 7px 11px; }
-}
-@supports (height: 100dvh) {
-    @media (max-width: 480px) {
-        .aa-container { height: calc(100dvh - 170px); }
-    }
 }
 
 /* === BLOCK CALENDAR PICKER === */
