@@ -4734,10 +4734,74 @@ async function rejectClientDeletion() {
 // ADMIN AI ASSISTANT
 // ============================================
 const AA_CHAT_URL = 'https://n8n.srv1204993.hstgr.cloud/webhook/chat-admin';
-const AA_SESSION  = crypto.randomUUID();
-let aaHistory = [];
+const AA_STORAGE_KEY = 'aa_chat_state';
+const AA_MAX_AGE_MS  = 24 * 60 * 60 * 1000; // 24h
+
+// Restore session from localStorage (persists up to 24h)
+function aaLoadState() {
+    try {
+        const raw = localStorage.getItem(AA_STORAGE_KEY);
+        if (!raw) return null;
+        const s = JSON.parse(raw);
+        if (Date.now() - s.ts > AA_MAX_AGE_MS) { localStorage.removeItem(AA_STORAGE_KEY); return null; }
+        return s;
+    } catch { return null; }
+}
+function aaSaveState() {
+    try {
+        localStorage.setItem(AA_STORAGE_KEY, JSON.stringify({
+            ts: Date.now(), sessionId: AA_SESSION, history: aaHistory, messages: aaSavedMessages()
+        }));
+    } catch {}
+}
+function aaSavedMessages() {
+    const box = document.getElementById('aaMessages');
+    if (!box) return [];
+    const msgs = [];
+    box.querySelectorAll('.aa-msg').forEach(el => {
+        const isUser = el.classList.contains('aa-msg-user');
+        const bubble = el.querySelector('.aa-msg-bubble');
+        if (bubble) msgs.push({ role: isUser ? 'user' : 'bot', html: bubble.innerHTML });
+    });
+    return msgs;
+}
+function aaRestoreMessages(saved) {
+    const box = document.getElementById('aaMessages');
+    if (!box || !saved.messages || saved.messages.length === 0) return;
+    // Remove welcome screen and render saved messages
+    box.innerHTML = '';
+    saved.messages.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'aa-msg aa-msg-' + (m.role === 'user' ? 'user' : 'bot');
+        const avatarIcon = m.role === 'user' ? 'fa-user' : 'fa-robot';
+        div.innerHTML = '<div class="aa-msg-avatar"><i class="fas ' + avatarIcon + '"></i></div>'
+            + '<div class="aa-msg-bubble">' + m.html + '</div>';
+        box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+}
+
+const saved = aaLoadState();
+const AA_SESSION  = saved ? saved.sessionId : crypto.randomUUID();
+let aaHistory = saved ? (saved.history || []) : [];
 let aaPendingAction = null;
 let aaBusy = false;
+
+// Restore chat UI — try after short delay (DOM ready), retry on first navigateTo('assistente')
+if (saved && saved.messages && saved.messages.length > 0) {
+    let _aaRestored = false;
+    function _aaTryRestore() {
+        if (_aaRestored) return;
+        const box = document.getElementById('aaMessages');
+        if (box) { _aaRestored = true; aaRestoreMessages(saved); }
+    }
+    setTimeout(_aaTryRestore, 300);
+    // Also hook navigateTo for deferred restore
+    document.addEventListener('click', function _aaNavClick(e) {
+        const btn = e.target.closest('[data-section="assistente"]');
+        if (btn) { setTimeout(_aaTryRestore, 50); document.removeEventListener('click', _aaNavClick); }
+    });
+}
 
 // ─── Context builders ────────────────────────────────────────
 function aaBuildContext() {
@@ -4939,6 +5003,7 @@ function addAaMsg(role, text, isVoice) {
         + '<div class="aa-msg-bubble">' + bubbleHtml + '</div>';
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
+    aaSaveState();
 }
 function aaFmt(t) {
     return t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -4958,6 +5023,7 @@ function showAaTyping(show) {
 }
 function clearAdminChat() {
     aaHistory = []; aaPendingAction = null;
+    try { localStorage.removeItem(AA_STORAGE_KEY); } catch {}
     document.getElementById('aaMessages').innerHTML = `
         <div class="aa-welcome">
             <div class="aa-welcome-icon"><i class="fas fa-robot"></i></div>

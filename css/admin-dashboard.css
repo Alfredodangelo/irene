@@ -1529,10 +1529,11 @@ body {
 
 /* Messages area */
 .aa-messages {
-    flex: 1; overflow-y: auto; padding: 16px;
+    flex: 1; min-height: 0; overflow-y: auto; padding: 16px;
     display: flex; flex-direction: column; gap: 12px;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    touch-action: pan-y;
 }
 .aa-messages::-webkit-scrollbar { width: 4px; }
 .aa-messages::-webkit-scrollbar-track { background: transparent; }
