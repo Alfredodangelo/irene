@@ -387,9 +387,11 @@ function navigateTo(section) {
     if (btn) btn.classList.add('active');
     const sec = document.getElementById('section-' + section);
     if (sec) sec.classList.add('active');
-    // Lock admin-main scroll when assistente is active (input bar must stay fixed)
+    // Lock full page scroll when assistente is active (input bar must stay fixed)
+    const isAssistente = section === 'assistente';
+    document.body.classList.toggle('aa-full', isAssistente);
     const main = document.querySelector('.admin-main');
-    if (main) main.classList.toggle('aa-lock', section === 'assistente');
+    if (main) main.classList.toggle('aa-lock', isAssistente);
     if (section === 'calendar')     renderCalendar();
     if (section === 'analytics')    renderAnalytics();
     if (section === 'portfolio')    loadPortfolioAdmin();
