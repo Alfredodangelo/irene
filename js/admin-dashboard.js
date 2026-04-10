@@ -387,6 +387,9 @@ function navigateTo(section) {
     if (btn) btn.classList.add('active');
     const sec = document.getElementById('section-' + section);
     if (sec) sec.classList.add('active');
+    // Lock admin-main scroll when assistente is active (input bar must stay fixed)
+    const main = document.querySelector('.admin-main');
+    if (main) main.classList.toggle('aa-lock', section === 'assistente');
     if (section === 'calendar')     renderCalendar();
     if (section === 'analytics')    renderAnalytics();
     if (section === 'portfolio')    loadPortfolioAdmin();

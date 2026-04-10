@@ -240,21 +240,16 @@ body {
     padding: 28px 32px;
     overflow-y: auto;
 }
+.admin-main.aa-lock {
+    overflow: hidden;
+    display: flex; flex-direction: column;
+}
 
 .admin-section { display: none; }
 .admin-section.active { display: block; }
 #section-assistente.active {
     display: flex; flex-direction: column;
-    height: calc(100vh - 140px); overflow: hidden;
-}
-@media (max-width: 480px) {
-    #section-assistente.active { height: calc(100vh - 170px); }
-}
-@supports (height: 100dvh) {
-    #section-assistente.active { height: calc(100dvh - 140px); }
-    @media (max-width: 480px) {
-        #section-assistente.active { height: calc(100dvh - 170px); }
-    }
+    flex: 1; min-height: 0; overflow: hidden;
 }
 
 .admin-section-title {
