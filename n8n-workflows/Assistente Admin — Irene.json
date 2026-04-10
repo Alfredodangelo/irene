@@ -50,12 +50,8 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.openai.com/v1/audio/transcriptions",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "Bearer {{ $env.OPENAI_API_KEY }}" }
-          ]
-        },
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
         "sendBody": true,
         "contentType": "multipart-form-data",
         "bodyParameters": {
@@ -76,6 +72,12 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [660, -140],
+      "credentials": {
+        "openAiApi": {
+          "id": "eEA5mIyd30Zgawju",
+          "name": "OpenAi - test -1"
+        }
+      },
       "onError": "continueRegularOutput"
     },
     {
@@ -122,10 +124,11 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "Bearer {{ $env.OPENAI_API_KEY }}" },
             { "name": "Content-Type", "value": "application/json" }
           ]
         },
@@ -139,6 +142,12 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [1320, 0],
+      "credentials": {
+        "openAiApi": {
+          "id": "eEA5mIyd30Zgawju",
+          "name": "OpenAi - test -1"
+        }
+      },
       "onError": "continueRegularOutput"
     },
     {
