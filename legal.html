@@ -88,7 +88,7 @@
                 <!-- ===================== PRIVACY POLICY ===================== -->
                 <div id="privacy" class="legal-section">
                     <h2 class="legal-section-title">Privacy Policy</h2>
-                    <p class="legal-updated">Ultimo aggiornamento: febbraio 2026 · Ai sensi dell'art. 13 GDPR (Reg. UE 2016/679)</p>
+                    <p class="legal-updated">Ultimo aggiornamento: aprile 2026 · Ai sensi dell'art. 13 GDPR (Reg. UE 2016/679)</p>
 
                     <h3 class="legal-subtitle">Titolare del Trattamento</h3>
                     <p>
@@ -98,7 +98,10 @@
                     </p>
 
                     <h3 class="legal-subtitle">Dati Raccolti</h3>
-                    <p>Il sito raccoglie esclusivamente i dati forniti volontariamente attraverso i moduli di contatto e prenotazione: nome, cognome, email, telefono e, dove applicabile, dati di pagamento tramite PayPal. I dati sono utilizzati unicamente per gestire appuntamenti e richieste.</p>
+                    <p>Il sito e l'applicazione web (PWA) raccolgono i dati forniti volontariamente attraverso i moduli di contatto, prenotazione e l'area personale: nome, cognome, email, telefono, storico appuntamenti e, dove applicabile, dati di pagamento tramite PayPal. I dati sono utilizzati per gestire appuntamenti, comunicazioni e richieste.</p>
+
+                    <h3 class="legal-subtitle">Area Personale</h3>
+                    <p>Il sito offre un'<strong>area personale</strong> accessibile tramite registrazione. Al suo interno sono visibili: appuntamenti, stato del percorso tattoo, lista d'attesa, notifiche e profilo personale. L'accesso e' protetto da autenticazione sicura tramite Supabase Auth. I dati dell'area personale sono trattati per l'erogazione del servizio di tatuaggio e non condivisi con terzi non autorizzati.</p>
 
                     <h3 class="legal-subtitle">Base Giuridica e Conservazione</h3>
                     <p>Il trattamento si basa sul consenso esplicito (art. 6 lett. a GDPR). I dati personali (nome, email, telefono, storico appuntamenti) sono conservati per un massimo di <strong>12 mesi</strong> dall'ultimo appuntamento, poi eliminati. I <strong>moduli di consenso</strong> compilati prima di ogni seduta sono conservati per <strong>5 anni</strong> ai sensi della normativa sulla responsabilità civile applicabile. Il consenso può essere revocato in qualsiasi momento.</p>
@@ -110,32 +113,52 @@
                         <li><strong>Cal.com</strong> (Cal.com Inc., USA) — sistema di prenotazione appuntamenti (<a href="https://cal.com/privacy" class="legal-link" target="_blank">cal.com/privacy</a>)</li>
                         <li><strong>PayPal</strong> (PayPal Europe S.à r.l., Lussemburgo) — pagamenti online (<a href="https://www.paypal.com/privacy" class="legal-link" target="_blank">paypal.com/privacy</a>)</li>
                         <li><strong>Google LLC</strong> (USA) — invio email transazionali tramite Gmail (<a href="https://policies.google.com/privacy" class="legal-link" target="_blank">policies.google.com/privacy</a>)</li>
-                        <li><strong>n8n</strong> — piattaforma di automazione self-hosted per notifiche interne</li>
-                        <li><strong>Vercel Inc.</strong> (USA) — hosting del sito web (<a href="https://vercel.com/legal/privacy-policy" class="legal-link" target="_blank">vercel.com/legal/privacy-policy</a>)</li>
-                        <li><strong>OpenAI</strong> (OpenAI LLC, USA) — alimenta l'assistente virtuale del sito (<a href="https://openai.com/privacy" class="legal-link" target="_blank">openai.com/privacy</a>)</li>
+                        <li><strong>n8n</strong> — piattaforma di automazione self-hosted per notifiche e comunicazioni automatiche</li>
+                        <li><strong>Vercel Inc.</strong> (USA) — hosting del sito web e dell'applicazione (<a href="https://vercel.com/legal/privacy-policy" class="legal-link" target="_blank">vercel.com/legal/privacy-policy</a>)</li>
+                        <li><strong>OpenAI</strong> (OpenAI LLC, USA) — alimenta l'assistente virtuale e la trascrizione di messaggi vocali (<a href="https://openai.com/privacy" class="legal-link" target="_blank">openai.com/privacy</a>)</li>
                     </ul>
+                    <p>Per i servizi di messaggistica diretta, potranno essere utilizzati in futuro anche: <strong>ChakraHQ</strong> per WhatsApp Business e <strong>Twilio</strong> per SMS, le cui policy saranno indicate al momento dell'attivazione.</p>
+
+                    <h3 class="legal-subtitle">Trasferimento Dati Extra-UE</h3>
+                    <p>Alcuni fornitori (Supabase, OpenAI, Vercel, Cal.com) hanno sede negli USA. Il trasferimento dei dati avviene sulla base delle <strong>Clausole Contrattuali Standard (SCC)</strong> approvate dalla Commissione Europea e/o del <strong>Data Privacy Framework UE-USA</strong>, come indicato nelle rispettive privacy policy.</p>
 
                     <h3 class="legal-subtitle">Assistente Virtuale</h3>
-                    <p>Il sito utilizza un <strong>assistente virtuale automatizzato</strong> basato su intelligenza artificiale per rispondere a domande su servizi, prenotazioni e cura del tatuaggio. L'assistente <strong>non memorizza le conversazioni</strong>: la cronologia chat esiste solo durante la sessione corrente e viene eliminata alla chiusura della pagina. I messaggi inviati vengono trasmessi a OpenAI per generare le risposte. Non inserire dati sensibili (codice fiscale, dati sanitari, ecc.) nella chat. Le risposte dell'assistente sono indicative e non sostituiscono i consigli professionali di Irene.</p>
+                    <p>Il sito utilizza un <strong>assistente virtuale automatizzato</strong> basato su intelligenza artificiale per rispondere a domande su servizi, prenotazioni e cura del tatuaggio. L'assistente <strong>non memorizza le conversazioni</strong>: la cronologia chat esiste solo durante la sessione corrente e viene eliminata alla chiusura della pagina. I messaggi inviati (inclusi eventuali <strong>messaggi vocali</strong>, trascritti automaticamente) vengono trasmessi a OpenAI per generare le risposte. Non inserire dati sensibili (codice fiscale, dati sanitari, ecc.) nella chat. Le risposte dell'assistente sono indicative e non sostituiscono i consigli professionali di Irene.</p>
+
+                    <h3 class="legal-subtitle">Comunicazioni Automatiche</h3>
+                    <p>Il sistema invia <strong>email automatiche</strong> per: conferme appuntamento, promemoria, notifiche di cambio data, aggiornamenti sulla lista d'attesa e comunicazioni relative al servizio. Le email sono inviate tramite Gmail (Google). L'invio avviene esclusivamente per finalita' connesse al servizio di tatuaggio e puo' essere interrotto su richiesta.</p>
+
+                    <h3 class="legal-subtitle">Applicazione Web (PWA)</h3>
+                    <p>Il sito e' installabile come <strong>applicazione web</strong> (Progressive Web App) sul proprio dispositivo. L'app utilizza un Service Worker che memorizza nella <strong>cache locale</strong> del dispositivo i file necessari al funzionamento offline (pagine, stili, script). Nessun dato personale viene memorizzato nella cache. La cache puo' essere cancellata dalle impostazioni del browser.</p>
 
                     <h3 class="legal-subtitle">I Tuoi Diritti</h3>
-                    <p>Hai diritto di accedere, rettificare, cancellare o opporti al trattamento dei tuoi dati. Scrivi a <a href="mailto:irenegipsytattoo@gmail.com" class="legal-link">irenegipsytattoo@gmail.com</a>. Puoi inoltre presentare reclamo al Garante Privacy (<a href="https://www.garanteprivacy.it" class="legal-link" target="_blank">garanteprivacy.it</a>).</p>
+                    <p>Ai sensi degli artt. 15-22 GDPR, hai diritto di:</p>
+                    <ul class="legal-list">
+                        <li><strong>Accesso</strong> — ottenere copia dei tuoi dati personali trattati</li>
+                        <li><strong>Rettifica</strong> — correggere dati inesatti o incompleti</li>
+                        <li><strong>Cancellazione</strong> — richiedere la cancellazione dei dati (diritto all'oblio)</li>
+                        <li><strong>Limitazione</strong> — limitare il trattamento in determinati casi</li>
+                        <li><strong>Portabilita'</strong> — ricevere i tuoi dati in formato strutturato e leggibile</li>
+                        <li><strong>Opposizione</strong> — opporti al trattamento in qualsiasi momento</li>
+                    </ul>
+                    <p>Per esercitare i tuoi diritti o richiedere la cancellazione dell'account dall'area personale, scrivi a <a href="mailto:irenegipsytattoo@gmail.com" class="legal-link">irenegipsytattoo@gmail.com</a>. Puoi inoltre presentare reclamo al <strong>Garante per la Protezione dei Dati Personali</strong> (<a href="https://www.garanteprivacy.it" class="legal-link" target="_blank">garanteprivacy.it</a>).</p>
                 </div>
 
                 <!-- ===================== COOKIE POLICY ===================== -->
                 <div id="cookie" class="legal-section">
                     <h2 class="legal-section-title">Cookie Policy</h2>
-                    <p class="legal-updated">Ultimo aggiornamento: febbraio 2026</p>
+                    <p class="legal-updated">Ultimo aggiornamento: aprile 2026</p>
 
-                    <p>Questo sito utilizza esclusivamente <strong>cookie tecnici</strong> necessari al funzionamento (navigazione, moduli, pagamenti). Non vengono utilizzati cookie di profilazione, tracciamento comportamentale o analytics.</p>
+                    <p>Questo sito utilizza esclusivamente <strong>cookie tecnici</strong> necessari al funzionamento (navigazione, autenticazione, moduli, pagamenti). Non vengono utilizzati cookie di profilazione, tracciamento comportamentale o analytics.</p>
                     <p>I servizi integrati (Cal.com, PayPal, Google Maps, Google Fonts, Supabase, Vercel) possono impostare cookie funzionali propri, disciplinati dalle rispettive privacy policy.</p>
-                    <p>Puoi gestire o disabilitare i cookie dalle impostazioni del tuo browser. La disabilitazione dei cookie tecnici potrebbe compromettere alcune funzionalità del sito.</p>
+                    <p>L'applicazione web (PWA) utilizza un <strong>Service Worker</strong> che memorizza file statici nella cache del browser per consentire il funzionamento offline. Questi file non contengono dati personali e possono essere cancellati dalle impostazioni del browser.</p>
+                    <p>Puoi gestire o disabilitare i cookie dalle impostazioni del tuo browser. La disabilitazione dei cookie tecnici potrebbe compromettere alcune funzionalita' del sito.</p>
                 </div>
 
                 <!-- ===================== TERMINI E CONDIZIONI ===================== -->
                 <div id="termini" class="legal-section">
                     <h2 class="legal-section-title">Termini e Condizioni</h2>
-                    <p class="legal-updated">Ultimo aggiornamento: febbraio 2026 · <strong>www.irenegipsytattoo.com</strong></p>
+                    <p class="legal-updated">Ultimo aggiornamento: aprile 2026 · <strong>www.irenegipsytattoo.com</strong></p>
 
                     <h3 class="legal-subtitle">Prenotazioni e Acconti</h3>
                     <ul class="legal-list">

@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // DATA LOADING
 // ============================================
 async function loadAllData() {
-    await Promise.all([loadClients(), loadAppointments(), loadWaitlist(), loadPendingReschedules(), loadWaitlistRequests()]);
+    await Promise.all([loadClients(), loadAppointments(), loadWaitlist(), loadWaitlistRequests()]);
     renderOverview();
     renderClientsTable(allClients);
     renderCalendar();
@@ -2147,6 +2147,7 @@ let currentBulkCh  = 'whatsapp';
 function setupComunicazioni() {
     // Popola select clienti (ordinati per cognome)
     const sel = document.getElementById('commRecipient');
+    if (!sel) return;
     [...allClients].sort((a, b) => (a.last_name || '').localeCompare(b.last_name || '')).forEach(c => {
         const opt = document.createElement('option');
         opt.value = c.id;
@@ -2263,7 +2264,9 @@ function sendIndividual() {
 }
 
 function getBulkRecipients() {
-    const target = document.querySelector('input[name="bulkTarget"]:checked').value;
+    const checked = document.querySelector('input[name="bulkTarget"]:checked');
+    if (!checked) return [];
+    const target = checked.value;
     if (target === 'all') return allClients;
 
     if (target === 'pending') {
@@ -2642,7 +2645,7 @@ function openRejectForm(requestId, clientEmail, clientName) {
 
 async function acceptReschedule(requestId, apptId, newDate, newTime, clientId, clientEmail, clientName) {
     const item = document.getElementById('rri-' + requestId);
-    const acceptBtn = item ? item.querySelector('.btn-accept-rsch') : null;
+    const acceptBtn = item ? item.querySelector('.btn-accept-reschedule') : null;
     if (acceptBtn) { acceptBtn.disabled = true; acceptBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="margin-right:5px;"></i>Attendere…'; }
     if (item) item.style.opacity = '0.5';
 
@@ -4754,7 +4757,7 @@ function aaBuildContext() {
         n: w.clients ? [w.clients.first_name, w.clients.last_name].filter(Boolean).join(' ') : '?',
         pos: w.position, pri: w.priority,
     }));
-    const wlReqs = (allRescheduleRequests || []).length; // pending requests count
+    const wlReqs = (allRescheduleRequests || []).length;
     const pendingWl = (allWaitlistRequests || []).length;
     return { date: today, today_appts: todayAppts, clients, waitlist: wl, pending_wl_requests: pendingWl, pending_rsch_requests: wlReqs };
 }
@@ -4768,6 +4771,7 @@ function aaQuick(text) {
 // ─── Send text message ──────────────────────────────────────
 async function sendAdminMsg() {
     const inp = document.getElementById('aaInput');
+    if (!inp) return;
     const text = (inp.value || '').trim();
     if (!text || aaBusy) return;
     inp.value = ''; aaAutoResize();
@@ -4924,12 +4928,15 @@ async function aaExecAction(action) {
 function addAaMsg(role, text, isVoice) {
     const box = document.getElementById('aaMessages');
     const div = document.createElement('div');
-    div.className = 'aa-msg aa-msg-' + (role === 'user' ? 'user' : 'bot');
-    let html = '';
-    if (role !== 'user') html += '<div class="aa-msg-label">Assistente</div>';
-    html += aaFmt(text);
-    if (isVoice) html += '<div class="aa-msg-voice-badge"><i class="fas fa-microphone"></i> Vocale</div>';
-    div.innerHTML = html;
+    const isUser = role === 'user';
+    div.className = 'aa-msg aa-msg-' + (isUser ? 'user' : 'bot');
+    let bubbleHtml = '';
+    if (!isUser) bubbleHtml += '<div class="aa-msg-label">Assistente</div>';
+    bubbleHtml += aaFmt(text);
+    if (isVoice) bubbleHtml += '<div class="aa-msg-voice-badge"><i class="fas fa-microphone"></i> Vocale</div>';
+    const avatarIcon = isUser ? 'fa-user' : 'fa-robot';
+    div.innerHTML = '<div class="aa-msg-avatar"><i class="fas ' + avatarIcon + '"></i></div>'
+        + '<div class="aa-msg-bubble">' + bubbleHtml + '</div>';
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
@@ -4944,7 +4951,8 @@ function showAaTyping(show) {
     if (show && !el) {
         el = document.createElement('div');
         el.id = 'aaTyping'; el.className = 'aa-typing';
-        el.innerHTML = '<span></span><span></span><span></span>';
+        el.innerHTML = '<div class="aa-msg-avatar"><i class="fas fa-robot"></i></div>'
+            + '<div class="aa-typing-dots"><span></span><span></span><span></span></div>';
         box.appendChild(el); box.scrollTop = box.scrollHeight;
     } else if (!show && el) { el.remove(); }
 }

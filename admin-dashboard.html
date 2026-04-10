@@ -108,12 +108,10 @@
                 <section id="section-assistente" class="admin-section">
                     <div class="aa-container">
                         <div class="aa-header">
-                            <div class="aa-header-left">
-                                <div class="aa-avatar"><i class="fas fa-robot"></i></div>
-                                <div>
-                                    <h1 class="aa-title">Assistente Irene</h1>
-                                    <span class="aa-subtitle">AI — Gestione studio</span>
-                                </div>
+                            <div class="aa-header-avatar"><i class="fas fa-robot"></i></div>
+                            <div class="aa-header-info">
+                                <div class="aa-header-title">Assistente Irene</div>
+                                <div class="aa-header-subtitle"><span class="aa-header-dot"></span> AI — Gestione studio</div>
                             </div>
                             <button class="aa-clear-btn" onclick="clearAdminChat()" title="Nuova conversazione">
                                 <i class="fas fa-broom"></i>
@@ -133,7 +131,7 @@
                             </div>
                         </div>
                         <div class="aa-input-area">
-                            <div class="aa-input-row">
+                            <div class="aa-input-row" id="aaInputRow">
                                 <button class="aa-mic-btn" id="aaMicBtn" onclick="toggleAdminVoice()" title="Nota vocale">
                                     <i class="fas fa-microphone"></i>
                                 </button>
