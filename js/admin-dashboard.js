@@ -1,6 +1,7 @@
 // ============================================
 // ADMIN DASHBOARD — Irene Gipsy Tattoo
 // ============================================
+function escHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 //
 // ⚠️ SUPABASE: eseguire queste policy SQL nel pannello Supabase
 // (SQL Editor) prima di usare questa dashboard:
@@ -269,8 +270,8 @@ function filterWlClients() {
     list.innerHTML = filtered.slice(0, 8).map(c => {
         const displayName = `${c.last_name || ''} ${c.first_name || ''}`.trim();
         return `
-        <div class="wl-modal-client-row" onclick="selectWlClient('${c.id}','${displayName.replace(/'/g,"\\'")}')">
-            ${displayName}
+        <div class="wl-modal-client-row" data-cid="${escHtml(c.id)}" data-cname="${escHtml(displayName)}" onclick="selectWlClient(this.dataset.cid,this.dataset.cname)">
+            ${escHtml(displayName)}
         </div>`;
     }).join('');
 }
@@ -336,8 +337,15 @@ async function approveWlRequest(requestId) {
     if (!req) return;
     const clientId = req.client_id;
     if (req.request_type === 'join') {
+        // Calcola la posizione successiva disponibile
+        const { data: maxRow } = await db.from('waitlist')
+            .select('position')
+            .eq('active', true)
+            .order('position', { ascending: false })
+            .limit(1);
+        const nextPos = (maxRow?.[0]?.position ?? -1) + 1;
         const { error: e1 } = await db.from('waitlist').upsert(
-            { client_id: clientId, active: true, position: 0 },
+            { client_id: clientId, active: true, position: nextPos },
             { onConflict: 'client_id' }
         );
         if (e1) { showToast('Errore nell\'approvazione: ' + e1.message, 4000, true); return; }
@@ -442,9 +450,9 @@ function renderOverview() {
         const name      = client ? `${client.first_name} ${client.last_name}` : '—';
         const date      = formatDate(a.scheduled_at);
         const time      = formatTime(a.scheduled_at);
-        const safeEmail    = (client?.email || '').replace(/'/g, "\\'");
-        const safeName     = name.replace(/'/g, "\\'");
-        const safeDate     = (a.scheduled_at || '').replace(/'/g, "\\'");
+        const safeEmail    = escHtml(client?.email || '');
+        const safeName     = escHtml(name);
+        const safeDate     = escHtml(a.scheduled_at || '');
         const safeClientId = (client?.id || '').replace(/'/g, "\\'");
         return `
         <div class="upcoming-item" onclick="openClientDetail('${safeClientId}')" style="cursor:pointer;">
@@ -579,7 +587,7 @@ async function saveNewClient() {
     const msg    = document.getElementById('ncMsg');
     const btn    = document.getElementById('ncSaveBtn');
     if (!first || !last || !email || !num) { msg.textContent = 'Compila tutti i campi obbligatori.'; return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = 'Inserisci un\'email valida.'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email.trim())) { msg.textContent = 'Inserisci un\'email valida.'; return; }
     btn.disabled = true; btn.textContent = 'Creazione account…';
     try {
         const resp = await fetch(ADMIN_CREATE_CLIENT_URL, {
@@ -1099,7 +1107,8 @@ async function submitCreateAppt() {
             is_first_session:  _caCtx.isFirstSession,
             location:          _caCtx.location,
         }),
-    }).catch(e => console.warn('[admin-create-appt]', e));
+    }).then(r => { if (r && !r.ok) throw new Error('HTTP ' + r.status); })
+      .catch(e => { console.warn('[admin-create-appt]', e); showToast('⚠️ Appuntamento salvato, ma email/calendario potrebbe non essere sincronizzato.', 5000, true); });
 
     closeCreateApptModal();
     renderOverview();
@@ -1235,7 +1244,7 @@ async function openClientDetail(clientId) {
             const dateStr = d.toLocaleDateString('it-IT', { day:'2-digit', month:'long', year:'numeric' });
             ideaEl.innerHTML = `
                 <div style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:14px 16px;">
-                    <p style="margin:0;font-size:0.9rem;color:#e8e8e8;line-height:1.6;white-space:pre-wrap;">${latestIdea.notes}</p>
+                    <p style="margin:0;font-size:0.9rem;color:#e8e8e8;line-height:1.6;white-space:pre-wrap;">${escHtml(latestIdea.notes)}</p>
                     <p style="margin:8px 0 0;font-size:0.75rem;color:var(--text-muted);">Consulenza del ${dateStr}</p>
                 </div>`;
         } else {
@@ -1502,9 +1511,9 @@ function showCalDayDetail(day, appts) {
     document.getElementById('calDayAppointments').innerHTML = sorted.map(a => {
         const client    = a.clients;
         const name      = client ? `${client.first_name} ${client.last_name}` : '—';
-        const safeEmail    = (client?.email || '').replace(/'/g, "\\'");
-        const safeName     = name.replace(/'/g, "\\'");
-        const safeDate     = (a.scheduled_at || '').replace(/'/g, "\\'");
+        const safeEmail    = escHtml(client?.email || '');
+        const safeName     = escHtml(name);
+        const safeDate     = escHtml(a.scheduled_at || '');
         const safeClientId = (client?.id || '').replace(/'/g, "\\'");
         const isCancelled  = a.status === 'cancelled';
         return `
@@ -2564,8 +2573,8 @@ function renderRescheduleRequests() {
     const buildClientRow = r => {
         const client    = r.clients;
         const name      = client ? `${client.first_name} ${client.last_name}` : '—';
-        const safeName  = name.replace(/'/g, "\\'");
-        const safeEmail = (client?.email || '').replace(/'/g, "\\'");
+        const safeName  = escHtml(name);
+        const safeEmail = escHtml(client?.email || '');
         const oldDate   = r.appointments?.scheduled_at
             ? new Date(r.appointments.scheduled_at).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone: 'Europe/Rome' })
             : '—';
@@ -2573,7 +2582,7 @@ function renderRescheduleRequests() {
         return `
         <div class="reschedule-request-item" id="rri-${r.id}">
             <div class="rri-header">
-                <span class="rri-client"><i class="fas fa-user"></i> ${name}</span>
+                <span class="rri-client"><i class="fas fa-user"></i> ${escHtml(name)}</span>
                 <span class="rri-time">${formatTimeAgo(r.created_at)}</span>
             </div>
             <div class="rri-dates">
@@ -2581,7 +2590,7 @@ function renderRescheduleRequests() {
                 <i class="fas fa-arrow-right" style="color:var(--text-muted);margin:0 6px;"></i>
                 <span class="rri-new"><i class="fas fa-calendar-plus"></i> Richiesta: <strong>${newDate} ore ${fmtReqTime(r.requested_time)}</strong></span>
             </div>
-            <div class="rri-reason"><i class="fas fa-comment-dots"></i> "${r.reason}"</div>
+            <div class="rri-reason"><i class="fas fa-comment-dots"></i> "${escHtml(r.reason)}"</div>
             <div class="rri-actions" id="rri-actions-${r.id}">
                 <button class="btn-accept-reschedule" onclick="acceptReschedule('${r.id}','${r.appointment_id}','${r.requested_date}','${r.requested_time}','${r.client_id}','${safeEmail}','${safeName}')">
                     <i class="fas fa-check"></i> Accetta
@@ -2609,7 +2618,7 @@ function renderRescheduleRequests() {
         return `
         <div class="reschedule-request-item" id="rri-${r.id}" style="border-left-color:var(--gold);">
             <div class="rri-header">
-                <span class="rri-client"><i class="fas fa-user"></i> ${name}</span>
+                <span class="rri-client"><i class="fas fa-user"></i> ${escHtml(name)}</span>
                 <span class="rri-time" style="color:var(--gold);">In attesa cliente</span>
             </div>
             <div class="rri-dates">
@@ -2768,7 +2777,8 @@ async function acceptReschedule(requestId, apptId, newDate, newTime, clientId, c
                 new_time:     newTime,
                 irene_notes:  '',
             }),
-        }).catch(e => console.warn('[RescheduleNotify] email non inviata:', e));
+        }).then(r => { if (r && !r.ok) throw new Error('HTTP ' + r.status); })
+          .catch(e => { console.warn('[RescheduleNotify]', e); showToast('⚠️ Approvato, ma email al cliente potrebbe non essere partita.', 5000, true); });
 
         // Ricarica
         await loadNotifications();
@@ -2783,6 +2793,7 @@ async function acceptReschedule(requestId, apptId, newDate, newTime, clientId, c
 
 async function confirmReject(requestId, clientId, clientEmail, clientName) {
     const notes = (document.getElementById('rejectNote-' + requestId)?.value || '').trim();
+    if (notes.length > 500) { showToast('Motivo troppo lungo (max 500 caratteri).', 3000, true); return; }
     const item  = document.getElementById('rri-' + requestId);
     if (item) item.style.opacity = '0.5';
 
@@ -3464,7 +3475,8 @@ async function confirmCancelAppointment() {
             client_name:      clientName,
             scheduled_at:     scheduledAt,
         }),
-    }).catch(e => console.warn('[Cancel n8n] non inviato:', e));
+    }).then(r => { if (r && !r.ok) throw new Error('HTTP ' + r.status); })
+      .catch(e => { console.warn('[Cancel n8n]', e); showToast('⚠️ Cancellato in DB, ma email/calendario potrebbe non essere aggiornato.', 5000, true); });
 
     // 4. Re-render UI
     renderOverview();
@@ -3546,10 +3558,10 @@ function renderFreedSlotClientList(query) {
         ? filtered.map(c => {
             const displayName = `${c.last_name || ''} ${c.first_name || ''}`.trim();
             return `
-            <div onclick="freedSlotSelectClient('${c.id}','${displayName.replace(/'/g,"\\'")}')"
+            <div data-cid="${escHtml(c.id)}" data-cname="${escHtml(displayName)}" onclick="freedSlotSelectClient(this.dataset.cid,this.dataset.cname)"
                 style="padding:9px 12px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);font-size:0.85rem;color:#ddd;transition:background 0.15s;"
                 onmouseover="this.style.background='rgba(212,175,55,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
-                ${displayName}
+                ${escHtml(displayName)}
             </div>`;
         }).join('')
         : '<p style="font-size:0.82rem;color:#555;text-align:center;padding:12px 0;">Nessun cliente trovato</p>';
@@ -3747,8 +3759,8 @@ function refreshClientDetailPayments(clientId) {
     apptEl.innerHTML = `<div class="appt-timeline">${appts.map(a => {
         const dotColor = { pending: 'var(--orange)', confirmed: 'var(--green)', completed: 'var(--blue)', cancelled: 'var(--red)' }[a.status] || 'var(--text-muted)';
         const isActionable = ['consulenza','seduta','pre-seduta'].includes(a.type) && (a.status === 'confirmed' || a.status === 'pending');
-        const safeEmail = (client.email || '').replace(/'/g, "\\'");
-        const safeName  = (`${client.first_name || ''} ${client.last_name || ''}`).replace(/'/g, "\\'");
+        const safeEmail = escHtml(client.email || '');
+        const safeName  = escHtml(`${client.first_name || ''} ${client.last_name || ''}`);
         const safeDate  = (a.scheduled_at || '').replace(/'/g, "\\'");
         const BTN_S = 'display:inline-flex;align-items:center;justify-content:center;width:46px;height:32px;border-radius:7px;cursor:pointer;font-size:1.04rem;border:1px solid;transition:opacity .15s;';
         const stdPrices = Array.from({length:15},(_,i)=>300+i*50);
@@ -4781,8 +4793,9 @@ function aaRestoreMessages(saved) {
         const div = document.createElement('div');
         div.className = 'aa-msg aa-msg-' + (m.role === 'user' ? 'user' : 'bot');
         const avatarIcon = m.role === 'user' ? 'fa-user' : 'fa-robot';
+        const safeHtml = m.role === 'user' ? escHtml(m.html) : m.html;
         div.innerHTML = '<div class="aa-msg-avatar"><i class="fas ' + avatarIcon + '"></i></div>'
-            + '<div class="aa-msg-bubble">' + m.html + '</div>';
+            + '<div class="aa-msg-bubble">' + safeHtml + '</div>';
         box.appendChild(div);
     });
     box.scrollTop = box.scrollHeight;
@@ -4900,7 +4913,7 @@ async function aaSendToBackend(payload) {
         if (data.transcription) {
             const msgs = document.querySelectorAll('.aa-msg-user');
             const last = msgs[msgs.length - 1];
-            if (last) last.innerHTML = data.transcription + '<div class="aa-msg-voice-badge"><i class="fas fa-microphone"></i> Vocale</div>';
+            if (last) last.innerHTML = escHtml(data.transcription) + '<div class="aa-msg-voice-badge"><i class="fas fa-microphone"></i> Vocale</div>';
             aaHistory.push({ role: 'user', content: data.transcription });
         }
 

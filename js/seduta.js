@@ -2,6 +2,7 @@
 //  SEDUTA BOOKING PAGE - Irene Gipsy Tattoo
 //  Integrazione: Cal.com API + PayPal + n8n
 // =============================================
+function escHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // =============================================
 //  ⚙️  CONFIGURAZIONE
@@ -222,7 +223,7 @@ async function prefillUserData() {
         if (title)   title.style.display   = 'none';
         if (booking) {
             const displayName = [data.first_name, data.last_name].filter(Boolean).join(' ') || authUser.email;
-            booking.innerHTML = `<i class="fas fa-user-check" style="color:#D4AF37;margin-right:6px;"></i>Stai prenotando come: <strong style="color:#e8e8e8;">${displayName}</strong> (${authUser.email})`;
+            booking.innerHTML = `<i class="fas fa-user-check" style="color:#D4AF37;margin-right:6px;"></i>Stai prenotando come: <strong style="color:#e8e8e8;">${escHtml(displayName)}</strong> (${escHtml(authUser.email)})`;
             booking.style.display = 'block';
         }
         checkFormAndUpdatePayPal();
@@ -1017,8 +1018,8 @@ function showSuccessState(bookingResults, userData) {
     success.classList.remove('hidden');
 
     let detailsHTML = `
-        <div class="booking-detail-item"><i class="far fa-user"></i><span>${userData.nome} ${userData.cognome}</span></div>
-        <div class="booking-detail-item"><i class="far fa-envelope"></i><span>${userData.email.replace('@', '<wbr>@')}</span></div>
+        <div class="booking-detail-item"><i class="far fa-user"></i><span>${escHtml(userData.nome)} ${escHtml(userData.cognome)}</span></div>
+        <div class="booking-detail-item"><i class="far fa-envelope"></i><span>${escHtml(userData.email).replace('@', '<wbr>@')}</span></div>
     `;
 
     bookingResults.forEach(r => {

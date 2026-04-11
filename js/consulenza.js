@@ -2,6 +2,7 @@
 //  CONSULENZA BOOKING PAGE - Irene Gipsy Tattoo
 //  Integrazione: Cal.com API + n8n webhook
 // =============================================
+function escHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // =============================================
 //  ⚙️  CONFIGURAZIONE  ⚙️
@@ -104,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (title)   title.style.display   = 'none';
                     if (booking) {
                         const displayName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email;
-                        booking.innerHTML = `<i class="fas fa-user-check" style="color:#D4AF37;margin-right:6px;"></i>Stai prenotando come: <strong style="color:#e8e8e8;">${displayName}</strong> (${user.email})`;
+                        booking.innerHTML = `<i class="fas fa-user-check" style="color:#D4AF37;margin-right:6px;"></i>Stai prenotando come: <strong style="color:#e8e8e8;">${escHtml(displayName)}</strong> (${escHtml(user.email)})`;
                         booking.style.display = 'block';
                     }
                 }

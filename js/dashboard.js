@@ -483,7 +483,11 @@ function updateTopbarName(name, avatar) {
     document.getElementById('userName').textContent = name;
     const avatarEl = document.getElementById('userAvatar');
     if (avatar) {
-        avatarEl.innerHTML = `<img src="${avatar}" alt="${name}">`;
+        const img = document.createElement('img');
+        img.src = avatar;
+        img.alt = name;
+        avatarEl.textContent = '';
+        avatarEl.appendChild(img);
     } else {
         avatarEl.textContent = name.charAt(0).toUpperCase();
     }
@@ -513,6 +517,11 @@ async function loadAllData() {
             .or(`recipient_email.eq.${currentUser.email},claimed_by_user_id.eq.${uid}`)
             .order('created_at', { ascending: false }),
     ]);
+
+    if (apptRes.error || galleryRes.error || vouchersRes.error) {
+        const errMsg = apptRes.error?.message || galleryRes.error?.message || vouchersRes.error?.message;
+        showToast('Errore nel caricamento dati: ' + errMsg, true);
+    }
 
     const appointments = apptRes.data || [];
     allClientAppointments = appointments;
@@ -1106,6 +1115,13 @@ function initGalleryUpload() {
         const files = Array.from(e.target.files);
         if (!files.length) return;
 
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+        const MAX_SIZE_MB = 10;
+        const invalid = files.filter(f => !ALLOWED_TYPES.includes(f.type));
+        if (invalid.length) { showToast('Formato non supportato. Usa JPG, PNG o WebP.', true); e.target.value = ''; return; }
+        const tooBig = files.filter(f => f.size > MAX_SIZE_MB * 1024 * 1024);
+        if (tooBig.length) { showToast(`File troppo grande (max ${MAX_SIZE_MB} MB).`, true); e.target.value = ''; return; }
+
         const progress = document.getElementById('uploadProgress');
         progress.textContent = `Caricamento ${files.length} foto...`;
         progress.classList.add('show');
@@ -1483,6 +1499,7 @@ async function rschFetchMonthSlots(year, month) {
             `&timeZone=${encodeURIComponent(RSCH_TIMEZONE)}`;
 
         const resp = await fetch(url);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
 
         if (data.slots) {
@@ -1648,6 +1665,8 @@ async function submitRescheduleRequest() {
     const msg    = document.getElementById('rescheduleMsg');
     const btn    = document.getElementById('rescheduleSubmitBtn');
 
+    if (btn.disabled) return; // double-click guard
+
     msg.style.color = 'var(--red)';
     if (!rschState.selectedDate) {
         msg.textContent = 'Seleziona una data dal calendario.'; return;
@@ -1787,6 +1806,7 @@ function closeRescheduleModal() {
 async function submitFreeReschedule() {
     const msg = document.getElementById('rescheduleMsg');
     const btn = document.getElementById('rescheduleSubmitBtn');
+    if (btn.disabled) return; // double-click guard
     msg.style.color = 'var(--red)';
     if (!rschState.selectedDate) { msg.textContent = 'Seleziona una data dal calendario.'; return; }
     if (!rschState.selectedTime) { msg.textContent = 'Seleziona un orario disponibile.'; return; }
@@ -1940,6 +1960,7 @@ async function rbFetchMonthSlots(year, month) {
             `&timeZone=${encodeURIComponent(RSCH_TIMEZONE)}`;
 
         const resp = await fetch(url);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
 
         if (data.slots) {
@@ -2481,6 +2502,8 @@ async function submitWlJoinRequest() {
 //  ADVANCE OFFER (offerta posto anticipato)
 // ─────────────────────────────────────────────
 
+function escAttr(s) { return String(s).replace(/[&"'<>]/g, c => ({'&':'&amp;','"':'&quot;',"'":'&#39;','<':'&lt;','>':'&gt;'}[c])); }
+
 function buildAdvanceOfferBanner(offer) {
     const date = new Date(offer.freed_slot_at).toLocaleDateString('it-IT', {
         weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
@@ -2500,12 +2523,12 @@ function buildAdvanceOfferBanner(offer) {
             <div style="margin-top:4px;color:#666;font-size:0.78rem;">Offerta valida fino al ${expiresAt}</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button onclick="acceptAdvanceOffer('${offer.id}','${offer.freed_slot_at}')"
+            <button onclick="acceptAdvanceOffer('${escAttr(offer.id)}','${escAttr(offer.freed_slot_at)}')"
                 style="font-size:0.78rem;padding:6px 14px;border-radius:7px;cursor:pointer;
                 background:rgba(109,192,124,0.2);border:1px solid rgba(109,192,124,0.5);color:#6dc07c;font-family:inherit;">
                 <i class="fas fa-check"></i> Accetta
             </button>
-            <button onclick="declineAdvanceOffer('${offer.id}','${offer.freed_slot_at}')"
+            <button onclick="declineAdvanceOffer('${escAttr(offer.id)}','${escAttr(offer.freed_slot_at)}')"
                 style="font-size:0.78rem;padding:6px 14px;border-radius:7px;cursor:pointer;
                 background:transparent;border:1px solid rgba(248,113,113,0.35);color:#f87171;font-family:inherit;">
                 <i class="fas fa-times"></i> Rifiuta
@@ -2573,6 +2596,8 @@ function showExtraSessionPayment() {
                     },
                     onError: () => {
                         showToast('Errore durante il pagamento. Riprova.', true);
+                        cleanup();
+                        resolve(null);
                     }
                 }).render('#paypalExtraBtnContainer');
             } catch {
@@ -2584,7 +2609,13 @@ function showExtraSessionPayment() {
     });
 }
 
+let _acceptingOffer = false;
 async function acceptAdvanceOffer(offerId, freedSlotAt) {
+    if (_acceptingOffer) return;
+    _acceptingOffer = true;
+    try { await _doAcceptAdvanceOffer(offerId, freedSlotAt); } finally { _acceptingOffer = false; }
+}
+async function _doAcceptAdvanceOffer(offerId, freedSlotAt) {
     // Recupera in parallelo: ultime sedute + dati cliente dalla tabella clients
     const [{ data: sedute }, { data: clientRec }] = await Promise.all([
         db.from('appointments')
@@ -2643,35 +2674,39 @@ async function acceptAdvanceOffer(offerId, freedSlotAt) {
     // Se non vuole tenere l'ultima, cancellala
     let cancelledApptId = null;
     if (keepLast === false && lastSeduta) {
-        await db.from('appointments').update({ status: 'cancelled' }).eq('id', lastSeduta.id);
+        const { error: cancelErr } = await db.from('appointments').update({ status: 'cancelled' }).eq('id', lastSeduta.id);
+        if (cancelErr) { showToast('Errore cancellazione seduta: ' + cancelErr.message, true); return; }
         cancelledApptId = lastSeduta.id;
     }
 
     // Rimuovi dalla waitlist
-    await db.from('waitlist').update({ active: false }).eq('client_id', currentUser.id);
+    const { error: wlErr } = await db.from('waitlist').update({ active: false }).eq('client_id', currentUser.id);
+    if (wlErr) console.warn('[waitlist remove]', wlErr.message);
 
     // Inserisci notifica di conferma nella dashboard del cliente
     const freedDateStr = new Date(freedSlotAt).toLocaleDateString('it-IT',
         { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' });
-    await db.from('notifications').insert({
+    const { error: notifErr } = await db.from('notifications').insert({
         type:      'advance_offer_accepted',
         title:     'Seduta anticipata confermata!',
         body:      `La tua seduta è confermata per ${freedDateStr}. Riceverai un invito nel calendario.`,
         client_id: currentUser.id,
         is_read:   false,
     });
+    if (notifErr) console.warn('[notif advance]', notifErr.message);
 
     // Se ha tenuto l'ultima seduta extra: notifica Irene con conferma pagamento
     if (keepLast === true && lastSeduta) {
         const lastDateStr = new Date(lastSeduta.scheduled_at).toLocaleDateString('it-IT',
             { day: '2-digit', month: 'long', year: 'numeric' });
-        await db.from('notifications').insert({
+        const { error: notifErr2 } = await db.from('notifications').insert({
             type:      'extra_seduta_payment',
             title:     `✅ ${clientName} ha pagato l'acconto seduta extra`,
             body:      `Ha accettato il posto del ${new Date(freedSlotAt).toLocaleDateString('it-IT',{day:'2-digit',month:'long'})} e ha mantenuto la seduta del ${lastDateStr}. Acconto €${EXTRA_SESSION_DEPOSIT} pagato (PayPal: ${extraPaypalOrderId}).`,
             client_id: lastSeduta.client_id,
             is_read:   false,
         });
+        if (notifErr2) console.warn('[notif extra payment]', notifErr2.message);
     }
 
     // fire-and-forget n8n: crea booking Cal.com + email al cliente
@@ -2695,6 +2730,8 @@ async function acceptAdvanceOffer(offerId, freedSlotAt) {
 }
 
 async function declineAdvanceOffer(offerId, freedSlotAt) {
+    const ok = await customConfirm('Sei sicuro/a di voler rifiutare? Verrai spostato/a in fondo alla lista d\'attesa.');
+    if (!ok) return;
     const now = new Date().toISOString();
     const { error } = await db.from('seduta_advance_offers')
         .update({ status: 'declined', resolved_at: now })
