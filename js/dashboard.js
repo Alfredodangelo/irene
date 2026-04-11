@@ -1863,46 +1863,21 @@ async function openRebookModal() {
         rbClientProfile = { ...(data || {}), email: currentUser.email };
     }
 
-    // Pre-compila preferenze dall'ultima consulenza
-    const lastConsulenza = allClientAppointments
-        .filter(a => a.type === 'consulenza')
-        .sort((a, b) => new Date(b.scheduled_at) - new Date(a.scheduled_at))[0];
-
-    // Reset default: Studio selezionato, motivazione nascosta
+    // Reset default: Studio + Contanti, motivazione nascosta, idea vuota
     const studioRadio = document.getElementById('rbLuogoStudio');
     const waRadio     = document.getElementById('rbLuogoWa');
     const contantiRadio = document.getElementById('rbPagContanti');
     const posRadio      = document.getElementById('rbPagPOS');
     const motivoBox   = document.getElementById('rbWhatsappMotivo');
     const motivoInput = document.getElementById('rbMotivoVideo');
+    const ideaEl      = document.getElementById('rbIdea');
     if (studioRadio) studioRadio.checked = true;
     if (waRadio) waRadio.checked = false;
     if (contantiRadio) contantiRadio.checked = true;
     if (posRadio) posRadio.checked = false;
     if (motivoBox) motivoBox.style.display = 'none';
     if (motivoInput) motivoInput.value = '';
-
-    if (lastConsulenza) {
-        const lm = lastConsulenza.consultation_mode || '';
-        const lp = lastConsulenza.payment_method    || '';
-        const li = lastConsulenza.notes             || '';
-
-        const isInPerson = /inPerson|studio/i.test(lm);
-        const isPOS      = /pos|carta/i.test(lp);
-
-        if (studioRadio && waRadio) {
-            studioRadio.checked = isInPerson;
-            waRadio.checked = !isInPerson;
-            if (!isInPerson && motivoBox) motivoBox.style.display = 'block';
-        }
-        if (contantiRadio && posRadio) {
-            contantiRadio.checked = !isPOS;
-            posRadio.checked = isPOS;
-        }
-
-        const ideaEl = document.getElementById('rbIdea');
-        if (ideaEl) ideaEl.value = li;
-    }
+    if (ideaEl) ideaEl.value = '';
 
     // Reset UI
     document.getElementById('rbTimesWrap').classList.add('hidden');
