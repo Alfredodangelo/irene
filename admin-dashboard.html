@@ -685,6 +685,21 @@
                             </button>
                         </div>
 
+                        <!-- Notifiche Push -->
+                        <div class="admin-card">
+                            <h2 class="admin-card-title"><i class="fas fa-bell"></i> Notifiche Push</h2>
+                            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:14px; line-height:1.6;">
+                                Ricevi notifiche in tempo reale quando un cliente prenota, richiede un cambio data, si registra o entra in lista d'attesa.
+                            </p>
+                            <span class="push-status" style="display:block;font-size:0.82rem;margin-bottom:12px;"></span>
+                            <button class="comm-send-btn push-enable-btn" onclick="pushNotificationsEnable()" style="width:100%;">
+                                <i class="fas fa-bell" style="margin-right:8px;"></i> Attiva notifiche
+                            </button>
+                            <button class="comm-send-btn push-disable-btn" onclick="pushNotificationsDisable()" style="width:100%;display:none;background:transparent;border:1px solid var(--border-color,#333);color:var(--text-muted);">
+                                <i class="fas fa-bell-slash" style="margin-right:8px;"></i> Disattiva notifiche
+                            </button>
+                        </div>
+
                         <!-- Installa App -->
                         <div class="admin-card pwa-install-section" style="display:none;">
                             <h2 class="admin-card-title"><i class="fas fa-mobile-alt"></i> Installa App</h2>
@@ -1278,6 +1293,8 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/holidays.js"></script>
     <script src="js/admin-dashboard.js"></script>
+    <script src="js/admin-animations.js"></script>
+    <script src="/js/push-config.js"></script>
     <script src="/js/pwa.js" defer></script>
 </body>
 </html>

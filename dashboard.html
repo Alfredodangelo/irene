@@ -1186,6 +1186,21 @@
                 </p>
             </div>
 
+            <!-- Notifiche Push -->
+            <p class="section-label" style="margin-top:28px;">Notifiche</p>
+            <div class="profile-card">
+                <p style="font-size:0.85rem;color:var(--text-muted);margin:0 0 14px;line-height:1.6;">
+                    Ricevi una notifica quando il tuo appuntamento viene confermato, riprogrammato o quando Irene ti invia un messaggio.
+                </p>
+                <span class="push-status" style="display:block;font-size:0.82rem;margin-bottom:12px;"></span>
+                <button class="btn-save-profile push-enable-btn" onclick="pushNotificationsEnable()" style="width:100%;">
+                    <i class="fas fa-bell" style="margin-right:8px;"></i> Attiva notifiche
+                </button>
+                <button class="btn-save-profile push-disable-btn" onclick="pushNotificationsDisable()" style="width:100%;display:none;background:transparent;border:1px solid var(--border);color:var(--text-muted);">
+                    <i class="fas fa-bell-slash" style="margin-right:8px;"></i> Disattiva notifiche
+                </button>
+            </div>
+
             <!-- Installa App -->
             <div class="pwa-install-section" style="display:none; margin-top:28px;">
                 <p class="section-label">App</p>
@@ -1540,7 +1555,9 @@
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
     <script src="js/holidays.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/dashboard-animations.js"></script>
     <script src="js/chat-widget.js" data-mode="private"></script>
+    <script src="/js/push-config.js"></script>
     <script src="/js/pwa.js" defer></script>
 </body>
 </html>

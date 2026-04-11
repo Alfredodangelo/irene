@@ -1,0 +1,233 @@
+/* ═══════════════════════════════════════════════════════════════
+   Irene Gipsy Tattoo — Premium Animations & Visual Enhancements
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── #1 Hero Text Reveal ─────────────────────────────────────── */
+.hero h1 .word,
+.hero h2 .word,
+.hero p .word {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+}
+.hero h1 .word-inner,
+.hero h2 .word-inner,
+.hero p .word-inner {
+    display: inline-block;
+    transform: translateY(110%);
+    opacity: 0;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero h1 .word-inner.revealed,
+.hero h2 .word-inner.revealed,
+.hero p .word-inner.revealed {
+    transform: translateY(0);
+    opacity: 1;
+}
+/* Keep hero-gipsy font override */
+.hero h1 .word-inner .hero-gipsy {
+    font-family: 'Roman SD', serif;
+    text-transform: uppercase;
+}
+
+/* ── #3 Parallax hero ────────────────────────────────────────── */
+.hero-bg.parallax-active {
+    background-attachment: scroll;
+    will-change: transform;
+}
+
+/* ── #4 Custom Cursor (desktop only) ─────────────────────────── */
+.custom-cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: 20px; height: 20px;
+    border: 1.5px solid rgba(212,175,55,0.7);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: width 0.25s cubic-bezier(0.16,1,0.3,1),
+                height 0.25s cubic-bezier(0.16,1,0.3,1),
+                border-color 0.25s ease,
+                background 0.25s ease;
+    mix-blend-mode: difference;
+}
+.custom-cursor.hovering {
+    width: 44px; height: 44px;
+    border-color: rgba(212,175,55,0.9);
+    background: rgba(212,175,55,0.08);
+}
+.custom-cursor-dot {
+    position: fixed;
+    top: 0; left: 0;
+    width: 5px; height: 5px;
+    background: #D4AF37;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+}
+@media (max-width: 1024px), (hover: none) {
+    .custom-cursor, .custom-cursor-dot { display: none !important; }
+}
+
+/* ── #5 Gallery 3D Tilt ──────────────────────────────────────── */
+@media (min-width: 769px) {
+    .gallery-item {
+        transform-style: preserve-3d;
+        perspective: 800px;
+    }
+    .gallery-item.tilt-active {
+        transition: transform 0.1s linear;
+    }
+    .gallery-overlay {
+        transform: translateZ(30px);
+    }
+}
+
+/* ── #6 Navbar progressive blur ──────────────────────────────── */
+.navbar {
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    transition: padding 0.3s ease, background 0.3s ease,
+                backdrop-filter 0.4s ease, -webkit-backdrop-filter 0.4s ease;
+}
+.navbar.scrolled {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* ── #7 Skeleton loading for portfolio images ────────────────── */
+.skeleton-item {
+    background: #1a1a1a;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+.skeleton-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(212,175,55,0.04) 40%,
+        rgba(212,175,55,0.08) 50%,
+        rgba(212,175,55,0.04) 60%,
+        transparent 100%);
+    animation: shimmer 1.8s infinite;
+}
+@keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+/* Gallery skeleton */
+.gallery-skeleton {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+.gallery-skeleton .skeleton-item {
+    height: 480px;
+}
+@media (max-width: 768px) {
+    .gallery-skeleton {
+        display: flex;
+        gap: 15px;
+        overflow: hidden;
+    }
+    .gallery-skeleton .skeleton-item {
+        min-width: 75%;
+        height: 420px;
+        flex-shrink: 0;
+    }
+}
+
+/* ── #8 Button ripple effect ─────────────────────────────────── */
+.btn {
+    position: relative;
+    overflow: hidden;
+}
+.btn .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(212,175,55,0.25);
+    transform: scale(0);
+    animation: ripple-expand 0.6s ease-out forwards;
+    pointer-events: none;
+}
+@keyframes ripple-expand {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+/* Press animation */
+.btn:active {
+    transform: scale(0.96) !important;
+    transition: transform 0.1s ease !important;
+}
+
+/* ── #9 Section gold dividers ────────────────────────────────── */
+.section-divider {
+    width: 100%;
+    height: 1px;
+    position: relative;
+    overflow: hidden;
+}
+.section-divider::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(212,175,55,0.3),
+        rgba(212,175,55,0.6),
+        rgba(212,175,55,0.3),
+        transparent);
+    transition: none;
+}
+.section-divider.visible::after {
+    animation: divider-sweep 1.2s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+@keyframes divider-sweep {
+    to { left: 0; }
+}
+
+/* ── #10 Reviews depth effect ────────────────────────────────── */
+@media (min-width: 601px) {
+    .review-card {
+        transition: transform 0.4s cubic-bezier(0.16,1,0.3,1),
+                    opacity 0.4s ease,
+                    box-shadow 0.4s ease;
+    }
+    .review-card.review-active {
+        transform: scale(1.04);
+        box-shadow: 0 12px 40px rgba(212,175,55,0.12);
+        opacity: 1;
+    }
+    .review-card.review-dimmed {
+        transform: scale(0.95);
+        opacity: 0.55;
+    }
+}
+
+/* ── Improved scroll fade-in animations with spring-like feel ── */
+.fade-in, .fade-in-up, .fade-in-left, .fade-in-right {
+    transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Smooth section reveal with stagger ──────────────────────── */
+.stagger-child {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+                transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.stagger-child.visible {
+    opacity: 1;
+    transform: translateY(0);
+}

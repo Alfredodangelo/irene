@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Genera VAPID Keys - IGT</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0a0a; color: #e0e0e0; font-family: 'Montserrat', sans-serif; padding: 40px 20px; }
+        .container { max-width: 700px; margin: 0 auto; }
+        h1 { color: #D4AF37; font-size: 1.5rem; margin-bottom: 8px; }
+        p { color: #888; font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px; }
+        button { background: #D4AF37; color: #0a0a0a; border: none; padding: 12px 24px; border-radius: 8px;
+                 font-weight: 600; cursor: pointer; font-size: 0.9rem; font-family: inherit; }
+        button:hover { background: #e8cc70; }
+        .key-box { margin-top: 20px; }
+        .key-box label { display: block; color: #D4AF37; font-size: 0.75rem; text-transform: uppercase;
+                         letter-spacing: 1px; margin-bottom: 6px; font-weight: 600; }
+        .key-box textarea { width: 100%; background: #111; color: #e0e0e0; border: 1px solid rgba(212,175,55,0.25);
+                            border-radius: 8px; padding: 12px; font-family: monospace; font-size: 0.85rem;
+                            resize: none; line-height: 1.5; }
+        .key-box textarea:focus { outline: none; border-color: #D4AF37; }
+        .copy-btn { margin-top: 6px; background: transparent; border: 1px solid rgba(212,175,55,0.3);
+                    color: #D4AF37; padding: 6px 14px; font-size: 0.78rem; }
+        .copy-btn:hover { background: rgba(212,175,55,0.1); }
+        .instructions { margin-top: 30px; padding: 20px; background: #111; border: 1px solid rgba(212,175,55,0.15);
+                        border-radius: 10px; }
+        .instructions h3 { color: #D4AF37; font-size: 0.9rem; margin-bottom: 12px; }
+        .instructions ol { padding-left: 20px; }
+        .instructions li { color: #aaa; font-size: 0.85rem; line-height: 1.8; }
+        .instructions code { background: rgba(212,175,55,0.1); padding: 2px 6px; border-radius: 4px; color: #D4AF37; font-size: 0.8rem; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Genera VAPID Keys</h1>
+        <p>Le VAPID keys servono per le notifiche push. Genera una coppia di chiavi,
+           poi copia la Public Key nel file <code>push-config.js</code> e la Private Key nelle variabili di n8n.</p>
+
+        <button id="generateBtn" onclick="generateKeys()">Genera nuove chiavi</button>
+
+        <div id="keysOutput" class="hidden">
+            <div class="key-box">
+                <label>Public Key (da mettere in push-config.js)</label>
+                <textarea id="publicKey" rows="2" readonly></textarea>
+                <button class="copy-btn" onclick="copyKey('publicKey')">Copia</button>
+            </div>
+            <div class="key-box">
+                <label>Private Key (da mettere nelle variabili n8n - TIENILA SEGRETA)</label>
+                <textarea id="privateKey" rows="2" readonly></textarea>
+                <button class="copy-btn" onclick="copyKey('privateKey')">Copia</button>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>Come usare le chiavi</h3>
+            <ol>
+                <li>Clicca "Genera nuove chiavi" qui sopra</li>
+                <li>Copia la <strong>Public Key</strong> e incollala nel file <code>js/push-config.js</code> al posto di <code>INSERISCI_QUI_LA_VAPID_PUBLIC_KEY</code></li>
+                <li>Copia la <strong>Private Key</strong> e salvala come variabile d'ambiente in n8n: <code>VAPID_PRIVATE_KEY</code></li>
+                <li>In n8n, aggiungi anche queste variabili:
+                    <br><code>VAPID_PUBLIC_KEY</code> = la stessa Public Key
+                    <br><code>VAPID_SUBJECT</code> = <code>mailto:irenegipsytattoo@gmail.com</code>
+                </li>
+                <li>Crea la tabella <code>push_subscriptions</code> in Supabase (vedi SQL nel file push-config.js)</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        async function generateKeys() {
+            try {
+                // Genera coppia di chiavi ECDSA P-256
+                const keyPair = await crypto.subtle.generateKey(
+                    { name: 'ECDSA', namedCurve: 'P-256' },
+                    true,
+                    ['sign', 'verify']
+                );
+
+                // Esporta public key come raw (uncompressed point)
+                const publicKeyRaw = await crypto.subtle.exportKey('raw', keyPair.publicKey);
+                const publicKeyBase64 = arrayBufferToBase64Url(publicKeyRaw);
+
+                // Esporta private key come JWK per ottenere il valore 'd'
+                const privateKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.privateKey);
+                const privateKeyBase64 = privateKeyJwk.d;
+
+                document.getElementById('publicKey').value = publicKeyBase64;
+                document.getElementById('privateKey').value = privateKeyBase64;
+                document.getElementById('keysOutput').classList.remove('hidden');
+                document.getElementById('generateBtn').textContent = 'Rigenera chiavi';
+            } catch (err) {
+                alert('Errore nella generazione delle chiavi: ' + err.message);
+                console.error(err);
+            }
+        }
+
+        function arrayBufferToBase64Url(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function copyKey(id) {
+            const textarea = document.getElementById(id);
+            textarea.select();
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                const btn = textarea.nextElementSibling;
+                btn.textContent = 'Copiato!';
+                setTimeout(() => { btn.textContent = 'Copia'; }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

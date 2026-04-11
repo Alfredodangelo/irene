@@ -1,0 +1,78 @@
+{
+  "name": "Push Notification — Invia",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "push-notify",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/push_subscriptions?user_id=eq.{{ $json.body.user_id }}&select=endpoint,p256dh,auth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-subscriptions",
+      "name": "Get Push Subscriptions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================\n// PUSH NOTIFICATION - Zero dipendenze esterne\n// Usa solo crypto e https (built-in Node.js)\n// =============================================\n\nconst crypto = require('crypto');\nconst https = require('https');\nconst http = require('http');\n\n// ===== VAPID CONFIG =====\nconst VAPID_PUBLIC_KEY = 'BAzB1_7H9MmyZGn2VeTLmfYdKHgekj3ZY7ElmD93ODlxvBChvKN-43VH-BLAepBnSMr8D3XyLua_DpS56Jp7soE';\nconst VAPID_PRIVATE_KEY = 'ujGxPNIepqQvKL0h6GWVjEXG4YqyxkarpIEYUU3vPeg';\nconst VAPID_SUBJECT = 'mailto:irenegipsytattoo@gmail.com';\n\n// ===== HELPERS =====\nfunction b64url(buf) {\n  return Buffer.from(buf).toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nfunction b64urlDec(s) {\n  s = s.replace(/-/g, '+').replace(/_/g, '/');\n  while (s.length % 4) s += '=';\n  return Buffer.from(s, 'base64');\n}\n\n// HKDF (RFC 5869)\nfunction hkdf(ikm, salt, info, len) {\n  const prk = crypto.createHmac('sha256', salt.length ? salt : Buffer.alloc(32)).update(ikm).digest();\n  let t = Buffer.alloc(0), out = Buffer.alloc(0);\n  for (let i = 1; out.length < len; i++) {\n    t = crypto.createHmac('sha256', prk).update(Buffer.concat([t, info, Buffer.from([i])])).digest();\n    out = Buffer.concat([out, t]);\n  }\n  return out.slice(0, len);\n}\n\n// VAPID JWT (ES256)\nfunction vapidAuth(endpoint) {\n  const u = new URL(endpoint);\n  const aud = u.protocol + '//' + u.host;\n  const hdr = b64url(JSON.stringify({ typ: 'JWT', alg: 'ES256' }));\n  const pay = b64url(JSON.stringify({\n    aud: aud,\n    exp: Math.floor(Date.now() / 1000) + 43200,\n    sub: VAPID_SUBJECT\n  }));\n  const unsigned = hdr + '.' + pay;\n\n  const pub = b64urlDec(VAPID_PUBLIC_KEY);\n  const key = crypto.createPrivateKey({\n    key: { kty: 'EC', crv: 'P-256', x: b64url(pub.slice(1, 33)), y: b64url(pub.slice(33, 65)), d: VAPID_PRIVATE_KEY },\n    format: 'jwk'\n  });\n  const sig = crypto.sign('sha256', Buffer.from(unsigned), { key: key, dsaEncoding: 'ieee-p1363' });\n  return 'vapid t=' + unsigned + '.' + b64url(sig) + ', k=' + VAPID_PUBLIC_KEY;\n}\n\n// Web Push Encryption (RFC 8291 + RFC 8188)\nfunction encrypt(p256dh, auth, text) {\n  const uaPub = b64urlDec(p256dh);\n  const uaAuth = b64urlDec(auth);\n  const ec = crypto.createECDH('prime256v1');\n  ec.generateKeys();\n  const asPub = ec.getPublicKey();\n  const secret = ec.computeSecret(uaPub);\n\n  const ikm = hkdf(secret, uaAuth, Buffer.concat([Buffer.from('WebPush: info\\0'), uaPub, asPub]), 32);\n  const salt = crypto.randomBytes(16);\n  const cek = hkdf(ikm, salt, Buffer.from('Content-Encoding: aes128gcm\\0'), 16);\n  const nonce = hkdf(ikm, salt, Buffer.from('Content-Encoding: nonce\\0'), 12);\n\n  const c = crypto.createCipheriv('aes-128-gcm', cek, nonce);\n  const enc = Buffer.concat([c.update(Buffer.concat([Buffer.from(text), Buffer.from([2])])), c.final(), c.getAuthTag()]);\n\n  const rs = Buffer.alloc(4);\n  rs.writeUInt32BE(4096);\n  return Buffer.concat([salt, rs, Buffer.from([65]), asPub, enc]);\n}\n\n// HTTP POST to push service\nfunction sendPush(endpoint, p256dh, auth, text) {\n  return new Promise((resolve, reject) => {\n    const body = encrypt(p256dh, auth, text);\n    const u = new URL(endpoint);\n    const opts = {\n      hostname: u.hostname,\n      port: u.port || 443,\n      path: u.pathname + u.search,\n      method: 'POST',\n      headers: {\n        'Content-Type': 'application/octet-stream',\n        'Content-Encoding': 'aes128gcm',\n        'Content-Length': body.length,\n        'Authorization': vapidAuth(endpoint),\n        'TTL': '86400',\n        'Urgency': 'normal'\n      }\n    };\n    const transport = u.protocol === 'https:' ? https : http;\n    const req = transport.request(opts, (res) => {\n      let d = '';\n      res.on('data', (chunk) => d += chunk);\n      res.on('end', () => resolve({ statusCode: res.statusCode, body: d }));\n    });\n    req.on('error', (e) => reject(e));\n    req.write(body);\n    req.end();\n  });\n}\n\n// ===== MAIN =====\nconst items = $input.all();\nlet subs;\nif (items.length === 1 && Array.isArray(items[0].json)) {\n  subs = items[0].json;\n} else {\n  subs = items.map(i => i.json);\n}\n\nconst wb = $('Webhook Trigger').first().json.body;\nconst payload = JSON.stringify({\n  title: wb.title || 'Irene Gipsy Tattoo',\n  body: wb.message || '',\n  icon: '/icons/icon-192x192.png',\n  url: wb.url || '/dashboard.html',\n  tag: wb.tag || 'igt-' + Date.now(),\n  type: wb.type || 'general'\n});\n\nconst results = [];\nfor (const sub of subs) {\n  if (!sub.endpoint) continue;\n  try {\n    const r = await sendPush(sub.endpoint, sub.p256dh, sub.auth, payload);\n    if (r.statusCode >= 200 && r.statusCode < 300) {\n      results.push({ endpoint: sub.endpoint, status: 'sent' });\n    } else if (r.statusCode === 410 || r.statusCode === 404) {\n      results.push({ endpoint: sub.endpoint, status: 'expired', code: r.statusCode });\n    } else {\n      results.push({ endpoint: sub.endpoint, status: 'error', code: r.statusCode, body: r.body });\n    }\n  } catch (e) {\n    results.push({ endpoint: sub.endpoint, status: 'error', error: e.message });\n  }\n}\n\nreturn [{\n  json: {\n    sent: results.filter(r => r.status === 'sent').length,\n    expired: results.filter(r => r.status === 'expired').length,\n    total: subs.length,\n    results: results\n  }\n}];"
+      },
+      "id": "send-push",
+      "name": "Send Push (no dependencies)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [880, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [{ "node": "Get Push Subscriptions", "type": "main", "index": 0 }]
+      ]
+    },
+    "Get Push Subscriptions": {
+      "main": [
+        [{ "node": "Send Push (no dependencies)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Send Push (no dependencies)": {
+      "main": [
+        [{ "node": "Respond OK", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [{ "name": "push-notifications" }]
+}

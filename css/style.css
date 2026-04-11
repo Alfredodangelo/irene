@@ -404,8 +404,16 @@ img {
     font-size: 1.2rem;
 }
 
+.cta-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
 .cta-group .btn {
-    margin: 0 10px;
+    margin: 0;
 }
 
 /* Section Components */

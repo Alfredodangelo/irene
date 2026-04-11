@@ -2419,10 +2419,10 @@ function renderNotifications() {
                 ? new Date(freedSlotAt).toLocaleDateString('it-IT', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
                 : '';
             const encodedBody = encodeURIComponent(n.body || '');
-            const actionsHtml = freedSlotAt ? `
+            const actionsHtml = (freedSlotAt && !n.is_read) ? `
                 <div class="freed-slot-actions">
                     <button class="freed-btn freed-btn-auto" onclick="event.stopPropagation();openFreedSlotModal('${freedSlotAt}',null,'${n.id}','${encodedBody}')">📆 Gestisci posto</button>
-                </div>` : '';
+                </div>` : (n.is_read ? '<div class="freed-slot-actions"><span style="font-size:0.8rem;color:#888;"><i class="fas fa-check-circle" style="color:var(--green,#55c97a);margin-right:4px;"></i>Gestito</span></div>' : '');
             return `<div class="notif-item freed-slot-card ${n.is_read ? '' : 'notif-unread'}" data-id="${n.id}" data-client="${n.client_id || ''}">
                 <div class="notif-icon" style="color:#D4AF37"><i class="fas fa-calendar-minus"></i></div>
                 <div class="notif-body" style="flex:1;min-width:0;">
@@ -3505,6 +3505,20 @@ let _freedSlotScheduledAt = null;
 let _freedSlotApptId      = null;
 let _freedSlotNotifId     = null;
 
+// Disabilita la card dopo un'azione (evita doppio click)
+function disableFreedSlotCard(notifId, label) {
+    if (!notifId) return;
+    const card = document.querySelector(`.notif-item[data-id="${notifId}"]`);
+    if (!card) return;
+    const actionsDiv = card.querySelector('.freed-slot-actions');
+    if (actionsDiv) {
+        actionsDiv.innerHTML = `<span style="font-size:0.8rem;color:#888;"><i class="fas fa-check-circle" style="color:var(--green,#55c97a);margin-right:4px;"></i>${label}</span>`;
+    }
+    card.classList.remove('notif-unread');
+    const dot = card.querySelector('.notif-dot');
+    if (dot) dot.remove();
+}
+
 function openFreedSlotModal(scheduledAt, apptId, notifId, reason) {
     _freedSlotScheduledAt = scheduledAt;
     _freedSlotApptId      = apptId || null;
@@ -3532,6 +3546,7 @@ function closeFreedSlotModal() {
 async function freedSlotTappabuchi() {
     closeFreedSlotModal();
     if (_freedSlotNotifId) await markAsRead(_freedSlotNotifId);
+    disableFreedSlotCard(_freedSlotNotifId, 'Offerta tappabuchi inviata');
     await triggerAutoOffer(_freedSlotScheduledAt, _freedSlotApptId);
 }
 
@@ -3572,19 +3587,24 @@ async function freedSlotSelectClient(clientId, clientName) {
     if (!await customConfirm(`Inviare offerta di posto anticipato a ${name}?`)) return;
     closeFreedSlotModal();
     if (_freedSlotNotifId) await markAsRead(_freedSlotNotifId);
+    disableFreedSlotCard(_freedSlotNotifId, 'Offerta inviata a ' + name);
     await triggerAutoOffer(_freedSlotScheduledAt, _freedSlotApptId, false, clientId);
 }
 
-// Libera: non fare nulla (segna notifica come letta se presente)
+// Libera: non fare nulla (segna notifica come letta e disabilita la card)
 async function freedSlotLibera() {
     if (_freedSlotNotifId) await markAsRead(_freedSlotNotifId);
+    disableFreedSlotCard(_freedSlotNotifId, 'Nessuna azione');
     closeFreedSlotModal();
 }
 
 // Ferie: usa freedSlotSetRiposo con i dati del modal (si chiude solo su successo)
 async function freedSlotFerie() {
     const done = await freedSlotSetRiposo(_freedSlotScheduledAt, _freedSlotNotifId);
-    if (done) closeFreedSlotModal();
+    if (done) {
+        disableFreedSlotCard(_freedSlotNotifId, 'Aggiunto alle ferie');
+        closeFreedSlotModal();
+    }
 }
 
 // ============================================
@@ -4134,6 +4154,18 @@ async function freedSlotSetRiposo(freedSlotAt, notifId) {
     const dateOnly = freedSlotAt.split('T')[0];
     const dateStr  = new Date(freedSlotAt).toLocaleDateString('it-IT',
         { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+    // Controlla se il giorno è già nelle ferie (evita duplicati)
+    const { data: existing } = await db.from('blocked_dates')
+        .select('id')
+        .eq('date_from', dateOnly)
+        .eq('date_to', dateOnly)
+        .limit(1);
+    if (existing && existing.length > 0) {
+        showToast(`${dateStr} è già segnato come ferie.`, true);
+        return true; // true = chiudi modal, è già gestito
+    }
+
     if (!await customConfirm(`Aggiungere ${dateStr} ai giorni di ferie?`)) return false;
 
     const { error } = await db.from('blocked_dates').insert({

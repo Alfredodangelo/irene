@@ -4,7 +4,7 @@
 //  Bump CACHE_VERSION per forzare aggiornamento
 // =============================================
 
-const CACHE_VERSION = 'igt-v1';
+const CACHE_VERSION = 'igt-v2';
 const CACHE_STATIC = CACHE_VERSION + '-static';
 const CACHE_DYNAMIC = CACHE_VERSION + '-dynamic';
 const CACHE_IMAGES = CACHE_VERSION + '-images';
@@ -40,6 +40,11 @@ const PRECACHE_URLS = [
   '/js/voucher.js',
   '/js/holidays.js',
   '/js/comuni-it.js',
+  '/js/animations.js',
+  '/js/dashboard-animations.js',
+  '/js/admin-animations.js',
+  '/js/push-config.js',
+  '/css/animations.css',
   '/favicon.svg',
   '/LOGO.svg',
   '/icons/icon-192x192.png',
@@ -165,4 +170,68 @@ self.addEventListener('message', (event) => {
   if (event.data === 'skipWaiting') {
     self.skipWaiting();
   }
+});
+
+// ---- PUSH NOTIFICATIONS ----
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch (e) {
+    payload = {
+      title: 'Irene Gipsy Tattoo',
+      body: event.data.text(),
+      icon: '/icons/icon-192x192.png'
+    };
+  }
+
+  const title = payload.title || 'Irene Gipsy Tattoo';
+  const options = {
+    body: payload.body || '',
+    icon: payload.icon || '/icons/icon-192x192.png',
+    badge: '/icons/icon-192x192.png',
+    tag: payload.tag || 'igt-notification',
+    renotify: !!payload.renotify,
+    data: {
+      url: payload.url || '/dashboard.html',
+      type: payload.type || 'general'
+    },
+    vibrate: [200, 100, 200],
+    actions: payload.actions || []
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+// ---- NOTIFICATION CLICK ----
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const targetUrl = event.notification.data?.url || '/dashboard.html';
+
+  // Se c'e' un'azione specifica
+  if (event.action === 'open') {
+    // default: apri la URL
+  } else if (event.action === 'dismiss') {
+    return;
+  }
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Se una tab e' gia' aperta, focalizzala e naviga
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          client.focus();
+          client.navigate(targetUrl);
+          return;
+        }
+      }
+      // Altrimenti apri una nuova tab
+      return clients.openWindow(targetUrl);
+    })
+  );
 });
