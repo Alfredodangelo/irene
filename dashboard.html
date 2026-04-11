@@ -808,27 +808,23 @@
             margin-top: 12px;
         }
 
-        /* Custom select dropdown */
-        .rb-custom-select { position:relative; width:100%; }
-        .rb-cs-trigger {
-            display:flex; align-items:center; justify-content:space-between;
-            padding:10px 13px; cursor:pointer;
-            background:rgba(212,175,55,0.07); border:1px solid rgba(212,175,55,0.25);
-            border-radius:8px; color:#e8e8e8; font-size:0.88rem; user-select:none;
+        /* Card/banner selector (stile pagina pubblica) */
+        .rb-card-options { display:flex; gap:10px; }
+        .rb-card { flex:1; cursor:pointer; }
+        .rb-card input[type="radio"] { display:none; }
+        .rb-card span {
+            display:flex; align-items:center; justify-content:center; gap:8px;
+            width:100%; padding:14px 12px;
+            border:1px solid #333; border-radius:6px;
+            background:rgba(0,0,0,0.5); color:#777;
+            font-size:0.88rem; transition:all 0.2s; text-align:center; line-height:1.3;
         }
-        .rb-cs-trigger:hover { background:rgba(212,175,55,0.12); }
-        .rb-cs-arrow { font-size:0.7rem; color:#888; transition:transform 0.2s; }
-        .rb-custom-select.open .rb-cs-arrow { transform:rotate(180deg); }
-        .rb-cs-dropdown {
-            position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:200;
-            background:#1a1a1a; border:1px solid rgba(212,175,55,0.25);
-            border-radius:8px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.5);
+        .rb-card span i { font-size:1rem; flex-shrink:0; }
+        .rb-card:hover span,
+        .rb-card input[type="radio"]:checked + span {
+            border-color:rgba(212,175,55,0.6); color:#D4AF37;
+            background:rgba(212,175,55,0.08);
         }
-        .rb-cs-option {
-            padding:10px 13px; cursor:pointer; font-size:0.88rem; color:#e8e8e8;
-            display:flex; align-items:center; gap:8px;
-        }
-        .rb-cs-option:hover { background:rgba(212,175,55,0.1); }
 
         /* ══════════════════════════════════════════
            RESCHEDULE — Modal calendario cambio data
@@ -1487,43 +1483,38 @@
                 <button class="rsch-change-btn" onclick="rbClearSelection()"><i class="fas fa-redo-alt"></i> Cambia</button>
             </div>
 
-            <!-- Modalità -->
+            <!-- Modalità (card/banner) -->
             <div class="rsch-field">
-                <label class="rsch-label">Modalità <span class="rsch-req">*</span></label>
-                <input type="hidden" id="rbLuogo" value="integrations:whatsapp_video">
-                <div class="rb-custom-select" id="rbLuogoBox" onclick="rbToggleSelect('rbLuogoBox')">
-                    <div class="rb-cs-trigger">
-                        <span id="rbLuogoLabel"><i class="fab fa-whatsapp" style="color:#25D366;"></i> Video WhatsApp</span>
-                        <i class="fas fa-chevron-down rb-cs-arrow"></i>
-                    </div>
-                    <div class="rb-cs-dropdown" id="rbLuogoDropdown" style="display:none;">
-                        <div class="rb-cs-option" onclick="rbSelectOption('rbLuogo','integrations:whatsapp_video','<i class=\'fab fa-whatsapp\' style=\'color:#25D366;\'></i> Video WhatsApp',event)">
-                            <i class="fab fa-whatsapp" style="color:#25D366;"></i> Video WhatsApp
-                        </div>
-                        <div class="rb-cs-option" onclick="rbSelectOption('rbLuogo','inPerson','<i class=\'fas fa-map-marker-alt\' style=\'color:#D4AF37;\'></i> Di persona',event)">
-                            <i class="fas fa-map-marker-alt" style="color:#D4AF37;"></i> Di persona
-                        </div>
-                    </div>
+                <label class="rsch-label">Dove preferisci la consulenza? <span class="rsch-req">*</span></label>
+                <div class="rb-card-options">
+                    <label class="rb-card">
+                        <input type="radio" name="rbLuogo" id="rbLuogoStudio" value="inPerson" checked>
+                        <span><i class="fas fa-map-marker-alt"></i> In Studio (Roma)</span>
+                    </label>
+                    <label class="rb-card">
+                        <input type="radio" name="rbLuogo" id="rbLuogoWa" value="integrations:whatsapp_video">
+                        <span><i class="fab fa-whatsapp"></i> Video WhatsApp</span>
+                    </label>
+                </div>
+                <p style="font-size:0.72rem;color:#666;margin-top:6px;font-style:italic;">La consulenza in studio è consigliata. Il video è riservato a chi non può raggiungere Roma.</p>
+                <div id="rbWhatsappMotivo" style="display:none;margin-top:8px;">
+                    <label for="rbMotivoVideo" style="font-size:0.82rem;color:#ccc;">Perché non puoi venire in studio? <span class="rsch-req">*</span></label>
+                    <input type="text" id="rbMotivoVideo" placeholder="Es: Abito a Milano" style="margin-top:4px;width:100%;padding:10px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#e8e8e8;font-size:0.88rem;font-family:inherit;">
                 </div>
             </div>
 
-            <!-- Pagamento -->
+            <!-- Pagamento (card/banner) -->
             <div class="rsch-field">
                 <label class="rsch-label">Preferenza pagamento <span class="rsch-req">*</span></label>
-                <input type="hidden" id="rbPagamento" value="Contanti">
-                <div class="rb-custom-select" id="rbPagamentoBox" onclick="rbToggleSelect('rbPagamentoBox')">
-                    <div class="rb-cs-trigger">
-                        <span id="rbPagamentoLabel"><i class="fas fa-money-bill-wave" style="color:#6dc07c;"></i> Contanti</span>
-                        <i class="fas fa-chevron-down rb-cs-arrow"></i>
-                    </div>
-                    <div class="rb-cs-dropdown" id="rbPagamentoDropdown" style="display:none;">
-                        <div class="rb-cs-option" onclick="rbSelectOption('rbPagamento','Contanti','<i class=\'fas fa-money-bill-wave\' style=\'color:#6dc07c;\'></i> Contanti',event)">
-                            <i class="fas fa-money-bill-wave" style="color:#6dc07c;"></i> Contanti
-                        </div>
-                        <div class="rb-cs-option" onclick="rbSelectOption('rbPagamento','POS','<i class=\'fas fa-credit-card\' style=\'color:#6dc07c;\'></i> POS / Carta',event)">
-                            <i class="fas fa-credit-card" style="color:#6dc07c;"></i> POS / Carta
-                        </div>
-                    </div>
+                <div class="rb-card-options">
+                    <label class="rb-card">
+                        <input type="radio" name="rbPagamento" id="rbPagContanti" value="Contanti" checked>
+                        <span><i class="fas fa-money-bill-wave"></i> Contanti</span>
+                    </label>
+                    <label class="rb-card">
+                        <input type="radio" name="rbPagamento" id="rbPagPOS" value="POS">
+                        <span><i class="fas fa-credit-card"></i> POS</span>
+                    </label>
                 </div>
             </div>
 

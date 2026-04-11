@@ -1868,31 +1868,39 @@ async function openRebookModal() {
         .filter(a => a.type === 'consulenza')
         .sort((a, b) => new Date(b.scheduled_at) - new Date(a.scheduled_at))[0];
 
+    // Reset default: Studio selezionato, motivazione nascosta
+    const studioRadio = document.getElementById('rbLuogoStudio');
+    const waRadio     = document.getElementById('rbLuogoWa');
+    const contantiRadio = document.getElementById('rbPagContanti');
+    const posRadio      = document.getElementById('rbPagPOS');
+    const motivoBox   = document.getElementById('rbWhatsappMotivo');
+    const motivoInput = document.getElementById('rbMotivoVideo');
+    if (studioRadio) studioRadio.checked = true;
+    if (waRadio) waRadio.checked = false;
+    if (contantiRadio) contantiRadio.checked = true;
+    if (posRadio) posRadio.checked = false;
+    if (motivoBox) motivoBox.style.display = 'none';
+    if (motivoInput) motivoInput.value = '';
+
     if (lastConsulenza) {
         const lm = lastConsulenza.consultation_mode || '';
         const lp = lastConsulenza.payment_method    || '';
         const li = lastConsulenza.notes             || '';
 
-        const luogoEl    = document.getElementById('rbLuogo');
-        const pagEl      = document.getElementById('rbPagamento');
-        const ideaEl     = document.getElementById('rbIdea');
-
         const isInPerson = /inPerson|studio/i.test(lm);
         const isPOS      = /pos|carta/i.test(lp);
-        if (luogoEl) {
-            luogoEl.value = isInPerson ? 'inPerson' : 'integrations:whatsapp_video';
-            const luogoLabel = document.getElementById('rbLuogoLabel');
-            if (luogoLabel) luogoLabel.innerHTML = isInPerson
-                ? '<i class="fas fa-map-marker-alt" style="color:#D4AF37;"></i> Di persona'
-                : '<i class="fab fa-whatsapp" style="color:#25D366;"></i> Video WhatsApp';
+
+        if (studioRadio && waRadio) {
+            studioRadio.checked = isInPerson;
+            waRadio.checked = !isInPerson;
+            if (!isInPerson && motivoBox) motivoBox.style.display = 'block';
         }
-        if (pagEl) {
-            pagEl.value = isPOS ? 'POS' : 'Contanti';
-            const pagLabel = document.getElementById('rbPagamentoLabel');
-            if (pagLabel) pagLabel.innerHTML = isPOS
-                ? '<i class="fas fa-credit-card" style="color:#6dc07c;"></i> POS / Carta'
-                : '<i class="fas fa-money-bill-wave" style="color:#6dc07c;"></i> Contanti';
+        if (contantiRadio && posRadio) {
+            contantiRadio.checked = !isPOS;
+            posRadio.checked = isPOS;
         }
+
+        const ideaEl = document.getElementById('rbIdea');
         if (ideaEl) ideaEl.value = li;
     }
 
@@ -1922,39 +1930,17 @@ async function openRebookModal() {
 
 function closeRebookModal() {
     document.getElementById('rebookModal').style.display = 'none';
-    document.querySelectorAll('.rb-custom-select.open').forEach(el => {
-        el.classList.remove('open');
-        const dd = el.querySelector('.rb-cs-dropdown');
-        if (dd) dd.style.display = 'none';
-    });
 }
 
-function rbToggleSelect(boxId) {
-    const box = document.getElementById(boxId);
-    if (!box) return;
-    const dropdown = box.querySelector('.rb-cs-dropdown');
-    const isOpen = box.classList.contains('open');
-    document.querySelectorAll('.rb-custom-select.open').forEach(el => {
-        el.classList.remove('open');
-        const dd = el.querySelector('.rb-cs-dropdown');
-        if (dd) dd.style.display = 'none';
+// Toggle motivazione WhatsApp Video nel rebook modal
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('input[name="rbLuogo"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const box = document.getElementById('rbWhatsappMotivo');
+            if (box) box.style.display = radio.value === 'integrations:whatsapp_video' && radio.checked ? 'block' : 'none';
+        });
     });
-    if (!isOpen) {
-        box.classList.add('open');
-        if (dropdown) dropdown.style.display = 'block';
-    }
-}
-
-function rbSelectOption(fieldId, value, labelHtml, event) {
-    event.stopPropagation();
-    document.getElementById(fieldId).value = value;
-    document.getElementById(fieldId + 'Label').innerHTML = labelHtml;
-    const box = document.getElementById(fieldId + 'Box');
-    if (!box) return;
-    box.classList.remove('open');
-    const dd = box.querySelector('.rb-cs-dropdown');
-    if (dd) dd.style.display = 'none';
-}
+});
 
 function rbFmtDate(d) {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -2139,9 +2125,18 @@ async function submitRebook() {
         return;
     }
 
-    const luogo    = document.getElementById('rbLuogo').value;
-    const pagamento = document.getElementById('rbPagamento').value;
-    const idea     = (document.getElementById('rbIdea').value || '').trim();
+    const luogoRadio = document.querySelector('input[name="rbLuogo"]:checked');
+    const pagRadio   = document.querySelector('input[name="rbPagamento"]:checked');
+    const luogo      = luogoRadio ? luogoRadio.value : 'inPerson';
+    const pagamento  = pagRadio ? pagRadio.value : 'Contanti';
+    const idea       = (document.getElementById('rbIdea').value || '').trim();
+    const motivoVideo = (document.getElementById('rbMotivoVideo')?.value || '').trim();
+
+    // Motivazione obbligatoria per WhatsApp Video
+    if (luogo === 'integrations:whatsapp_video' && !motivoVideo) {
+        msg.textContent = 'Indica il motivo per cui non puoi venire in studio.';
+        return;
+    }
 
     rbState.isSubmitting = true;
     btn.disabled = true;
@@ -2164,7 +2159,9 @@ async function submitRebook() {
             name:  `${nome} ${cognome}`.trim(),
             email: email,
             location: { value: luogo, optionValue: '' },
-            notes: `Preferenza pagamento: ${pagamento}`,
+            notes: motivoVideo
+                ? `Preferenza pagamento: ${pagamento} | Motivo video: ${motivoVideo}`
+                : `Preferenza pagamento: ${pagamento}`,
         };
         if (telefono && /^\+\d{7,15}$/.test(telefono)) {
             responses.attendeePhoneNumber = telefono;
@@ -2175,7 +2172,7 @@ async function submitRebook() {
             start: startISO,
             end: endDate.toISOString(),
             responses,
-            metadata: { source: 'dashboard_rebook', descrizione_idea: idea, pagamento },
+            metadata: { source: 'dashboard_rebook', descrizione_idea: idea, pagamento, motivo_video: motivoVideo || undefined },
             timeZone: RSCH_TIMEZONE,
             language: 'it',
         };
@@ -2212,6 +2209,7 @@ async function submitRebook() {
             descrizione_idea: idea,
             preferenza_pagamento: pagamento,
             luogo,
+            motivo_video: motivoVideo || '',
             gdpr_consent: 'true',
         });
 
