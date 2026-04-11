@@ -687,7 +687,7 @@ function showSuccessState(bookingResult, userData) {
     const timeObj = new Date(state.selectedTime);
     const dateLabel = dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     const timeLabel = timeObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', timeZone: CONFIG.TIMEZONE });
-    const luogoLabel = userData.luogo === 'integrations:whatsapp_video' ? 'Video su WhatsApp' : 'In Studio (Roma)';
+    const luogoLabel = userData.luogo === 'integrations:whatsapp_video' ? 'Video WhatsApp' : 'In Studio (Roma)';
 
     let detailsHTML = `
         <div class="booking-detail-item"><i class="far fa-user"></i><span>${userData.nome} ${userData.cognome}</span></div>

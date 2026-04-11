@@ -2134,9 +2134,11 @@ async function submitRebook() {
             name:  `${nome} ${cognome}`.trim(),
             email: email,
             location: { value: luogo, optionValue: '' },
-            notes: motivoVideo
-                ? `Preferenza pagamento: ${pagamento} | Motivo video: ${motivoVideo}`
-                : `Preferenza pagamento: ${pagamento}`,
+            notes: [
+                idea ? `Descrizione idea tattoo: ${idea}` : null,
+                `Preferenza pagamento: ${pagamento}`,
+                motivoVideo ? `Motivo video: ${motivoVideo}` : null,
+            ].filter(Boolean).join('\n'),
         };
         if (telefono && /^\+\d{7,15}$/.test(telefono)) {
             responses.attendeePhoneNumber = telefono;
