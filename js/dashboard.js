@@ -708,7 +708,7 @@ function renderAppointments(list, waitlist) {
             const payIconA = _payMethodA === 'contanti'
                 ? `<i class="fas fa-money-bill-wave" style="font-size:0.72rem;color:#4ade80;" title="Contanti"></i>`
                 : _payMethodA === 'pos'
-                ? `<i class="fas fa-credit-card" style="font-size:0.72rem;color:#60a5fa;" title="POS"></i>`
+                ? `<i class="fab fa-paypal" style="font-size:0.72rem;color:#0070ba;" title="POS"></i>`
                 : _payMethodA === 'paypal'
                 ? `<i class="fab fa-paypal" style="font-size:0.72rem;color:#0070ba;" title="PayPal"></i>`
                 : '';
@@ -773,7 +773,7 @@ function renderAppointments(list, waitlist) {
             const payIcon = _payMethod === 'contanti'
                 ? `<i class="fas fa-money-bill-wave" style="font-size:0.72rem;color:#4ade80;" title="Contanti"></i>`
                 : _payMethod === 'pos'
-                ? `<i class="fas fa-credit-card" style="font-size:0.72rem;color:#60a5fa;" title="POS"></i>`
+                ? `<i class="fab fa-paypal" style="font-size:0.72rem;color:#0070ba;" title="POS"></i>`
                 : _payMethod === 'paypal'
                 ? `<i class="fab fa-paypal" style="font-size:0.72rem;color:#0070ba;" title="PayPal"></i>`
                 : '';
@@ -1026,7 +1026,7 @@ function renderAppointments(list, waitlist) {
         const payIcon = _payMethodH === 'contanti'
             ? `<i class="fas fa-money-bill-wave" style="font-size:0.72rem;color:#4ade80;margin-left:5px;" title="Contanti"></i>`
             : _payMethodH === 'pos'
-            ? `<i class="fas fa-credit-card" style="font-size:0.72rem;color:#60a5fa;margin-left:5px;" title="POS"></i>`
+            ? `<i class="fab fa-paypal" style="font-size:0.72rem;color:#0070ba;margin-left:5px;" title="POS"></i>`
             : _payMethodH === 'paypal'
             ? `<i class="fab fa-paypal" style="font-size:0.72rem;color:#0070ba;margin-left:5px;" title="PayPal"></i>`
             : '';
