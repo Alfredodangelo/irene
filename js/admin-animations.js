@@ -46,7 +46,6 @@
         initStatsCountUp();        // #20
         initFunnelAnimation();     // #21
         initChatAnimations();      // #22
-        initUpcomingStagger();
     });
 
     /* ── #19 Section Transitions ─────────────────────────────── */
