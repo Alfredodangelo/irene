@@ -2572,7 +2572,7 @@ async function clearInfoNotifications() {
 
     const ids = toDelete.map(n => n.id);
     const { error } = await db.from('notifications').delete().in('id', ids);
-    if (error) { showToast('Errore durante la cancellazione.', true); return; }
+    if (error) { showToast('Errore durante la cancellazione.', 3000, true); return; }
 
     allNotifications = allNotifications.filter(n => !n.is_read);
     updateNotifBadge();

@@ -72,6 +72,18 @@ async function setupDashboard(user) {
     initProfileSave();
     initPasswordChange();
 
+    // Logout
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        try {
+            localStorage.removeItem('pendingNewsletterConsent');
+            await db.auth.signOut();
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+            window.location.href = isPWA ? 'login.html' : 'index.html';
+        } catch (e) {
+            showToast('Errore nel logout. Riprova.', 3000, true);
+        }
+    });
+
     // PWA mode: logo apre sito in browser esterno invece di navigare
     var isPWA = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     if (isPWA) {
@@ -500,17 +512,7 @@ function updateTopbarName(name, avatar) {
     }
 }
 
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-    try {
-        localStorage.removeItem('pendingNewsletterConsent');
-        await db.auth.signOut();
-        const isPWA = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-        window.location.href = isPWA ? 'login.html' : 'index.html';
-    } catch (e) {
-        showToast('Errore nel logout. Riprova.', 3000, true);
-    }
-});
+// Logout — attached in setupDashboard() after DOM is ready
 
 // ─────────────────────────────────────────────
 //  CARICA TUTTI I DATI

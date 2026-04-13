@@ -595,6 +595,21 @@ function updateDepositUI() {
 // =============================================
 //  FORM VALIDATION
 // =============================================
+// Silent check — returns true/false without showing error messages (used by PayPal button logic)
+function isFormComplete() {
+    const nome = document.getElementById('nome').value.trim();
+    const cognome = document.getElementById('cognome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const telefono = iti ? iti.getNumber() : document.getElementById('telefono').value.trim();
+    const gdpr = document.getElementById('gdpr').checked;
+    const datesOk = state.selectedDates.length > 0 && state.selectedDates.every(d => state.selectedTimes[d]);
+    if (!datesOk || !nome || !cognome || !email || !emailValid || !telefono || !gdpr) return false;
+    if (iti && !iti.isValidNumber()) return false;
+    return true;
+}
+
+// Full validation with visible error messages (used on form submit)
 function isFormValid() {
     const nome = document.getElementById('nome').value.trim();
     const cognome = document.getElementById('cognome').value.trim();
@@ -672,7 +687,7 @@ async function checkFormAndUpdatePayPal() {
     }
     noDateWarning.classList.add('hidden');
 
-    if (!isFormValid()) {
+    if (!isFormComplete()) {
         document.getElementById('paypalButtonContainer').innerHTML = '';
         state.paypalRendered = false;
         return;
