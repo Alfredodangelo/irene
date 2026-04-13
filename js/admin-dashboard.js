@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // DATA LOADING
 // ============================================
 async function loadAllData() {
-    await Promise.all([loadClients(), loadAppointments(), loadWaitlist(), loadWaitlistRequests()]);
+    await Promise.all([loadClients(), loadAppointments(), loadWaitlist(), loadWaitlistRequests(), loadPendingReschedules()]);
     renderOverview();
     renderClientsTable(allClients);
     renderCalendar();
@@ -146,7 +146,9 @@ async function loadAppointments() {
         .from('appointments')
         .select('*, clients(id, first_name, last_name, email, phone)')
         .order('scheduled_at', { ascending: true });
-    if (!error) allAppointments = data || [];
+    if (error) console.error('[admin] loadAppointments error:', error);
+    else allAppointments = data || [];
+    console.log('[admin] appointments loaded:', allAppointments.length);
 }
 
 async function loadWaitlist() {
@@ -504,6 +506,7 @@ function renderOverview() {
     const BTN_GOLD = BTN_BASE + 'background:rgba(212,175,55,0.12);border-color:rgba(212,175,55,0.4);color:#D4AF37;';
     const BTN_RED  = BTN_BASE + 'background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.35);color:#f87171;';
 
+    try {
     list.innerHTML = upcoming.map(a => {
         const client    = a.clients;
         const name      = client ? `${client.first_name} ${client.last_name}` : '—';
@@ -536,6 +539,10 @@ function renderOverview() {
             </div>
         </div>`;
     }).join('');
+    } catch (err) {
+        console.error('[admin] renderOverview upcoming error:', err);
+        list.innerHTML = '<div class="empty-state" style="color:#f87171;">Errore nel caricamento appuntamenti</div>';
+    }
 }
 
 // ============================================
@@ -1531,9 +1538,7 @@ function renderCalendar() {
 
         if (isHoliday) day.title = 'Giorno festivo';
 
-        if (appts.length > 0) {
-            day.addEventListener('click', () => showCalDayDetail(d, appts));
-        }
+        day.addEventListener('click', () => showCalDayDetail(d, appts));
 
         grid.appendChild(day);
     }
@@ -1566,6 +1571,13 @@ function showCalDayDetail(day, appts) {
         `<i class="fas fa-calendar-day"></i> ${dateStr}`;
 
     const sorted = [...appts].sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at));
+
+    if (sorted.length === 0) {
+        document.getElementById('calDayAppointments').innerHTML = '<div style="color:#888;text-align:center;padding:20px 0;font-size:0.85rem;">Nessun appuntamento in questo giorno</div>';
+        detailEl.style.display = 'block';
+        detailEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+    }
 
     document.getElementById('calDayAppointments').innerHTML = sorted.map(a => {
         const client    = a.clients;

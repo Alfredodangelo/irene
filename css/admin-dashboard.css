@@ -1155,10 +1155,16 @@ body.aa-full .admin-layout {
     .admin-nav-item span { display: block; font-size: 0.62rem; letter-spacing: 0; }
     .admin-nav-item i { font-size: 1.25rem; width: auto; }
 
-    /* Main: spazio per bottom nav */
+    /* Main: spazio per bottom nav + safe area iOS */
     .admin-main {
-        padding: 14px 10px 95px;
+        padding: 14px 10px calc(90px + env(safe-area-inset-bottom, 0px));
         margin-left: 0 !important;
+    }
+
+    /* Bottom nav: rispetta safe area iOS */
+    .admin-sidebar {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        height: calc(81px + env(safe-area-inset-bottom, 0px));
     }
 
     /* Stats a colonna singola */
