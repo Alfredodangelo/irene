@@ -118,8 +118,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 // DATA LOADING
 // ============================================
 async function loadAllData() {
-    await Promise.all([loadClients(), loadAppointments(), loadWaitlist(), loadWaitlistRequests(), loadPendingReschedules()]);
-    renderOverview();
+    await Promise.allSettled([loadClients(), loadAppointments(), loadWaitlist(), loadWaitlistRequests(), loadPendingReschedules()]);
+    try { renderOverview(); } catch (e) { console.error('[admin] renderOverview crash:', e); }
     renderClientsTable(allClients);
     renderCalendar();
 }
@@ -496,9 +496,11 @@ function renderOverview() {
         .filter(a => new Date(a.scheduled_at) >= now && a.status !== 'cancelled')
         .slice(0, 8);
 
+    console.log('[admin] allAppointments:', allAppointments.length, 'upcoming:', upcoming.length);
+
     const list = document.getElementById('upcomingList');
     if (upcoming.length === 0) {
-        list.innerHTML = '<div class="empty-state">Nessun appuntamento futuro</div>';
+        list.innerHTML = `<div class="empty-state">Nessun appuntamento futuro (totali: ${allAppointments.length})</div>`;
         return;
     }
 
@@ -2435,8 +2437,6 @@ async function loadNotifications() {
     renderWlRequestsInNotif();
     renderRescheduleRequests();
     renderNotifications();
-    renderOverview();
-    renderCalendar();
     // Bottone "segna tutte lette"
     document.getElementById('markAllReadBtn')?.addEventListener('click', markAllRead);
 }
