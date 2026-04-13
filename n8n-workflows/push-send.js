@@ -60,10 +60,19 @@ function sendPush(ep, p, a, t) {
 
 function getSubs(uid) {
   return new Promise((ok, no) => {
-    https.get(SU + '/rest/v1/push_subscriptions?user_id=eq.' + uid + '&select=endpoint,p256dh,auth',
+    https.get(SU + '/rest/v1/push_subscriptions?user_id=eq.' + uid + '&select=id,endpoint,p256dh,auth',
       { headers: { apikey: SK, Authorization: 'Bearer ' + SK } },
       r => { let d = ''; r.on('data', c => d += c); r.on('end', () => { try { ok(JSON.parse(d)); } catch (e) { no(e); } }); }
     ).on('error', no);
+  });
+}
+
+function delSub(id) {
+  return new Promise((ok, no) => {
+    const rq = https.request(SU + '/rest/v1/push_subscriptions?id=eq.' + id, {
+      method: 'DELETE', headers: { apikey: SK, Authorization: 'Bearer ' + SK }
+    }, r => { let d = ''; r.on('data', c => d += c); r.on('end', () => ok(r.statusCode)); });
+    rq.on('error', no); rq.end();
   });
 }
 
@@ -78,12 +87,17 @@ function getSubs(uid) {
     const subs = await getSubs(uid);
     if (!Array.isArray(subs) || !subs.length) { console.log(JSON.stringify({ sent: 0, total: 0 })); return; }
     const payload = JSON.stringify({ title, body: message, icon: '/icons/icon-192x192.png', url, tag: 'igt-' + Date.now(), type });
-    const res = [];
+    const res = []; const gone = [];
     for (const s of subs) {
       if (!s.endpoint) continue;
-      try { const r = await sendPush(s.endpoint, s.p256dh, s.auth, payload); res.push({ st: r.s >= 200 && r.s < 300 ? 'sent' : 'err', c: r.s }); }
-      catch (e) { res.push({ st: 'err', e: e.message }); }
+      try {
+        const r = await sendPush(s.endpoint, s.p256dh, s.auth, payload);
+        if (r.s === 410 || r.s === 404) { gone.push(s.id); res.push({ st: 'gone', c: r.s }); }
+        else if (r.s >= 200 && r.s < 300) { res.push({ st: 'sent', c: r.s }); }
+        else { res.push({ st: 'err', c: r.s }); }
+      } catch (e) { res.push({ st: 'err', e: e.message }); }
     }
-    console.log(JSON.stringify({ sent: res.filter(r => r.st === 'sent').length, total: subs.length, results: res }));
+    for (const id of gone) { try { await delSub(id); } catch (_) {} }
+    console.log(JSON.stringify({ sent: res.filter(r => r.st === 'sent').length, total: subs.length, cleaned: gone.length, results: res }));
   } catch (e) { console.log(JSON.stringify({ error: e.message })); }
 })();

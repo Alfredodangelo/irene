@@ -2,7 +2,7 @@
    Irene Gipsy Tattoo — Premium Animations (Public Site)
    Features: #1 Hero text, #2 Lenis, #3 Parallax, #4 Cursor,
              #5 Tilt, #6 Navbar blur, #7 Skeleton, #8 Ripple,
-             #9 Dividers, #10 Reviews depth
+             #9 Dividers, #10 Reviews depth, #11 Scroll Video
    ═══════════════════════════════════════════════════════════════ */
 
 (function () {
@@ -22,6 +22,7 @@
         initButtonRipple();    // #8
         initSectionDividers(); // #9
         initReviewsDepth();    // #10
+        initScrollVideo();     // #11
     }
 
     /* ── #2 Lenis Smooth Scroll ──────────────────────────────── */
@@ -383,6 +384,61 @@
         window.addEventListener('resize', updateDepth);
         // Initial
         setTimeout(updateDepth, 300);
+    }
+
+    /* ── #11 Scroll-Driven Pinned Video ────────────────────────── */
+    function initScrollVideo() {
+        var video = document.getElementById('scrollVideo');
+        var section = document.getElementById('scrollVideoSection');
+        if (!video || !section) return;
+
+        // Prevent default playback
+        video.pause();
+
+        function onReady() {
+            var duration = video.duration;
+            if (!duration || isNaN(duration)) return;
+
+            var ticking = false;
+
+            function updateVideoTime() {
+                var rect = section.getBoundingClientRect();
+                var vh = window.innerHeight;
+
+                // Scroll room = section height minus one viewport (the sticky viewport)
+                var scrollRoom = rect.height - vh;
+                if (scrollRoom <= 0) { ticking = false; return; }
+
+                // How far we've scrolled into the section
+                // 0 = section top at viewport top, scrollRoom = section bottom at viewport bottom
+                var scrolled = -rect.top;
+                var progress = Math.max(0, Math.min(1, scrolled / scrollRoom));
+
+                var targetTime = progress * duration;
+
+                if (Math.abs(video.currentTime - targetTime) > 0.02) {
+                    video.currentTime = targetTime;
+                }
+                ticking = false;
+            }
+
+            window.addEventListener('scroll', function () {
+                if (!ticking) {
+                    requestAnimationFrame(updateVideoTime);
+                    ticking = true;
+                }
+            }, { passive: true });
+
+            // Initial position
+            updateVideoTime();
+        }
+
+        // Wait for video metadata
+        if (video.readyState >= 1) {
+            onReady();
+        } else {
+            video.addEventListener('loadedmetadata', onReady);
+        }
     }
 
 })();

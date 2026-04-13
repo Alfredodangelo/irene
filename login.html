@@ -380,7 +380,7 @@
         <div class="login-msg" id="loginMsg"></div>
     </div>
 
-    <a href="index.html" class="back-link">← Torna al sito</a>
+    <a href="index.html" class="back-link" id="backToSite">← Torna al sito</a>
 
     <!-- Modal Registrazione Google -->
     <div class="reg-overlay" id="regOverlay" onclick="if(event.target===this)closeRegModal()">
@@ -771,6 +771,20 @@
         }
     </script>
     <script src="js/chat-widget.js" data-mode="public"></script>
+    <script src="/js/push-config.js"></script>
     <script src="/js/pwa.js" defer></script>
+    <script>
+    // PWA mode: adatta la login per l'app installata
+    (function() {
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+        if (!isPWA) return;
+        const link = document.getElementById('backToSite');
+        if (link) {
+            link.textContent = 'Visita il sito →';
+            link.target = '_blank';
+            link.rel = 'noopener';
+        }
+    })();
+    </script>
 </body>
 </html>

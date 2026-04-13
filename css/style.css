@@ -124,11 +124,6 @@ img {
     transform: translateY(-2px);
 }
 
-.btn-secondary:hover {
-    background-color: rgba(212, 175, 55, 0.1);
-    color: var(--accent-color);
-}
-
 .btn-lg {
     padding: 15px 40px;
     font-size: 1.1rem;
@@ -414,6 +409,14 @@ img {
 
 .cta-group .btn {
     margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 32px;
+    font-size: 0.9rem;
+    border-width: 2px;
+    min-height: 50px;
+    box-sizing: border-box;
 }
 
 /* Section Components */
@@ -453,6 +456,33 @@ img {
 .col-img img {
     border: 1px solid #333;
     box-shadow: 10px 10px 0 var(--secondary-color);
+}
+
+/* ── Scroll-driven pinned video ── */
+.scroll-video-section {
+    position: relative;
+    height: 250vh;
+    background: #0a0a0a;
+}
+
+.scroll-video-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.scroll-video-sticky video {
+    max-height: 75vh;
+    max-width: 85vw;
+    width: auto;
+    object-fit: contain;
+    border: 1px solid #333;
+    box-shadow: 10px 10px 0 var(--secondary-color);
+    border-radius: 2px;
 }
 
 .text-link {
@@ -1223,6 +1253,16 @@ img {
     }
 
     .col-img img {
+        box-shadow: 5px 5px 0 var(--secondary-color);
+    }
+
+    .scroll-video-section {
+        height: 200vh;
+    }
+
+    .scroll-video-sticky video {
+        max-height: 65vh;
+        max-width: 90vw;
         box-shadow: 5px 5px 0 var(--secondary-color);
     }
 

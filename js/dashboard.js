@@ -72,6 +72,13 @@ async function setupDashboard(user) {
     initProfileSave();
     initPasswordChange();
 
+    // PWA mode: logo apre sito in browser esterno invece di navigare
+    var isPWA = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    if (isPWA) {
+        var logo = document.getElementById('topbarLogo');
+        if (logo) { logo.target = '_blank'; logo.rel = 'noopener'; }
+    }
+
     // Realtime: aggiorna automaticamente quando cambiano i dati del cliente
     const uid = user.id;
     db.channel('client-dashboard-' + uid)
@@ -498,7 +505,8 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     try {
         localStorage.removeItem('pendingNewsletterConsent');
         await db.auth.signOut();
-        window.location.href = 'index.html';
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+        window.location.href = isPWA ? 'login.html' : 'index.html';
     } catch (e) {
         showToast('Errore nel logout. Riprova.', 3000, true);
     }
