@@ -726,7 +726,7 @@ function renderAppointments(list, waitlist) {
                     const safeAtA  = (a.scheduled_at || '').replace(/'/g, "\\'");
                     extraBtnHtml = `<button class="btn-reschedule" style="margin-top:0;" onclick="openFreeRescheduleModal('${a.id}','${safeUidA}','${safeAtA}')"><i class="fas fa-calendar-alt"></i> Cambia data</button>`;
                 } else if (daysToA > 0 && !hasPendingA) {
-                    extraBtnHtml = `<button class="btn-reschedule" style="margin-top:0;" onclick="openRescheduleModal('${a.id}')"><i class="fas fa-clock"></i> Richiedi cambio data</button>`;
+                    extraBtnHtml = `<button class="btn-reschedule" style="margin-top:0;" onclick="openRescheduleModal('${a.id}')"><i class="fas fa-clock"></i> Cambia data</button>`;
                 }
             }
             const extraConsentBtn = getConsentBtnHtml(a);
@@ -893,7 +893,7 @@ function renderAppointments(list, waitlist) {
         const isConsulenzaPast = consulenza.scheduled_at && new Date(consulenza.scheduled_at) < new Date() && ['confirmed','pending'].includes(consulenza.status);
         const hasBlocker = isConsulenzaPast || ireneProposal || (clientRr && clientRr.status === 'pending');
         if (!hasBlocker) {
-            consulenzaActions = `<button class="btn-reschedule" onclick="openRescheduleModal('${consulenza.id}')"><i class="fas fa-calendar-alt"></i> Richiedi cambio data</button>`;
+            consulenzaActions = `<button class="btn-reschedule" onclick="openRescheduleModal('${consulenza.id}')"><i class="fas fa-calendar-alt"></i> Cambia data</button>`;
         }
     }
     // Nel dashboard il cliente è sempre registrato: usa sempre il modal interno
@@ -969,7 +969,7 @@ function renderAppointments(list, waitlist) {
                 const safeAt  = (preseduta.scheduled_at || '').replace(/'/g, "\\'");
                 presedutaActionsHtml = `<button class="btn-reschedule" onclick="openFreeRescheduleModal('${preseduta.id}','${safeUid}','${safeAt}')"><i class="fas fa-calendar-alt"></i> Cambia data</button>`;
             } else if (daysToPreseduta > 0) {
-                presedutaActionsHtml = `<button class="btn-reschedule" onclick="openRescheduleModal('${preseduta.id}')"><i class="fas fa-clock"></i> Richiedi cambio data</button>`;
+                presedutaActionsHtml = `<button class="btn-reschedule" onclick="openRescheduleModal('${preseduta.id}')"><i class="fas fa-clock"></i> Cambia data</button>`;
             }
         }
     }
@@ -988,7 +988,7 @@ function renderAppointments(list, waitlist) {
             const safeAt  = (seduta.scheduled_at || '').replace(/'/g, "\\'");
             sedutaActionsHtml = `<button class="btn-reschedule" onclick="openFreeRescheduleModal('${seduta.id}','${safeUid}','${safeAt}')"><i class="fas fa-calendar-alt"></i> Cambia data</button>`;
         } else if (daysToAppt > 0 && !hasPendingRsch) {
-            sedutaActionsHtml = `<button class="btn-reschedule" onclick="openRescheduleModal('${seduta.id}')"><i class="fas fa-clock"></i> Richiedi cambio data</button>`;
+            sedutaActionsHtml = `<button class="btn-reschedule" onclick="openRescheduleModal('${seduta.id}')"><i class="fas fa-clock"></i> Cambia data</button>`;
         }
     }
 
@@ -1786,7 +1786,7 @@ function _resetRescheduleModalToRequestMode() {
     const subtitleEl = document.getElementById('rschModalSubtitle');
     const reasonEl   = document.getElementById('rschReasonField');
     const btnEl      = document.getElementById('rescheduleSubmitBtn');
-    if (titleEl)    titleEl.innerHTML  = '<i class="fas fa-calendar-alt"></i> Richiedi cambio data';
+    if (titleEl)    titleEl.innerHTML  = '<i class="fas fa-calendar-alt"></i> Cambia data';
     if (subtitleEl) subtitleEl.textContent = 'Scegli una data disponibile. La richiesta sarà inviata a Irene — la data attuale resterà invariata fino alla conferma.';
     if (reasonEl)   reasonEl.style.display = '';
     if (btnEl) {
