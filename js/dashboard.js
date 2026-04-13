@@ -704,7 +704,7 @@ function renderAppointments(list, waitlist) {
     if (allActiveSedute.length > 1) {
         sedutaExtraHtml = allActiveSedute.slice(1).map((a, idx) => {
             const date    = a.scheduled_at ? formatDate(a.scheduled_at) : 'Data da definire';
-            const _payMethodA = a.acconto_payment_method || a.payment_method || a.session_payment_method || '';
+            const _payMethodA = a.acconto_payment_method || a.payment_method || a.session_payment_method || ((a.amount_paid || 0) > 0 ? 'paypal' : '');
             const payIconA = _payMethodA === 'contanti'
                 ? `<i class="fas fa-money-bill-wave" style="font-size:0.72rem;color:#4ade80;" title="Contanti"></i>`
                 : _payMethodA === 'pos'
@@ -769,7 +769,7 @@ function renderAppointments(list, waitlist) {
         let inner = '';
         if (appt) {
             const date    = appt.scheduled_at ? formatDate(appt.scheduled_at) : 'Data da definire';
-            const _payMethod = appt.acconto_payment_method || appt.payment_method || appt.session_payment_method || '';
+            const _payMethod = appt.acconto_payment_method || appt.payment_method || appt.session_payment_method || ((appt.amount_paid || 0) > 0 ? 'paypal' : '');
             const payIcon = _payMethod === 'contanti'
                 ? `<i class="fas fa-money-bill-wave" style="font-size:0.72rem;color:#4ade80;" title="Contanti"></i>`
                 : _payMethod === 'pos'
@@ -1022,7 +1022,7 @@ function renderAppointments(list, waitlist) {
         const icon   = typeIcons[a.type]  || 'far fa-calendar-alt';
         const date    = a.scheduled_at ? formatDate(a.scheduled_at) : 'Data da definire';
         const amount  = a.amount ? ` · €${Number(a.amount).toFixed(0)}` : '';
-        const _payMethodH = a.acconto_payment_method || a.payment_method || a.session_payment_method || '';
+        const _payMethodH = a.acconto_payment_method || a.payment_method || a.session_payment_method || ((a.amount_paid || 0) > 0 ? 'paypal' : '');
         const payIcon = _payMethodH === 'contanti'
             ? `<i class="fas fa-money-bill-wave" style="font-size:0.72rem;color:#4ade80;margin-left:5px;" title="Contanti"></i>`
             : _payMethodH === 'pos'
