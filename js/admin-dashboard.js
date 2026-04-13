@@ -2527,21 +2527,16 @@ async function markAllRead() {
         .in('id', unread.map(n => n.id));
 }
 
-const INFO_NOTIF_TYPES = [
-    'new_appointment', 'new_client',
-    'advance_offer_accepted', 'advance_offer_declined', 'irene_proposal_rejected',
-];
-
 async function clearInfoNotifications() {
-    const toDelete = allNotifications.filter(n => INFO_NOTIF_TYPES.includes(n.type));
-    if (toDelete.length === 0) { showToast('Nessuna notifica informativa da cancellare.'); return; }
-    if (!await customConfirm(`Cancellare ${toDelete.length} notifiche informative?\nL'operazione è irreversibile.`)) return;
+    const toDelete = allNotifications.filter(n => n.is_read);
+    if (toDelete.length === 0) { showToast('Nessuna notifica gestita da cancellare.'); return; }
+    if (!await customConfirm(`Cancellare ${toDelete.length} notifiche già gestite?\nL'operazione è irreversibile.`)) return;
 
     const ids = toDelete.map(n => n.id);
     const { error } = await db.from('notifications').delete().in('id', ids);
     if (error) { showToast('Errore durante la cancellazione.', true); return; }
 
-    allNotifications = allNotifications.filter(n => !INFO_NOTIF_TYPES.includes(n.type));
+    allNotifications = allNotifications.filter(n => !n.is_read);
     updateNotifBadge();
     renderNotifications();
     showToast(`${toDelete.length} notifiche cancellate.`);
