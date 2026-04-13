@@ -107,6 +107,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupPortfolio();
     await loadNotifications();
     setupNotifRealtime();
+
+    // Refresh dati quando la pagina torna in primo piano (tab switch, app resume)
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') loadAllData();
+    });
 });
 
 // ============================================
