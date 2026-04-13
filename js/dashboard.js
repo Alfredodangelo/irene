@@ -2411,7 +2411,7 @@ function buildWaitlistBlock(waitlist) {
                     <span style="background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.3);border-radius:20px;padding:2px 9px;font-size:0.66rem;font-weight:500;letter-spacing:0.3px;">Attiva</span>
                 </div>
                 <div style="font-size:0.74rem;color:#888;line-height:1.5;">
-                    Sei in lista. Se si libera un posto prima della tua data, riceverai una notifica.<br>Hai <strong style="color:#bbb;">24 ore</strong> per accettare, poi il posto passa al prossimo.
+                    Sei in lista. Se si libera un posto prima della tua data, riceverai una notifica.<br>Hai <strong style="color:#bbb;">24 ore</strong> per accettare. Se rifiuti o non rispondi in tempo, resti in lista ma in ultima posizione.
                 </div>
             </div>
             <div style="display:flex;justify-content:flex-end;">
