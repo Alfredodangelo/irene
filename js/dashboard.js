@@ -709,6 +709,8 @@ function renderAppointments(list, waitlist) {
                 ? `<i class="fas fa-money-bill-wave" style="font-size:0.72rem;color:#4ade80;" title="Contanti"></i>`
                 : _payMethodA === 'pos'
                 ? `<i class="fas fa-credit-card" style="font-size:0.72rem;color:#60a5fa;" title="POS"></i>`
+                : _payMethodA === 'paypal'
+                ? `<i class="fab fa-paypal" style="font-size:0.72rem;color:#0070ba;" title="PayPal"></i>`
                 : '';
             const amountRightA = a.amount
                 ? `<div style="font-size:0.78rem;color:#ccc;display:flex;align-items:center;gap:5px;">€${Number(a.amount).toFixed(0)}${payIconA}</div>`
@@ -772,6 +774,8 @@ function renderAppointments(list, waitlist) {
                 ? `<i class="fas fa-money-bill-wave" style="font-size:0.72rem;color:#4ade80;" title="Contanti"></i>`
                 : _payMethod === 'pos'
                 ? `<i class="fas fa-credit-card" style="font-size:0.72rem;color:#60a5fa;" title="POS"></i>`
+                : _payMethod === 'paypal'
+                ? `<i class="fab fa-paypal" style="font-size:0.72rem;color:#0070ba;" title="PayPal"></i>`
                 : '';
             const amountRight = appt.amount
                 ? `<div style="font-size:0.78rem;color:#ccc;display:flex;align-items:center;gap:5px;">€${Number(appt.amount).toFixed(0)}${payIcon}</div>`
@@ -1023,6 +1027,8 @@ function renderAppointments(list, waitlist) {
             ? `<i class="fas fa-money-bill-wave" style="font-size:0.72rem;color:#4ade80;margin-left:5px;" title="Contanti"></i>`
             : _payMethodH === 'pos'
             ? `<i class="fas fa-credit-card" style="font-size:0.72rem;color:#60a5fa;margin-left:5px;" title="POS"></i>`
+            : _payMethodH === 'paypal'
+            ? `<i class="fab fa-paypal" style="font-size:0.72rem;color:#0070ba;margin-left:5px;" title="PayPal"></i>`
             : '';
         return `
         <div class="data-row">
@@ -2667,6 +2673,8 @@ async function _doAcceptAdvanceOffer(offerId, freedSlotAt) {
         type:         'seduta',
         status:       'confirmed',
         scheduled_at: freedSlotAt,
+        amount:       50,
+        amount_paid:  0,
         notes:        'Anticipo via lista priorità',
     }).select().single();
     if (insertErr) { showToast('Errore inserimento seduta: ' + insertErr.message, true); return; }
@@ -2695,8 +2703,9 @@ async function _doAcceptAdvanceOffer(offerId, freedSlotAt) {
     });
     if (notifErr) console.warn('[notif advance]', notifErr.message);
 
-    // Se ha tenuto l'ultima seduta extra: notifica Irene con conferma pagamento
+    // Se ha tenuto l'ultima seduta extra: segna pagamento PayPal + notifica Irene
     if (keepLast === true && lastSeduta) {
+        await db.from('appointments').update({ acconto_payment_method: 'paypal' }).eq('id', lastSeduta.id);
         const lastDateStr = new Date(lastSeduta.scheduled_at).toLocaleDateString('it-IT',
             { day: '2-digit', month: 'long', year: 'numeric' });
         const { error: notifErr2 } = await db.from('notifications').insert({
