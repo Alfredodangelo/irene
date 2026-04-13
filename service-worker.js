@@ -4,7 +4,7 @@
 //  Bump CACHE_VERSION per forzare aggiornamento
 // =============================================
 
-const CACHE_VERSION = 'igt-v2';
+const CACHE_VERSION = 'igt-v3';
 const CACHE_STATIC = CACHE_VERSION + '-static';
 const CACHE_DYNAMIC = CACHE_VERSION + '-dynamic';
 const CACHE_IMAGES = CACHE_VERSION + '-images';
@@ -191,7 +191,7 @@ self.addEventListener('push', (event) => {
   const options = {
     body: payload.body || '',
     icon: payload.icon || '/icons/icon-192x192.png',
-    badge: '/icons/icon-192x192.png',
+    badge: '/icons/badge-96x96.png',
     tag: payload.tag || 'igt-notification',
     renotify: !!payload.renotify,
     data: {
