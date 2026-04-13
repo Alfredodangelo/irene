@@ -1668,10 +1668,13 @@ function renderBlockCal() {
         const isTo      = dateStr === _bcalTo;
         const inRange   = _bcalFrom && _bcalTo && dateStr > _bcalFrom && dateStr < _bcalTo;
 
+        const isHoliday = typeof isItalianHoliday === 'function' && isItalianHoliday(dateStr);
+
         let cls = 'bcal-day';
         if (isToday)   cls += ' bcal-today';
         if (hasAppt)   cls += ' bcal-has-appt';
         if (isBlocked) cls += ' bcal-already-blocked';
+        if (isHoliday) cls += ' bcal-holiday';
         if (isFrom)    cls += ' bcal-sel-from';
         if (isTo)      cls += ' bcal-sel-to';
         if (inRange)   cls += ' bcal-in-range';
@@ -1679,6 +1682,7 @@ function renderBlockCal() {
         const el = document.createElement('div');
         el.className = cls;
         el.innerHTML = `<span>${d}</span>${hasAppt ? '<div class="bcal-dots"><div class="bcal-dot"></div></div>' : ''}`;
+        if (isHoliday) el.title = 'Giorno festivo';
         el.addEventListener('click', () => blockCalSelectDay(dateStr));
         grid.appendChild(el);
     }
@@ -4554,16 +4558,22 @@ function renderExportCal() {
         const isTo     = dateStr === _exCalTo;
         const inRange  = _exCalFrom && _exCalTo && dateStr > _exCalFrom && dateStr < _exCalTo;
 
+        const isBlocked = isDateBlocked(dateStr);
+        const isHoliday = typeof isItalianHoliday === 'function' && isItalianHoliday(dateStr);
+
         let cls = 'bcal-day';
-        if (isToday)  cls += ' bcal-today';
-        if (hasAppt)  cls += ' bcal-has-appt';
-        if (isFrom)   cls += ' excal-sel-from';
-        if (isTo)     cls += ' excal-sel-to';
-        if (inRange)  cls += ' excal-in-range';
+        if (isToday)   cls += ' bcal-today';
+        if (hasAppt)   cls += ' bcal-has-appt';
+        if (isBlocked) cls += ' bcal-already-blocked';
+        if (isHoliday) cls += ' bcal-holiday';
+        if (isFrom)    cls += ' excal-sel-from';
+        if (isTo)      cls += ' excal-sel-to';
+        if (inRange)   cls += ' excal-in-range';
 
         const el = document.createElement('div');
         el.className = cls;
         el.innerHTML = `<span>${d}</span>${hasAppt ? '<div class="bcal-dots"><div class="bcal-dot"></div></div>' : ''}`;
+        if (isHoliday) el.title = 'Giorno festivo';
         el.addEventListener('click', () => exCalSelectDay(dateStr));
         grid.appendChild(el);
     }

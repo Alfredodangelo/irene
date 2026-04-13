@@ -699,10 +699,10 @@ body.aa-full .admin-layout {
 .cal-day.blocked-day { background: rgba(248,113,113,0.07); color: #f87171; position: relative; }
 .cal-day.blocked-day::after { content: ''; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); width: 16px; height: 2px; background: rgba(248,113,113,0.5); border-radius: 1px; }
 .cal-day.blocked-day:hover { background: rgba(248,113,113,0.12); }
-.cal-day.holiday { background: rgba(212,175,55,0.06); border: 1px dashed rgba(212,175,55,0.3); color: #999; position: relative; }
-.cal-day.holiday::after { content: '★'; position: absolute; top: 2px; right: 3px; font-size: 0.5rem; color: rgba(212,175,55,0.5); }
+.cal-day.holiday { background: rgba(248,113,113,0.05); border: 1px dashed rgba(248,113,113,0.3); color: #e88; position: relative; }
+.cal-day.holiday::after { content: '★'; position: absolute; top: 2px; right: 3px; font-size: 0.5rem; color: rgba(248,113,113,0.5); }
 .cal-day.holiday.has-appointments { color: #ccc; }
-.cal-day.holiday:hover { background: rgba(212,175,55,0.12); }
+.cal-day.holiday:hover { background: rgba(248,113,113,0.1); }
 
 .cal-dots {
     display: flex; gap: 3px;
@@ -1794,6 +1794,8 @@ body.aa-full .admin-layout {
 .bcal-day.bcal-in-range { background: rgba(248,113,113,0.1); border-color: transparent; color: #f87171; }
 .bcal-day.bcal-already-blocked { background: rgba(248,113,113,0.07); color: #f87171; }
 .bcal-day.bcal-already-blocked::after { content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 12px; height: 2px; background: rgba(248,113,113,0.5); border-radius: 1px; }
+.bcal-day.bcal-holiday { background: rgba(248,113,113,0.05); border: 1px dashed rgba(248,113,113,0.3); color: #e88; }
+.bcal-day.bcal-holiday::after { content: '★'; position: absolute; top: 1px; right: 2px; font-size: 0.45rem; color: rgba(248,113,113,0.5); }
 /* Export calendar — gold selection */
 .bcal-day.excal-sel-from, .bcal-day.excal-sel-to { background: rgba(212,175,55,0.25); border-color: rgba(212,175,55,0.7); color: #D4AF37; font-weight: 700; }
 .bcal-day.excal-in-range { background: rgba(212,175,55,0.08); border-color: transparent; color: #D4AF37; }
