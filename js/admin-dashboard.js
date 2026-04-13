@@ -447,6 +447,23 @@ function navigateTo(section) {
 function setupNavigation() {
     document.querySelectorAll('.admin-nav-item').forEach(btn => {
         btn.addEventListener('click', () => navigateTo(btn.dataset.section));
+
+        // Mobile: fire click on touchend if finger didn't move much (fixes scroll/tap conflict)
+        let _tx, _ty;
+        btn.addEventListener('touchstart', e => {
+            _tx = e.touches[0].clientX;
+            _ty = e.touches[0].clientY;
+        }, { passive: true });
+        btn.addEventListener('touchend', e => {
+            if (_tx == null) return;
+            const dx = Math.abs(e.changedTouches[0].clientX - _tx);
+            const dy = Math.abs(e.changedTouches[0].clientY - _ty);
+            if (dx < 12 && dy < 12) {
+                e.preventDefault();
+                navigateTo(btn.dataset.section);
+            }
+            _tx = _ty = null;
+        });
     });
 }
 

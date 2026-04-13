@@ -1139,19 +1139,21 @@ body.aa-full .admin-layout {
     .admin-sidebar::-webkit-scrollbar { display: none; }
     .admin-nav-item {
         flex: 0 0 auto;
-        width: 20vw;
-        min-width: 72px;
-        max-width: 90px;
+        width: 16vw;
+        min-width: 58px;
+        max-width: 72px;
         flex-direction: column;
-        padding: 10px 6px;
+        padding: 8px 4px 10px;
         border-radius: 0;
-        font-size: 0.7rem;
-        gap: 5px;
+        font-size: 0.62rem;
+        gap: 3px;
         -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
+        touch-action: pan-x;
+        user-select: none;
+        -webkit-user-select: none;
     }
-    .admin-nav-item span { display: block; font-size: 0.7rem; letter-spacing: 0; }
-    .admin-nav-item i { font-size: 1.4rem; width: auto; }
+    .admin-nav-item span { display: block; font-size: 0.62rem; letter-spacing: 0; }
+    .admin-nav-item i { font-size: 1.25rem; width: auto; }
 
     /* Main: spazio per bottom nav */
     .admin-main {
