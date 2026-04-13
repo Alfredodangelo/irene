@@ -332,6 +332,41 @@ function renderWlRequests() {
         </div>`;
 }
 
+// ── Richieste WL nel pannello Notifiche (con bottoni azione) ─────────────────
+function renderWlRequestsInNotif() {
+    const card = document.getElementById('wlRequestsNotifCard');
+    const list = document.getElementById('wlRequestsNotifList');
+    if (!card || !list) return;
+
+    if (!allWaitlistRequests || allWaitlistRequests.length === 0) {
+        card.style.display = 'none';
+        return;
+    }
+    card.style.display = 'block';
+    list.innerHTML = allWaitlistRequests.map(r => {
+        const client = r.clients || {};
+        const name = escHtml(`${client.first_name || ''} ${client.last_name || ''}`.trim() || '—');
+        const typeLabel = r.request_type === 'join' ? 'entrare in lista d\'attesa' : 'uscire dalla lista d\'attesa';
+        const timeAgo = formatTimeAgo(r.created_at);
+        return `
+        <div class="wl-notif-req" id="wlnr-${r.id}" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:0.85rem;color:#eee;font-weight:500;">${name}</div>
+                <div style="font-size:0.78rem;color:#999;">Vuole ${typeLabel}</div>
+                <div style="font-size:0.72rem;color:#666;margin-top:2px;">${timeAgo}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+                <button onclick="approveWlRequest('${escHtml(r.id)}')" style="font-size:0.78rem;padding:5px 12px;border-radius:6px;cursor:pointer;background:rgba(109,192,124,0.15);border:1px solid rgba(109,192,124,0.4);color:#6dc07c;font-family:inherit;">
+                    <i class="fas fa-check" style="margin-right:4px;"></i>Approva
+                </button>
+                <button onclick="denyWlRequest('${escHtml(r.id)}')" style="font-size:0.78rem;padding:5px 12px;border-radius:6px;cursor:pointer;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);color:#f87171;font-family:inherit;">
+                    <i class="fas fa-times" style="margin-right:4px;"></i>Nega
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
 async function approveWlRequest(requestId) {
     const req = allWaitlistRequests.find(r => r.id === requestId);
     if (!req) return;
@@ -363,6 +398,7 @@ async function approveWlRequest(requestId) {
     }).catch(() => showToast('Approvata, ma notifica email non inviata.', 4000, true));
     allWaitlistRequests = allWaitlistRequests.filter(r => r.id !== requestId);
     updateNotifBadge();
+    renderWlRequestsInNotif();
     await loadWaitlist();
     renderWaitlist();
     renderWlRequests();
@@ -381,6 +417,7 @@ async function denyWlRequest(requestId) {
     }).catch(() => showToast('Negata, ma notifica email non inviata.', 4000, true));
     allWaitlistRequests = allWaitlistRequests.filter(r => r.id !== requestId);
     updateNotifBadge();
+    renderWlRequestsInNotif();
     renderWlRequests();
     showToast('Richiesta negata.');
 }
@@ -2361,6 +2398,7 @@ async function loadNotifications() {
     }
     allRescheduleRequests = reschedRes.data || [];
     updateNotifBadge();
+    renderWlRequestsInNotif();
     renderRescheduleRequests();
     renderNotifications();
     renderOverview();
